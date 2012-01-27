@@ -1,0 +1,53 @@
+#######################################
+# Syntax Coloring Map For SFRGBLEDMatrix
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SFRGBLEDMatrix	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+square		KEYWORD2
+dispCount	KEYWORD2
+width		KEYWORD2
+height		KEYWORD2
+pixels		KEYWORD2
+frameBuff	KEYWORD2
+show		KEYWORD2
+config		KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SQUARE		LITERAL1
+SIDE		LITERAL1
+DISP_LEN	LITERAL1
+RGB		LITERAL1
+MAX_R		LITERAL1
+MID_R		LITERAL1
+MAX_G		LITERAL1
+MID_G		LITERAL1
+MAX_B		LITERAL1
+MID_B		LITERAL1
+BLACK		LITERAL1
+WHITE		LITERAL1
+RED		LITERAL1
+RED_MAGENTA	LITERAL1
+RED_YELLOW	LITERAL1
+GREEN		LITERAL1
+GREEN_CYAN	LITERAL1
+GREEN_YELLOW	LITERAL1
+BLUE		LITERAL1
+BLUE_CYAN	LITERAL1
+BLUE_MAGENTA	LITERAL1
+CYAN		LITERAL1
+MAGENTA		LITERAL1
+YELLOW		LITERAL1
+
+
