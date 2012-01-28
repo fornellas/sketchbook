@@ -127,7 +127,7 @@ if( c&RGB(0,7,0) && !d) {
 
 /* end soft fix for light green */
          if('%'==c)
-           sendChar('%'-1);
+           sendChar(RGB(2,1,1));
          else
            sendChar(c);
       };
