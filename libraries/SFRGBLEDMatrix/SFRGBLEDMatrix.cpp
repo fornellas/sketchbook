@@ -24,14 +24,12 @@ prog_uchar *line_4p[] PROGMEM={
 #define CHAR_MAX_4P 126
 
 SFRGBLEDMatrix::SFRGBLEDMatrix(bool square, byte dispCount, byte pinSCK, byte pinMOSI, byte pinSS) {
-  word p;
-//Serial.println("build");
   this->pinSCK=pinSCK;
   this->pinMOSI=pinMOSI;
   this->pinSS=pinSS;
   this->square=square;
   this->dispCount=dispCount;
-  dispCountSqrt=(byte)sqrt(float(dispCount));
+  byte dispCountSqrt=(byte)sqrt(float(dispCount));
   if(square) {
     width=DISP_LEN*dispCountSqrt;
     height=width;
@@ -65,35 +63,18 @@ void SFRGBLEDMatrix::sendChar(byte cData){
 void SFRGBLEDMatrix::show() {
   word d, x, y;
   byte c;
-  word dispRow;
-  word dispCol;
 
-//Serial.println("show");
   for(d=dispCount-1;d<dispCount;d--){
-//Serial.print("d=");
-//Serial.print(d);
-//Serial.println("");
     digitalWrite(pinSS, LOW);
     delayMicroseconds(500);
-    if(square) {
-      dispRow=dispCountSqrt-1-(d/dispCountSqrt);
-      if((dispRow+2)%2)
-        dispCol=(dispCountSqrt+d)%dispCountSqrt;
-      else
-        dispCol=dispCountSqrt-(dispCountSqrt+d)%dispCountSqrt;
-    }
     for(y=0;y<DISP_LEN;y++){
-//Serial.print("  y=");
-//Serial.print(y);
-//Serial.println("");
       for(x=DISP_LEN-1;x<DISP_LEN;x--) {
-//Serial.print("    x=");
-//Serial.print(x);
-//Serial.print(" ");
-        if(square) {
-          c=*(frameBuff + dispRow*dispCountSqrt*DISP_LEN*DISP_LEN + y*dispCountSqrt*DISP_LEN + dispCol*DISP_LEN + x);
-         } else
-           c=*(frameBuff + dispCount*DISP_LEN*y + d*DISP_LEN + x);
+        // print regular for SDIE or SQUARE bottom row
+        if(!square||(square&&(0==d||1==d)))
+          c=*(frameBuff + dispCount*DISP_LEN*y + d*DISP_LEN + x);
+        // print upside down for SQUARE and top row
+        else
+          c=*(frameBuff + dispCount*DISP_LEN*(DISP_LEN-y-1) + d*DISP_LEN + (DISP_LEN-x-1));
 /* soft fix for light green */
 if( c&RGB(0,7,0) && d) {
   byte g=(c&RGB(0,7,0))>>2;
@@ -131,7 +112,6 @@ if( c&RGB(0,7,0) && !d) {
          else
            sendChar(c);
       };
-//Serial.println("");
     };
     digitalWrite(pinSS, HIGH);
     delayMicroseconds(10);
@@ -148,14 +128,13 @@ void SFRGBLEDMatrix::config() {
 };
 
 void SFRGBLEDMatrix::printChar4p(char c, byte color, int x_offset, int y_offset){
-  for(int y=y<0?y*-1:0;y<4;y++){
+  for(byte y=0;y<4;y++){
     byte x_max=(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P+1)-(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P);
 
     if(y+y_offset>=height)
       continue;
 
-    for(int x=x<0?x*-1:0;x<x_max;x++){
-      byte f;
+    for(byte x=0;x<x_max;x++){
       unsigned int bitOffset;
       byte charData;
       byte pixel;

@@ -50,16 +50,16 @@ class SFRGBLEDMatrix {
     bool square;
 /*
 
-SQUARE
+SQUARE: Max 4 displays
             +--> 0x0
            /
            +---+---+ --> 15x0
-           | 3 | 2 |
-           +---+---+
- Wires ==> | 0 | 1 |
+           | 3 | 2 |<=\\
+           +---+---+  ||
+ Wires ==> | 0 | 1 |==//
            +---+---+ --> 15x15
 
-SIDE
+SIDE: Max 8 displays
 
             +--> 0x0
            /
