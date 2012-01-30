@@ -41,11 +41,10 @@
 
 class SFRGBLEDMatrix {
   private:
-    byte pinSCK;
-    byte pinMOSI;
     byte pinSS;
     void sendChar(byte cData);
     byte dispCountSqrt;
+    void setupSPI();
   public:
     bool square;
 /*
@@ -76,8 +75,6 @@ SIDE: Max 8 displays
     SFRGBLEDMatrix(
       bool square,
       byte dispCount, // must be equals 4 if square equals true
-      byte pinSCK, // SCLK
-      byte pinMOSI,
       byte pinSS); // CS
     ~SFRGBLEDMatrix();
     void show(); // send frameBuff to the screens

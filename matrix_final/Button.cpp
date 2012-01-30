@@ -6,9 +6,9 @@
 #define DEBOUNCE_DELAY 30
 
 prog_int16_t pin[BUTTON_COUNT] PROGMEM = {
-  DIN_BUTTON_MODE,
-  DIN_BUTTON_A,
-  DIN_BUTTON_B,
+  PIN_BUTTON_MODE,
+  PIN_BUTTON_A,
+  PIN_BUTTON_B,
 };
 
 Button::Button() {

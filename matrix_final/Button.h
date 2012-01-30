@@ -17,7 +17,9 @@ private:
   unsigned long lastDebounceTime[BUTTON_COUNT];
 public:
   Button();
+  // to be called in loop to update button status
   void update();
+  // get the status of a button
   boolean state(byte button);
 };
 

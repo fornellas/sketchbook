@@ -1,7 +1,6 @@
 #include <SFRGBLEDMatrix.h>
+#include <SPI.h>
 
-#define PIN_MATRIX_SCK  13
-#define	PIN_MATRIX_MOSI 11
 #define PIN_MATRIX_SS   10
 
 #define DISP_COUNT 2
@@ -85,11 +84,11 @@ byte spectrum[]={
 };
 
 void setup(){
-
+  SPI.begin();
 }
 
 void loop(){
-  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SCK, PIN_MATRIX_MOSI, PIN_MATRIX_SS);
+  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SS);
   display.config();
   while(1){
     for(byte p=0;p<display.pixels;p++)

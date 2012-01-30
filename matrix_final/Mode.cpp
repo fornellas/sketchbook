@@ -7,7 +7,7 @@ Mode::Mode(String name) {
   this->name=name;
 }
 
-void Mode::main() {
+void Mode::start() {
   boolean change=false;
 
   Serial.print("Mode changed: ");
@@ -17,15 +17,21 @@ void Mode::main() {
   this->enter();
 
   while(1){
-    //    Serial.println("Reading buttons.");
+    // read buttons
     button->update();
+    
+    // change mode if MODE button is pressed
     if(button->state(MODE)==false)
       change=true;
     if(change&&button->state(MODE)) {
       this->exit();
       return;
     }
+    
+    // coll main mode method
     this->loop();
+    
+    // sleep
     delay(1000/LOOP_HZ);
   }
 }

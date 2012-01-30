@@ -6,6 +6,7 @@ extern "C" {
 
 #include <Arduino.h>
 #include <SFRGBLEDMatrix.h>
+#include <SPI.h>
 
 prog_uint16_t coffset_4p[] PROGMEM={
   0, 1, 2, 5, 10, 13, 17, 21, 22, 24, 26, 31, 34, 36, 38, 39, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 74, 76, 78, 80, 82, 85, 88, 91, 94, 97, 100, 103, 106, 109, 112, 115, 118, 122, 125, 130, 134, 138, 141, 145, 148, 151, 154, 158, 162, 167, 170, 173, 177, 179, 183, 185, 188, 191, 193, 196, 199, 202, 205, 208, 210, 212, 215, 216, 219, 222, 224, 229, 232, 235, 238, 241, 243, 246, 249, 252, 255, 260, 263, 266, 269, 272, 273, 276, 280};
@@ -23,9 +24,7 @@ prog_uchar *line_4p[] PROGMEM={
 #define CHAR_MIN_4P 32
 #define CHAR_MAX_4P 126
 
-SFRGBLEDMatrix::SFRGBLEDMatrix(bool square, byte dispCount, byte pinSCK, byte pinMOSI, byte pinSS) {
-  this->pinSCK=pinSCK;
-  this->pinMOSI=pinMOSI;
+SFRGBLEDMatrix::SFRGBLEDMatrix(bool square, byte dispCount, byte pinSS) {
   this->pinSS=pinSS;
   this->square=square;
   this->dispCount=dispCount;
@@ -40,12 +39,6 @@ SFRGBLEDMatrix::SFRGBLEDMatrix(bool square, byte dispCount, byte pinSCK, byte pi
   pixels=word(dispCount)*word(DISP_LEN*DISP_LEN);
   frameBuff=(byte *)calloc((size_t)pixels, sizeof(byte)); // FIXME validate if NULL
 
-  SPCR=(1<<SPE)|(1<<MSTR)|(1<<SPR1)|(1<<SPR0);
-  SPSR = SPSR & B11111110;
-
-  pinMode(pinSCK, OUTPUT);
-  digitalWrite(pinSCK, LOW);
-  pinMode(pinMOSI, OUTPUT);
   pinMode(pinSS, OUTPUT);
   digitalWrite(pinSS, HIGH);
   delayMicroseconds(500);
@@ -55,14 +48,17 @@ SFRGBLEDMatrix::~SFRGBLEDMatrix() {
   free(frameBuff);
 };
 
-void SFRGBLEDMatrix::sendChar(byte cData){
-  SPDR = cData;
-  while(!(SPSR&(1<<SPIF)));
-};
+void SFRGBLEDMatrix::setupSPI() {
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setBitOrder(MSBFIRST);
+}
 
 void SFRGBLEDMatrix::show() {
   word d, x, y;
   byte c;
+
+  setupSPI();
 
   for(d=dispCount-1;d<dispCount;d--){
     digitalWrite(pinSS, LOW);
@@ -75,7 +71,7 @@ void SFRGBLEDMatrix::show() {
         // print upside down for SQUARE and top row
         else
           c=*(frameBuff + dispCount*DISP_LEN*(DISP_LEN-y-1) + d*DISP_LEN + (DISP_LEN-x-1));
-/* soft fix for light green */
+/* Software fix for broken LED matrix with dim green
 if( c&RGB(0,7,0) && d) {
   byte g=(c&RGB(0,7,0))>>2;
   switch(g){
@@ -105,12 +101,11 @@ if( c&RGB(0,7,0) && !d) {
   };
   c=(c&RGB(7,0,7)) | (g<<2);
 }
-
-/* end soft fix for light green */
+/* end soft */
          if('%'==c)
-           sendChar(RGB(2,1,1));
+           SPI.transfer(RGB(2,1,1));
          else
-           sendChar(c);
+           SPI.transfer(c);
       };
     };
     digitalWrite(pinSS, HIGH);
@@ -119,10 +114,11 @@ if( c&RGB(0,7,0) && !d) {
 };
 
 void SFRGBLEDMatrix::config() {
+  setupSPI();
   digitalWrite(pinSS, LOW);
   delayMicroseconds(500);
-  sendChar('%');
-  sendChar(dispCount);
+  SPI.transfer('%');
+  SPI.transfer(dispCount);
   digitalWrite(pinSS, HIGH);
   delayMicroseconds(10);
 };

@@ -7,8 +7,11 @@ class RGBLED:
 public Mode {
 public:
   RGBLED() : 
-  Mode("RGB LED"){  };
+  Mode("RGB LED"){  
+  };
   void loop();
+  void exit();
 };
 
 #endif
+

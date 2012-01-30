@@ -2,9 +2,8 @@
 #include <SFRGBLEDMatrix.h>
 #include <RTCDS1307.h>
 #include "Wire.h"
+#include <SPI.h>
 
-#define PIN_MATRIX_SCK  13
-#define	PIN_MATRIX_MOSI 11
 #define PIN_MATRIX_SS   10
 
 #define DISP_COUNT 2
@@ -80,32 +79,76 @@ void printMinute(SFRGBLEDMatrix *display, int rg_brightness, int minute){
     PAINT(2,3,g);
 };
 
+void printSec(SFRGBLEDMatrix *display, int rg_brightness, int b_brightness, int second){
+  byte c=RGB(0,rg_brightness,b_brightness);
+  byte b=RGB(0,0,b_brightness);
+  /*
+  if(second>=5)
+   PAINT(4,0,c);
+   if(second>=10)
+   PAINT(5,1,c);
+   if(second>=15)
+   PAINT(6,2,c);
+   if(second>=20)
+   PAINT(6,4,c);
+   if(second>=25)
+   PAINT(5,5,c);
+   if(second>=30)
+   PAINT(4,6,c);
+   if(second>=35)
+   PAINT(2,6,c);
+   if(second>=40)
+   PAINT(1,5,c);
+   if(second>=45)
+   PAINT(0,4,c);
+   if(second>=50)
+   PAINT(0,2,c);
+   if(second>=55)
+   PAINT(1,1,c);
+   if(second>=60)
+   PAINT(2,0,c);
+   */
+  if(second%5>=0)
+    PAINT(3,3,b);
+  if(second%5>=1)
+    PAINT(4,2,b);
+  if(second%5>=2)
+    PAINT(4,4,b);
+  if(second%5>=3)
+    PAINT(2,4,b);
+  if(second%5>=4)
+    PAINT(2,2,b);
+};
+
 void printTime(SFRGBLEDMatrix *display, int rg_brightness, int hour, int minute, int second){
   int p;
-  byte b_brightness;
-  b_brightness=rg_brightness>>1;
+  byte b_brightness=3;
+  if(rg_brightness<3)
+    b_brightness=rg_brightness/2;
   if(!b_brightness)
     b_brightness=1;
   for(p=0;p<display->pixels;p++)
     display->frameBuff[p]=BLACK;
-  PAINT(3,3,RGB(0,0,b_brightness));
+  //  PAINT(3,3,RGB(0,rg_brightness,0));
   if(hour<13)
     printHour(display, rg_brightness, hour);
   else
     printHour(display, rg_brightness, hour-12);
   printMinute(display, rg_brightness, minute);
+  printSec(display, rg_brightness, b_brightness, second);
 };
 
 
 void setup(){
-
+  SPI.begin();
 }
 
 void loop(){
   int p;
   struct date d;
   int k=0;
-  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SCK, PIN_MATRIX_MOSI, PIN_MATRIX_SS);
+  
+  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SS);
   RTCDS1307 rtc(1);
   display.config();
   int j=0;
@@ -155,7 +198,9 @@ void loop(){
       rg_brightness=7;
     if(rg_brightness<1)
       rg_brightness=1;
-    b_brightness=rg_brightness>>1;
+    b_brightness=3;
+    if(rg_brightness<3)
+      b_brightness=rg_brightness/2;
     if(!b_brightness)
       b_brightness=1;
     if(light<00){
@@ -206,6 +251,8 @@ void loop(){
     display.show();
   }
 }
+
+
 
 
 

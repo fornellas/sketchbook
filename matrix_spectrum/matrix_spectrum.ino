@@ -1,13 +1,12 @@
 #include <SFRGBLEDMatrix.h>
+#include <SPI.h>
 
-#define PIN_MATRIX_SCK  13
-#define	PIN_MATRIX_MOSI 11
 #define PIN_MATRIX_SS   10
 
 #define DISP_COUNT 2
 
 void setup(){
-
+  SPI.begin();
 }
 #define VLEN 42
 void loop(){
@@ -64,7 +63,7 @@ void loop(){
     RGB(7,0,0),
   };
 
-  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SCK, PIN_MATRIX_MOSI, PIN_MATRIX_SS);
+  SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SS);
   display.config();
   while(1)
     for(j=0;j<=VLEN;j++){
