@@ -156,6 +156,6 @@ void SFRGBLEDMatrix::paintPixel(byte color, int x_offset, int y_offset) {
 }
 
 void SFRGBLEDMatrix::fill(byte color){
-  for(word p;p<pixels;p++)
+  for(word p=0;p<pixels;p++)
     frameBuff[p]=color;
 }

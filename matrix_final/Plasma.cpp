@@ -110,7 +110,7 @@ void Plasma::loop() {
 }
 
 void Plasma::enter() {
-  plasma=(byte *)malloc(display->pixels*sizeof(byte));
+  plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
   fillPlasma(currMode); 
 }
 

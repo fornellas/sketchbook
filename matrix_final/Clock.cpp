@@ -12,30 +12,34 @@ extern SFRGBLEDMatrix *display;
 extern Button *button;
 
 void printTime(Date date, int x_offset, int y_offset, byte hourColor, byte minuteColor5, byte minuteColor1, byte secondColor) {
+  int hour;
+  hour=date.hour;
+  if(hour>=13)
+    hour-=12;
   // Hour
-  if(date.hour>=1||date.hour==0)
+  if(hour>=1||hour==0)
     display->paintPixel(hourColor, x_offset+5, y_offset+0);
-  if(date.hour>=2||date.hour==0)
+  if(hour>=2||hour==0)
     display->paintPixel(hourColor, x_offset+6, y_offset+1);
-  if(date.hour>=3||date.hour==0)
+  if(hour>=3||hour==0)
     display->paintPixel(hourColor, x_offset+6, y_offset+3);
-  if(date.hour>=4||date.hour==0)
+  if(hour>=4||hour==0)
     display->paintPixel(hourColor, x_offset+6, y_offset+5);
-  if(date.hour>=5||date.hour==0)
+  if(hour>=5||hour==0)
     display->paintPixel(hourColor, x_offset+5, y_offset+6);
-  if(date.hour>=6||date.hour==0)
+  if(hour>=6||hour==0)
     display->paintPixel(hourColor, x_offset+3, y_offset+6);
-  if(date.hour>=7||date.hour==0)
+  if(hour>=7||hour==0)
     display->paintPixel(hourColor, x_offset+1, y_offset+6);
-  if(date.hour>=8||date.hour==0)
+  if(hour>=8||hour==0)
     display->paintPixel(hourColor, x_offset+0, y_offset+5);
-  if(date.hour>=9||date.hour==0)
+  if(hour>=9||hour==0)
     display->paintPixel(hourColor, x_offset+0, y_offset+3);
-  if(date.hour>=10||date.hour==0)
+  if(hour>=10||hour==0)
     display->paintPixel(hourColor, x_offset+0, y_offset+1);
-  if(date.hour>=11||date.hour==0)
+  if(hour>=11||hour==0)
     display->paintPixel(hourColor, x_offset+1, y_offset+0);
-  if(date.hour>=12||date.hour==0)
+  if(hour>=12||hour==0)
     display->paintPixel(hourColor, x_offset+3, y_offset+0);
   // minute 5
   if(date.minute>=5)
@@ -116,3 +120,4 @@ void Clock::loop() {
   }
   display->show();
 }
+
