@@ -71,7 +71,7 @@ void SFRGBLEDMatrix::show() {
         // print upside down for SQUARE and top row
         else
           c=*(frameBuff + dispCount*DISP_LEN*(DISP_LEN-y-1) + d*DISP_LEN + (DISP_LEN-x-1));
-/* Software fix for broken LED matrix with dim green
+/* Software fix for broken LED matrix with dim green */
 if( c&RGB(0,7,0) && d) {
   byte g=(c&RGB(0,7,0))>>2;
   switch(g){
@@ -124,6 +124,9 @@ void SFRGBLEDMatrix::config() {
 };
 
 void SFRGBLEDMatrix::printChar4p(char c, byte color, int x_offset, int y_offset){
+  if(c<CHAR_MIN_4P||c>CHAR_MAX_4P)
+    return;
+
   for(byte y=0;y<4;y++){
     byte x_max=(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P+1)-(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P);
 
@@ -150,4 +153,9 @@ void SFRGBLEDMatrix::printChar4p(char c, byte color, int x_offset, int y_offset)
 void SFRGBLEDMatrix::paintPixel(byte color, int x_offset, int y_offset) {
   if(x_offset>=0&&x_offset<width&&y_offset>=0&&y_offset<height)
     frameBuff[width*y_offset+x_offset]=color;
+}
+
+void SFRGBLEDMatrix::fill(byte color){
+  for(word p;p<pixels;p++)
+    frameBuff[p]=color;
 }

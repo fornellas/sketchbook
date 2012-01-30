@@ -81,6 +81,7 @@ SIDE: Max 8 displays
     void config(); // configure daisy chain
     void printChar4p(char c, byte color, int x_offset, int y_offset); // print 4x4 char
     void paintPixel(byte color, int x_offset, int y_offset); // paint single pixel
+    void fill(byte color); // fill screen with one color
 };
 
 #endif

@@ -26,8 +26,7 @@ public:
   virtual void loop(){
   };
   // Called when exiting the mode
-  virtual void exit(){
-  };
+  virtual void exit();
 };
 
 #endif

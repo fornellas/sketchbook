@@ -6,18 +6,13 @@
 
 #define DS1307_ADDRESS 0x68
 
-RTCDS1307::RTCDS1307(bool w) {
-  if(w)
-    Wire.begin();
-};
-
 byte RTCDS1307::bcdToDec(byte val)  {
   return ( (val/16*10) + (val%16) );
 }
 
-struct date RTCDS1307::getDate() {
+struct Date RTCDS1307::getDate() {
   int zero=0;
-  struct date d;
+  struct Date d;
   Wire.beginTransmission(DS1307_ADDRESS);
   Wire.write(zero);
   Wire.endTransmission();
@@ -37,7 +32,7 @@ byte RTCDS1307::decToBcd(byte val){
   return ( (val/10*16) + (val%10) );
 }
 
-void RTCDS1307::setDate(struct date d) {
+void RTCDS1307::setDate(struct Date d) {
   int zero=0;
   Wire.beginTransmission(DS1307_ADDRESS);
   Wire.write(zero); //stop Oscillator

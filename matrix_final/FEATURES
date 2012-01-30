@@ -1,0 +1,28 @@
+DONE
+
+- Multiple modes.
+- 3 button input.
+- Save state to EEPROM.
+- Clock
+  - Decimal
+  - Graphic #1
+
+
+TODO
+
+- Mode change animation
+  - Text scroll?
+  - Icon?
+- Clock
+  - Clock + Temperature
+  - Binary
+- Plasma
+  - Multiple modes
+- Fire
+  - tunnable palette
+- Temperatue
+  - Current
+  - Indoor / outdoor / barometric
+  - Max / min
+  - Plot
+

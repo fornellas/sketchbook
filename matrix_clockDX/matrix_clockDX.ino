@@ -141,15 +141,16 @@ void printTime(SFRGBLEDMatrix *display, int rg_brightness, int hour, int minute,
 
 void setup(){
   SPI.begin();
+  Wire.begin();
 }
 
 void loop(){
   int p;
-  struct date d;
+  struct Date d;
   int k=0;
-  
+
   SFRGBLEDMatrix display(SIDE, DISP_COUNT, PIN_MATRIX_SS);
-  RTCDS1307 rtc(1);
+  RTCDS1307 rtc = new RTCDS1307();
   display.config();
   int j=0;
   float temperature;
@@ -251,6 +252,7 @@ void loop(){
     display.show();
   }
 }
+
 
 
 

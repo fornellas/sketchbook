@@ -1,3 +1,2 @@
-- Remove SCK and MOSI pins from constructor.
 - Add 7 pixels font.
-- Switch to http://arduino.cc/en/Reference/SPI
+- Create 5 pixels font.

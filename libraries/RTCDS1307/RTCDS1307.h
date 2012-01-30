@@ -24,7 +24,7 @@
 #define NOVEMBER 11
 #define DECEMBER 12
 
-struct date {
+struct Date {
   int second;
   int minute;
   int hour; // 24 Hour
@@ -40,9 +40,8 @@ class RTCDS1307
     byte bcdToDec(byte val);
     byte decToBcd(byte val);
   public:
-    RTCDS1307(bool);
-    struct date getDate();
-    void setDate(struct date d);
+    struct Date getDate();
+    void setDate(struct Date d);
 };
 
 #endif

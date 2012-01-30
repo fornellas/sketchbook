@@ -1,5 +1,7 @@
 #include "Mode.h"
 #include "Button.h"
+#include <SFRGBLEDMatrix.h>
+extern SFRGBLEDMatrix *display;
 
 extern Button *button;
 
@@ -19,7 +21,7 @@ void Mode::start() {
   while(1){
     // read buttons
     button->update();
-    
+
     // change mode if MODE button is pressed
     if(button->state(MODE)==false)
       change=true;
@@ -27,13 +29,18 @@ void Mode::start() {
       this->exit();
       return;
     }
-    
+
     // coll main mode method
     this->loop();
-    
+
     // sleep
     delay(1000/LOOP_HZ);
   }
+}
+
+void Mode::exit() {
+  display->fill(BLACK);
+  display->show(); 
 }
 
 
