@@ -71,7 +71,7 @@ void SFRGBLEDMatrix::show() {
         // print upside down for SQUARE and top row
         else
           c=*(frameBuff + dispCount*DISP_LEN*(DISP_LEN-y-1) + d*DISP_LEN + (DISP_LEN-x-1));
-/* Software fix for broken LED matrix with dim green */
+/* Software fix for broken LED matrix with dim green 
 if( c&RGB(0,7,0) && d) {
   byte g=(c&RGB(0,7,0))>>2;
   switch(g){

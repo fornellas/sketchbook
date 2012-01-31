@@ -1,12 +1,15 @@
+/*
+
 DONE
 
 - Multiple modes.
 - 3 button input.
+  - Pressed, hold, released.
 - Save state to EEPROM.
 - Clock
   - Decimal
-  - Graphic #1
-
+  - Graphic Small Clock
+  - Graphic Small Clock + Date
 
 TODO
 
@@ -25,4 +28,7 @@ TODO
   - Indoor / outdoor / barometric
   - Max / min
   - Plot
+- HW
+  - reset Matrices with Arduino.
+*/
 

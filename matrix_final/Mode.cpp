@@ -10,8 +10,6 @@ Mode::Mode(String name) {
 }
 
 void Mode::start() {
-  boolean change=false;
-
   Serial.print("Mode changed: ");
   Serial.print(name);
   Serial.println("");
@@ -23,9 +21,7 @@ void Mode::start() {
     button->update();
 
     // change mode if MODE button is pressed
-    if(button->state(MODE)==false)
-      change=true;
-    if(change&&button->state(MODE)) {
+    if(button->pressed(MODE)) {
       this->exit();
       return;
     }

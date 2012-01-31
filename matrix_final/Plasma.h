@@ -16,12 +16,16 @@ private:
   byte currMode;
   byte *plasma;
   void fillPlasma(byte mode);
+  int pSpeed;
+  void pSpeedVal();
 public:
   Plasma() : 
-  Mode("Clock"){
+  Mode("Plasma"){
     currMode=EEPROM.read(EEPROM_PLASMA_MODE);
     if(currMode>=PLASMA_MODES)
       currMode=0;
+    pSpeed=EEPROM.read(EEPROM_PLASMA_SPEED);
+    pSpeedVal();
   };
   void loop();
   void enter();

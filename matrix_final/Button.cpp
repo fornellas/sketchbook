@@ -16,6 +16,8 @@ Button::Button() {
     buttonState[b]=false;
     lastButtonState[b]=false;
     lastDebounceTime[b]=0;
+    pressedState[b]=false;
+    releasedState[b]=false;
     pinMode(pgm_read_word_near(pin+b), INPUT);
     digitalWrite(pgm_read_word_near(pin+b), HIGH);
   }
@@ -24,11 +26,17 @@ Button::Button() {
 void Button::update(){
   for(byte b=0;b<BUTTON_COUNT;b++){
     int reading=!digitalRead(pgm_read_word_near(pin+b));
-//    Serial.println(reading);
     if (reading != lastButtonState[b])
       lastDebounceTime[b] = millis();
-    if ((millis() - lastDebounceTime[b]) > DEBOUNCE_DELAY)
+    if ((millis() - lastDebounceTime[b]) > DEBOUNCE_DELAY) {
+      pressedState[b]=false;
+      releasedState[b]=false;
+      if(!buttonState[b]&&reading)
+        pressedState[b]=true;
+      if(buttonState[b]&&!reading)
+        releasedState[b]=true;
       buttonState[b] = reading;
+    }
     lastButtonState[b] = reading;
   }
 }
@@ -36,6 +44,18 @@ void Button::update(){
 boolean Button::state(byte button){
   return buttonState[button];
 };
+
+boolean Button::pressed(byte button){
+  return pressedState[button];
+}
+
+boolean Button::released(byte button){
+  return releasedState[button]; 
+}
+
+
+
+
 
 
 

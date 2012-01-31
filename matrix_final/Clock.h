@@ -5,7 +5,7 @@
 #include <EEPROM.h>
 #include "EEPROM.h"
 
-#define CLOCK_MODES 2
+#define CLOCK_MODES 3
 
 class Clock: 
 public Mode {

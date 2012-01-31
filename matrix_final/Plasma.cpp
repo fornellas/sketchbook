@@ -86,23 +86,35 @@ void Plasma::fillPlasma(byte mode) {
   }
 }
 
-void Plasma::loop() {
-  static boolean lastA;
+void Plasma::pSpeedVal(){
+  if(pSpeed==0)
+    pSpeed++;
+  if(pSpeed>6)
+    pSpeed=-6;
+  if(pSpeed<-6)
+    pSpeed=-6;
+}
 
+void Plasma::loop() {
   display->fill(BLACK);
 
   // change mode if MODE button is pressed
-  if(button->state(A)&&lastA==false) {
+  if(button->pressed(A)) {
     currMode++;
     if(currMode>=PLASMA_MODES)
       currMode=0;
     EEPROM.write(EEPROM_PLASMA_MODE, currMode);
     fillPlasma(currMode);
   }
-  lastA=button->state(A);
+
+  if(button->pressed(B)) {
+    pSpeed++;
+    pSpeedVal();
+    EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
+  }
 
   for(byte p=0;p<display->pixels;p++)
-    plasma[p]-=6;
+    plasma[p]-=pSpeed;
   for(byte p=0;p<display->pixels;p++)
     display->frameBuff[p]=pgm_read_word_near(spectrum+int(float(plasma[p])/255.0*float(SPECTRUM_LEN-1)));
 
@@ -119,6 +131,10 @@ void Plasma::exit() {
   display->show();
   free(plasma);
 }
+
+
+
+
 
 
 

@@ -8,7 +8,6 @@
 // Modes
 #include "Mode.h"
 #include "Clock.h"
-#include "RGBLED.h"
 #include "Plasma.h"
 
 // Input
@@ -50,7 +49,6 @@ void setup(){
   
   // register all modes
   addMode(new Clock());
-  addMode(new RGBLED());
   addMode(new Plasma);
   
   // recover last mode
