@@ -19,8 +19,7 @@
 
 #define DISPLAY_PIXELS 64
 #define BITS_PER_COLOR 4
-#define DISPLAY_BUFFER_SIZE (DISPLAY_PIXELS*BITS_PER_COLOR*3/8)
-#define DISPLAY_WIDTH 8
+#define DISPLAY_BUFFER_SIZE (DISPLAY_PIXELS*BITS_PER_COLOR*3>>3)
 
 // Port B
 #define CS 2
@@ -140,17 +139,17 @@ ISR(SIG_SPI) {
     SPDR=value;
 
     if(spiByteCount>2) {
-    // If the byte is for this board, store it at the receive buffer
-    if(spiByteCount>=startOfBuffer && spiByteCount<endOfBuffer)
-     receiveBuffer[spiByteCount-startOfBuffer]=value;
+      // If the byte is for this board, store it at the receive buffer
+      if(spiByteCount>=startOfBuffer && spiByteCount<endOfBuffer)
+       receiveBuffer[spiByteCount-startOfBuffer]=value;
 
-    // If we finished receiving, set OK to process buffer
-    if(endOfBuffer-1==spiByteCount)
-      frameReceivedOK=1;
+      // If we finished receiving, set OK to process buffer
+      if(endOfBuffer-1==spiByteCount)
+        frameReceivedOK=1;
 
-    // If we get more data than we should, invalidate it
-    if(endOfBuffer==spiByteCount)
-      frameReceivedOK=0;
+      // If we get more data than we should, invalidate it
+      if(endOfBuffer==spiByteCount)
+        frameReceivedOK=0;
     }
   }
 
@@ -166,16 +165,17 @@ ISR(SIG_SPI) {
 //
 
 void sendColorValues(char row_num, uint8_t bitOffset){
-  for (uint8_t led=row_num*8;led<(row_num*8)+8;led++){
+  uint8_t ledMax=(row_num<<3)+8;
+  for (uint8_t led=row_num<<3;led<ledMax;led++){
     // Get current color
     uint16_t startBit;
     uint8_t value;
     // Find the byte where the pixel color is stored
     startBit=bitOffset+12*led;
     if(startBit%8)
-      value=displayBuffer[startBit/8]&0x0F;
+      value=displayBuffer[startBit>>3]&0x0F;
     else {
-      value=displayBuffer[startBit/8]&0xF0;
+      value=displayBuffer[startBit>>3]&0xF0;
       value=value>>4;
     }
     //Lower the shift register clock so we can configure the data
@@ -196,7 +196,7 @@ void sendColorValues(char row_num, uint8_t bitOffset){
 
 void showDisplayBuffer(){
   //Increment clicks to determine LED brightness levels, circular 0-15
-  timer_clicks = (timer_clicks + 1) & 0x0F;
+  timer_clicks = ++timer_clicks&0x0F;
   
   //Send all 8 rows of colors to the Matrix
   for(char row_num=0;row_num<8;row_num++){
@@ -227,11 +227,11 @@ void showDisplayBuffer(){
 
 void paintColor(uint8_t x, uint8_t y, uint16_t colorOffset, uint8_t value){
   uint16_t startBit;
-  startBit=colorOffset+(y*DISPLAY_WIDTH+x)*(BITS_PER_COLOR*3);
+  startBit=colorOffset+(y<<3+x)*(BITS_PER_COLOR*3);
   if(startBit%8)
-    displayBuffer[startBit/8]=(displayBuffer[startBit/8]&0xF0)|value;
+    displayBuffer[startBit>>3]=(displayBuffer[startBit>>3]&0xF0)|value;
   else
-    displayBuffer[startBit/8]=(displayBuffer[startBit/8]&0x0F)|(value<<BITS_PER_COLOR);
+    displayBuffer[startBit>>3]=(displayBuffer[startBit>>3]&0x0F)|(value<<BITS_PER_COLOR);
 }
 
 //
