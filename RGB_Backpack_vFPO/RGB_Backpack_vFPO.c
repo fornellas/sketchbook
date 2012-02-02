@@ -275,11 +275,11 @@ int main(void){
         // Copy receive buffer to display buffer ()
         cli();
         memcpy((void *)displayBuffer, (void *)receiveBuffer, (size_t)DISPLAY_BUFFER_SIZE);
-        // Reset counters
-        spiByteCount=0;
-        frameReceivedOK=0;
         sei();
       }
+      // Reset counters
+      spiByteCount=0;
+      frameReceivedOK=0;
     }
     // Display current buffer
     showDisplayBuffer();
