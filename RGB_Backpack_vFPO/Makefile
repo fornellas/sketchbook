@@ -40,7 +40,7 @@
 
 
 # MCU name
-MCU = atmega168
+MCU = atmega328
 
 
 # Processor frequency.
@@ -50,13 +50,12 @@ MCU = atmega168
 #     automatically to create a 32-bit value in your source code.
 F_CPU = 8000000
 
-
 # Output format. (can be srec, ihex, binary)
 FORMAT = ihex
 
 
 # Target file name (without extension).
-TARGET = RGB_Backpack_v5
+TARGET = RGB_Backpack_vFPO
 
 
 # List C source files here. (C dependencies are automatically generated.)
