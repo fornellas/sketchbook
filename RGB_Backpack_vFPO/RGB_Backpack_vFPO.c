@@ -22,9 +22,6 @@
 #define DISPLAY_BUFFER_SIZE (DISPLAY_PIXELS*BITS_PER_COLOR*3/8)
 #define DISPLAY_WIDTH 8
 
-// Start of this board buffer at SPI data stream
-#define START_OF_BUFFER (2+DISPLAY_BUFFER_SIZE*(thisBoardPosition-1))
-
 // Port B
 #define CS 2
 #define MOSI 3
@@ -110,6 +107,8 @@ void ioinit(void) {
 ISR(SIG_SPI) {
   // byte received
   volatile char value;
+  static uint16_t startOfBuffer;
+  static uint16_t endOfBuffer;
 
   // Halt Interrupts
   cli();
@@ -120,6 +119,8 @@ ISR(SIG_SPI) {
   // First byte is the position of this board at the board array
   if(0==spiByteCount) {
     thisBoardPosition=value;
+    startOfBuffer=(2+DISPLAY_BUFFER_SIZE*(thisBoardPosition-1));
+    endOfBuffer=startOfBuffer+DISPLAY_BUFFER_SIZE;
     // Decrease the board before passing it to the next board
     SPDR=value-1;
   } else {
@@ -138,17 +139,19 @@ ISR(SIG_SPI) {
     // Pass boardCount or image data to the next board 
     SPDR=value;
 
+    if(spiByteCount>2) {
     // If the byte is for this board, store it at the receive buffer
-    if(spiByteCount>=START_OF_BUFFER && spiByteCount<START_OF_BUFFER+DISPLAY_BUFFER_SIZE)
-     receiveBuffer[spiByteCount-START_OF_BUFFER]=value;
+    if(spiByteCount>=startOfBuffer && spiByteCount<endOfBuffer)
+     receiveBuffer[spiByteCount-startOfBuffer]=value;
 
     // If we finished receiving, set OK to process buffer
-    if(START_OF_BUFFER+DISPLAY_BUFFER_SIZE-1==spiByteCount)
+    if(endOfBuffer-1==spiByteCount)
       frameReceivedOK=1;
 
     // If we get more data than we should, invalidate it
-    if(START_OF_BUFFER+DISPLAY_BUFFER_SIZE==spiByteCount)
+    if(endOfBuffer==spiByteCount)
       frameReceivedOK=0;
+    }
   }
 
   // increment byte counter
