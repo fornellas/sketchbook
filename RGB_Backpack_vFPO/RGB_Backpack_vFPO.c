@@ -1,5 +1,5 @@
 /* TODO
-  - Test data packing with one color per byte, to see if flickering decreases.
+  - Try do optmize main loop to allow 5bits per color without flickering.
 */
 
 /*****************************************************************************
