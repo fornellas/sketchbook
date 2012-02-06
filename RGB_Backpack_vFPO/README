@@ -1,6 +1,6 @@
 = What it is =
 
-This is an alternative firmware for [[http://www.sparkfun.com/products/760|Sparkfun's serial interface RGB LED Matrix]]. It was based on [[http://www.sparkfun.com/datasheets/Components/RGB_Backpack_v4.zip|Sparkfun's firmware v4]] to address some limitations.
+This is an alternative firmware for Sparkfun's serial interface RGB LED Matrix (http://www.sparkfun.com/products/760). It was based on Sparkfun's firmware v4 (http://www.sparkfun.com/datasheets/Components/RGB_Backpack_v4.zip) to address some limitations.
 
 = Motivation =
 
@@ -12,13 +12,13 @@ The v4 firmware had some issues:
 * Daisy chain operation requires pre configuration of each board individually.
 * Limit of 8 boards with daisy chain configuration.
 
-Although there was a [[http://www.sparkfun.com/tutorial/ArduinoRGBMatrix/RGB_Backpack_v5.zip|firmware v5]] released, not everything was fixed.
+Although there was a firmware v5 released (http://www.sparkfun.com/tutorial/ArduinoRGBMatrix/RGB_Backpack_v5.zip), not everything was fixed.
 
 = Features =
 
 This new firmware gives new life to the boad:
 
-* '''4096 colors'''.
+* 4096 colors.
 * Synchronization is done when SS goes from low to high, so there is no need to reboot anymore.
 * No more control characters.
 * Zero configuration daisy chain operation.
@@ -38,21 +38,21 @@ The controlling device must be configured as follows:
 == Frame data packing ==
 
 Each color has 4bits (MSB) and you need 3 bytes to store data for 2 pixels:
-<nowiki>
+
  |      pixel0     |      pixel1     |
  | RRRR GGGG | BBBB RRRR | GGGG BBBB |
  |   byte0   |   byte1   |   byte2   |
-</nowiki>
+
 One frame will contain enough data to fill up all boards. A single board, will have a 96 bytes frame; two boards daisy chain, 192 bytes and so on.
 
 The order data must be sent, is as follows. For the example configuration below:
-<nowiki>
+
             +--> 0x0
            /
            +---+---+---+---+ --> 31x0
  Wires ==> | 0 | 1 | 2 | 3 |
            +---+---+---+---+ --> 31x7
-</nowiki>
+
 You must send data for each board in reverse order:
 
 * Board 3
@@ -75,12 +75,12 @@ Pixels for each board, must be sent in this order:
 
 The firmware will accept frame data via SPI. To send a single frame, the procedure below must be followed:
 
-# Assert SS.
-# Transfer frame data:
-## Send one byte.
-## Delay 7us.
-## Repeat the last 2 steps for the remaining bytes.
-# Deassert SS.
-# Delay 263us.
+* Assert SS.
+* Transfer frame data:
+** Send one byte.
+** Delay 7us.
+** Repeat last 2 steps for the remaining bytes.
+* Deassert SS.
+* Delay 263us.
 
 The delays are necessary to allow some time for the firmware to process received data before receiving more.
