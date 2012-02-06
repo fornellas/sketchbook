@@ -24,6 +24,14 @@ This new firmware gives new life to the boad:
 * Zero configuration daisy chain operation.
 * Unlimited boards with daisy chain configuration (as long as SS output port from master can handle all input slave ports from all boards).
 
+= Compile and Install =
+
+The code was tested at Ubuntu 11.10, with gcc-avr 1:4.5.3-2 and avr-libc 1:1.7.1-2. To compile, just rum "$ make".
+
+Sparkfun has a nice tutorial on how to use your Arduino to program the AVR chip: http://www.sparkfun.com/tutorials/200. The issue I found, is that newer Arduino IDE versions do not come with ArduinoISP sketch. I own a Duemilanove, and was able to program using ancient Arduino 0018 IDE, its avrdude and fixed ArduinoISP-dev04b.zip sketch from http://code.google.com/p/mega-isp/issues/detail?id=14.
+
+If you own an Uno, check out http://arduino.cc/en/Tutorial/ArduinoISP to see if there is a newer version of ArduinoISP sketch. Currently (Jan 2012), Uno can not be used as ISP. Worst case scenario, you will need to buy an AVR programmer, such as http://www.sparkfun.com/products/9825.
+
 = Interfacing =
 
 == SPI configuration ==
