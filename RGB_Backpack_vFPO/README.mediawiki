@@ -22,7 +22,7 @@ This new firmware gives new life to the boad:
 * Synchronization is done when SS goes from low to high, so there is no need to reboot anymore.
 * No more control characters.
 * Zero configuration daisy chain operation.
-* Unlimited <ref>as long as SS output port from master can handle all input slave ports from all boards</ref> boards with daisy chain configuration.
+* Unlimited boards with daisy chain configuration (as long as SS output port from master can handle all input slave ports from all boards).
 
 = Interfacing =
 
@@ -38,21 +38,21 @@ The controlling device must be configured as follows:
 == Frame data packing ==
 
 Each color has 4bits (MSB) and you need 3 bytes to store data for 2 pixels:
-
+<code>
  |      pixel0     |      pixel1     |
  | RRRR GGGG | BBBB RRRR | GGGG BBBB |
  |   byte0   |   byte1   |   byte2   |
-
+</code>
 One frame will contain enough data to fill up all boards. A single board, will have a 96 bytes frame; two boards daisy chain, 192 bytes and so on.
 
 The order data must be sent, is as follows. For the example configuration below:
-
+<code>
             +--> 0x0
            /
            +---+---+---+---+ --> 31x0
  Wires ==> | 0 | 1 | 2 | 3 |
            +---+---+---+---+ --> 31x7
-
+</code>
 You must send data for each board in reverse order:
 
 * Board 3
