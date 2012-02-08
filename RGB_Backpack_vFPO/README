@@ -6,8 +6,8 @@ This is an alternative firmware for Sparkfun's serial interface RGB LED Matrix (
 
 The v4 firmware had some issues:
 
-* 255 colors only (4bit red/green, 3bit blue, minus the control char '%').
-* Partial frame transfers require a reset or power off / on to synchronize the screens again.
+* 255 colors only (3bit red/green, 2bit blue, minus the control char '%').
+* Partial frame transfers require a reset or power off / on to synchronize the screen buffer again.
 * The control character '%' can not be used as a valid color, essentially eliminating this color.
 * Daisy chain operation requires pre configuration of each board individually.
 * Limit of 8 boards with daisy chain configuration.
@@ -18,7 +18,7 @@ Although there was a firmware v5 released (http://www.sparkfun.com/tutorial/Ardu
 
 This new firmware gives new life to the boad:
 
-* 4096 colors.
+* 4096 colors (4bit red, 4bit green and 4bit blue), higher contrast.
 * Synchronization is done when SS goes from low to high, so there is no need to reboot anymore.
 * No more control characters.
 * Zero configuration daisy chain operation.
