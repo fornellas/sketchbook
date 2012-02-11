@@ -111,8 +111,6 @@ Here is a minimal code for Arduino 1.0. You should see a full white frame blinki
   #define BOARDS 1
   
   void setup() {
-    // Serial
-    Serial.begin(115200);
     // SPI Init
     SPCR=(1<<SPE)|(1<<MSTR);
     SPSR = SPSR & B11111110;
@@ -145,7 +143,7 @@ Here is a minimal code for Arduino 1.0. You should see a full white frame blinki
       // Give some time for the interrupt code at the boards
       delayMicroseconds(64);
     }
-    // Finishe transfer, image will go to the screen only at this point
+    // Finish transfer, image will be displayed only at this point
     digitalWrite(10, HIGH);
     // Give some time for the receive / image buffers to be swapped
     delayMicroseconds(297);
