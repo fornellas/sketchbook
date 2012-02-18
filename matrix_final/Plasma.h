@@ -13,19 +13,15 @@ extern SFRGBLEDMatrix *display;
 class Plasma: 
 public Mode {
 private:
-  byte currMode;
   byte *plasma;
-  void fillPlasma(byte mode);
+  void fillPlasma();
   int pSpeed;
-  void pSpeedVal();
+  void pSpeedValidate();
 public:
   Plasma() : 
   Mode("Plasma"){
-    currMode=EEPROM.read(EEPROM_PLASMA_MODE);
-    if(currMode>=PLASMA_MODES)
-      currMode=0;
     pSpeed=EEPROM.read(EEPROM_PLASMA_SPEED);
-    pSpeedVal();
+    pSpeedValidate();
   };
   void loop();
   void enter();

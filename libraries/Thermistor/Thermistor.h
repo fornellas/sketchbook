@@ -1,27 +1,25 @@
 /*
   Thermistor.h - Temperature reading library for Arduino
-  Based on the code found at:
-  http://www.arduino.cc/playground/ComponentLib/Thermistor2
 
-  Schematic:
-
-  [Ground] ---- [10k-Resistor] -------|------- [Thermistor] ---- [+5v]
+  [Ground] ---- [10k Resistor] -------|------- [ Thermistor] ---- [Vcc]
                                       |
                                   Analog Pin
+
+  Constants configured for Vishay part NTCLE100E3103JB0:
+  http://www.sparkfun.com/products/250
+  adjust at Thermistor.cpp if needed.
 */
+
+
 
 #ifndef Thermistor_h
 #define Thermistor_h
 
 #include <inttypes.h>
 
-class Thermistor
+namespace Thermistor
 {
-  private:
-    uint8_t pin;
-  public:
-    Thermistor(uint8_t pin);
-    double read();
+  double read(uint8_t pin);
 };
 
 #endif

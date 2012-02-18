@@ -1,14 +1,4 @@
-/*
-  Thermistor.cpp - Temperature reading library for Arduino
-  Based on the code found at:
-  http://www.arduino.cc/playground/ComponentLib/Thermistor2
 
-  Schematic:
-
-  [Ground] ---- [10k Resistor] -------|------- [10k Thermistor] ---- [+5v]
-                                      |
-                                  Analog Pin
-*/
 
 extern "C" {
   #include <inttypes.h>
@@ -18,28 +8,33 @@ extern "C" {
 #include <Thermistor.h>
 #include <Arduino.h>
 
-Thermistor::Thermistor(uint8_t pin) {
-  this->pin=pin;
-};
+// Constants for Vishay part NTCLE100E3103JB0:
+// http://www.sparkfun.com/products/250
+// If you have a different part, please refer to the datasheet:
+// http://www.sparkfun.com/datasheets/Sensors/Thermistor23816403-1.pdf
+// and adjust them as needed.
+#define RREF 10000.0
+#define TA1 0.003354016
+#define TB1 0.0002569850
+#define TC1 0.000002620131
+#define TD1 0.00000006383091
 
-double Thermistor::read() {
-  int RawADC;
-  long Resistance;
-  double Temp;
+double Thermistor::read(uint8_t pin) {
+  double RT;
+  double temperature;
+  double logRtRref;
+  double logRtRref2;
 
-  RawADC=analogRead(pin);
+  RT=10000.0*(1023/double(analogRead(pin))-1);
+  logRtRref=log(RT/RREF);
+  logRtRref2=logRtRref * logRtRref;
+  temperature=1.0 /
+    (
+      TA1 + 
+      TB1 * logRtRref +
+      TC1 * logRtRref2 +
+      TD1 * logRtRref2 * logRtRref
+    ) - 273.15;
 
- // Inputs ADC Value from Thermistor and outputs Temperature in Celsius
- //  requires: include <math.h>
- // Utilizes the Steinhart-Hart Thermistor Equation:
- //    Temperature in Kelvin = 1 / {A + B[ln(R)] + C[ln(R)]^3}
- //    where A = 0.001129148, B = 0.000234125 and C = 8.76741E-08
- Resistance=((10240000/RawADC) - 10000);  // Assuming a 10k Thermistor.  Calculation is actually: Resistance = (1024/ADC)
- Temp = log(Resistance); // Saving the Log(resistance) so not to calculate it 4 times later. // "Temp" means "Temporary" on this line.
- Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));   // Now it means both "Temporary" and "Temperature"
- Temp = Temp - 273.15;  // Convert Kelvin to Celsius                                         // Now it only means "Temperature"
-
- // Uncomment this line for the function to return Fahrenheit instead.
- //Temp = (Temp * 9.0)/ 5.0 + 32.0; // Convert to Fahrenheit
- return Temp;  // Return the Temperature
+  return temperature;
 }

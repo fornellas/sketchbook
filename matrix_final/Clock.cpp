@@ -5,28 +5,28 @@
 #include "Button.h"
 #include <EEPROM.h>
 #include "EEPROM.h"
+#include "pins.h"
 
 extern RTCDS1307 *rtc;
-extern Thermistor *thermistor;
 extern SFRGBLEDMatrix *display;
 extern Button *button;
 
-void printOuter12(byte value, int x_offset, int y_offset, byte color) {
+void printOuter12(byte value, int x_offset, int y_offset, Color color) {
   byte x[12] = {
-    5,6,6,6,5,3,1,0,0,0,1,3        };
+    5,6,6,6,5,3,1,0,0,0,1,3                      };
   byte y[12] = {
-    0,1,3,5,6,6,6,5,3,1,0,0        };
+    0,1,3,5,6,6,6,5,3,1,0,0                      };
   for(byte h=1;h<13;h++){
     if(value>=h||value==0)
       display->paintPixel(color, x_offset+x[h-1], y_offset+y[h-1]);
   }
 }
 
-void printInner60(byte value, int x_offset, int y_offset, byte colorOuter, byte colorInner) {
+void printInner60(byte value, int x_offset, int y_offset, Color colorOuter, Color colorInner) {
   byte x[12] = {
-    4,5,5,5,4,3,2,1,1,1,2,3        };
+    4,5,5,5,4,3,2,1,1,1,2,3                      };
   byte y[12] = {
-    1,2,3,4,5,5,5,4,3,2,1,1        };
+    1,2,3,4,5,5,5,4,3,2,1,1                      };
   for(byte m=5;m<=60;m+=5){
     if(value>=m)
       display->paintPixel(colorOuter, x_offset+x[m/5-1], y_offset+y[m/5-1]);
@@ -41,9 +41,9 @@ void printInner60(byte value, int x_offset, int y_offset, byte colorOuter, byte 
     display->paintPixel(colorInner, x_offset+2, y_offset+3);
 }
 
-void printTime(Date date, int x_offset, int y_offset, byte hourColor, byte minuteColor5, byte minuteColor1, byte secondColor) {
+void printTimeSmall(Date date, int x_offset, int y_offset, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor) {
   // Middle point
-  display->paintPixel(WHITE, x_offset+3, y_offset+3);
+  display->paintPixel(centerColor, x_offset+3, y_offset+3);
   // Hour
   int hour;
   hour=date.hour;
@@ -63,9 +63,85 @@ void printTime(Date date, int x_offset, int y_offset, byte hourColor, byte minut
     display->paintPixel(secondColor, x_offset+2, y_offset+2);
 };
 
-void printDate(Date date, int x_offset, int y_offset, byte monthColor, byte dayColor5, byte dayColor1) {
+void printTimeBig(Date date, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor) {
   // Middle point
-  display->paintPixel(WHITE, x_offset+3, y_offset+3);
+  display->paintPixel(centerColor, 7, 7);
+  display->paintPixel(centerColor, 8, 7);
+  display->paintPixel(centerColor, 7, 8);
+  display->paintPixel(centerColor, 8, 8);
+  // Hour
+  int hour;
+  hour=date.hour;
+  if(hour>=13)
+    hour-=12;
+  byte hx1[12] = {
+    11,14,15,14,11,7,3,1,0,1,3,7                      };
+  byte hy1[12] = {
+    1,3,7,11,14,15,14,11,7,3,1,0                      };
+  byte hx2[12] = {
+    12,14,15,14,12,8,4,1,0,1,4,8                      };
+  byte hy2[12] = {
+    1,4,8,12,14,15,14,12,8,4,1,0                      };
+  for(byte h=1;h<13;h++){
+    if(hour>=h||hour==0) {
+      display->paintPixel(hourColor, hx1[h-1], hy1[h-1]);
+      display->paintPixel(hourColor, hx2[h-1], hy2[h-1]);
+    }
+  }
+
+  // minute
+  byte mx1[12] = {
+    10,12,13,12,10,7,4,3,2,3,4,7                      };
+  byte my1[12] = {
+    3,4,7,10,12,13,12,10,7,4,3,2                      };
+  byte mx2[12] = {
+    11,12,13,12,11,8,5,3,2,3,5,8                      };
+  byte my2[12] = {
+    3,5,8,11,12,13,12,11,8,5,3,2                      };
+  for(byte m=5;m<=60;m+=5){
+    if(date.minute>=m){
+      display->paintPixel(minuteColor5, mx1[m/5-1], +my1[m/5-1]);
+      display->paintPixel(minuteColor5, mx2[m/5-1], +my2[m/5-1]);
+    }
+  }
+  if(date.minute%5>=1){
+    display->paintPixel(minuteColor1, 7, 4);
+    display->paintPixel(minuteColor1, 8, 4);
+  }
+  if(date.minute%5>=2){
+    display->paintPixel(minuteColor1, 11, 7);
+    display->paintPixel(minuteColor1, 11, 8);
+  }
+  if(date.minute%5>=3){
+    display->paintPixel(minuteColor1, 7, 11);
+    display->paintPixel(minuteColor1, 8, 11);
+  }
+  if(date.minute%5>=4){
+    display->paintPixel(minuteColor1, 4, 7);
+    display->paintPixel(minuteColor1, 4, 8);
+  }
+  // Second
+  if(date.second%5>=1){
+    display->paintPixel(secondColor, 7, 6);
+    display->paintPixel(secondColor, 8, 6);
+  }
+  if(date.second%5>=2){
+    display->paintPixel(secondColor, 9, 7);
+    display->paintPixel(secondColor, 9, 8);
+  }
+  if(date.second%5>=3){
+    display->paintPixel(secondColor, 7, 9);
+    display->paintPixel(secondColor, 8, 9);
+  }
+  if(date.second%5>=4){
+    display->paintPixel(secondColor, 6, 7);
+    display->paintPixel(secondColor, 6, 8);
+  }
+}
+
+void printDate(Date date, int x_offset, int y_offset, Color centerColor, Color monthColor, Color dayColor5, Color dayColor1) {
+  // Middle point
+  display->paintPixel(centerColor, x_offset+3, y_offset+3);
   // Month
   printOuter12(date.month, x_offset, y_offset, monthColor);
   // Day
@@ -74,37 +150,57 @@ void printDate(Date date, int x_offset, int y_offset, byte monthColor, byte dayC
 
 void Clock::loop() {
   struct Date date;
+  int light;
+  byte value;
+  float temperature;
 
   display->fill(BLACK);
 
   // change mode if MODE button is pressed
-  if(button->pressed(A)) {
+  if(button->released(A)) {
     currMode++;
     if(currMode>=CLOCK_MODES)
       currMode=0;
     EEPROM.write(EEPROM_CLOCK_MODE, currMode);
   }
 
+  pinMode(PIN_PHOTORESISTOR_RED, INPUT);
+  digitalWrite(PIN_CD74HC4067_S0, ADDR_PHOTORESISTOR_RED & 0x1);
+  digitalWrite(PIN_CD74HC4067_S1, ADDR_PHOTORESISTOR_RED & 0x2);
+  digitalWrite(PIN_CD74HC4067_S2, ADDR_PHOTORESISTOR_RED & 0x4);
+  digitalWrite(PIN_CD74HC4067_S3, ADDR_PHOTORESISTOR_RED & 0x8);
+  light=analogRead(PIN_PHOTORESISTOR_RED);
+  light-=220;
+  value=1+15*light/800;
+
   date=rtc->getDate();
 
   switch(currMode){
   case 0:
-    display->printChar4p(char(48+(date.hour/10)), RED, 0, 0);
-    display->printChar4p(char(48+(date.hour%10)), RED, 4, 0);
-    display->printChar4p(char(48+(date.minute/10)), GREEN, 8, 0);
-    display->printChar4p(char(48+(date.minute%10)), GREEN, 12, 0);
-    display->printChar4p(char(48+(date.second/10)), BLUE, 4, 4);
-    display->printChar4p(char(48+(date.second%10)), BLUE, 8, 4);
+    display->printChar4p(char(48+(date.hour/10)), RGB(value,0,0), 0, 4);
+    display->printChar4p(char(48+(date.hour%10)), RGB(value,0,0), 4, 4);
+    display->printChar4p(char(48+(date.minute/10)), RGB(0,value,0), 8, 4);
+    display->printChar4p(char(48+(date.minute%10)), RGB(0,value,0), 12, 4);
+    display->printChar4p(char(48+(date.second/10)), RGB(0,0,value), 4, 9);
+    display->printChar4p(char(48+(date.second%10)), RGB(0,0,value), 8, 9);
     break;
   case 1:
-    printTime(date, 4, 0, RED, YELLOW, GREEN, BLUE);
+    printTimeSmall(date, 0, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
+    printDate(date, 8, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0));
     break;
   case 2:
-    printTime(date, 0, 0, RED, YELLOW, GREEN, BLUE);
-    printDate(date, 8, 0, RED, YELLOW, GREEN);
+    printTimeBig(date, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
+    break;
   }
   display->show();
 }
+
+
+
+
+
+
+
 
 
 

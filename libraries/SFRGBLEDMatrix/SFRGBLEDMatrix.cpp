@@ -8,6 +8,10 @@ extern "C" {
 #include <SFRGBLEDMatrix.h>
 #include <SPI.h>
 
+#define DISPLAY_PIXELS 64
+#define BITS_PER_COLOR 4
+#define DISPLAY_BUFFER_SIZE (DISPLAY_PIXELS*BITS_PER_COLOR*3>>3)
+
 prog_uint16_t coffset_4p[] PROGMEM={
   0, 1, 2, 5, 10, 13, 17, 21, 22, 24, 26, 31, 34, 36, 38, 39, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 74, 76, 78, 80, 82, 85, 88, 91, 94, 97, 100, 103, 106, 109, 112, 115, 118, 122, 125, 130, 134, 138, 141, 145, 148, 151, 154, 158, 162, 167, 170, 173, 177, 179, 183, 185, 188, 191, 193, 196, 199, 202, 205, 208, 210, 212, 215, 216, 219, 222, 224, 229, 232, 235, 238, 241, 243, 246, 249, 252, 255, 260, 263, 266, 269, 272, 273, 276, 280};
 prog_uchar line0_4p[] PROGMEM={
@@ -28,20 +32,19 @@ SFRGBLEDMatrix::SFRGBLEDMatrix(bool square, byte dispCount, byte pinSS) {
   this->pinSS=pinSS;
   this->square=square;
   this->dispCount=dispCount;
-  byte dispCountSqrt=(byte)sqrt(float(dispCount));
   if(square) {
-    width=DISP_LEN*dispCountSqrt;
+    width=DISP_LEN*2;
     height=width;
   }else{
     width=DISP_LEN*dispCount;
     height=DISP_LEN;
   }
-  pixels=word(dispCount)*word(DISP_LEN*DISP_LEN);
-  frameBuff=(byte *)calloc((size_t)pixels, sizeof(byte)); // FIXME validate if NULL
+  pixels=uint16_t(dispCount)*DISPLAY_PIXELS;
+  buffSize=DISPLAY_BUFFER_SIZE*dispCount;
+  frameBuff=(byte *)calloc((size_t)(buffSize), sizeof(byte)); // FIXME validate if NULL
 
-  pinMode(pinSS, OUTPUT);
-  digitalWrite(pinSS, HIGH);
-  delayMicroseconds(500);
+  setupSPI();
+  setupPINs();
 };
 
 SFRGBLEDMatrix::~SFRGBLEDMatrix() {
@@ -50,112 +53,101 @@ SFRGBLEDMatrix::~SFRGBLEDMatrix() {
 
 void SFRGBLEDMatrix::setupSPI() {
   SPI.setDataMode(SPI_MODE0);
-  SPI.setClockDivider(SPI_CLOCK_DIV128);
+  SPI.setClockDivider(SPI_CLOCK_DIV4);
   SPI.setBitOrder(MSBFIRST);
 }
 
+void SFRGBLEDMatrix::setupPINs() {
+  // FIXME it is hardcoded for Duemilanove
+  pinMode(11, OUTPUT); // MOSI
+  pinMode(pinSS, OUTPUT); // SS
+}
+
 void SFRGBLEDMatrix::show() {
-  word d, x, y;
-  byte c;
-
-  setupSPI();
-
-  for(d=dispCount-1;d<dispCount;d--){
-    digitalWrite(pinSS, LOW);
-    delayMicroseconds(500);
-    for(y=0;y<DISP_LEN;y++){
-      for(x=DISP_LEN-1;x<DISP_LEN;x--) {
-        // print regular for SDIE or SQUARE bottom row
-        if(!square||(square&&(0==d||1==d)))
-          c=*(frameBuff + dispCount*DISP_LEN*y + d*DISP_LEN + x);
-        // print upside down for SQUARE and top row
-        else
-          c=*(frameBuff + dispCount*DISP_LEN*(DISP_LEN-y-1) + d*DISP_LEN + (DISP_LEN-x-1));
-/* Software fix for broken LED matrix with dim green 
-if( c&RGB(0,7,0) && d) {
-  byte g=(c&RGB(0,7,0))>>2;
-  switch(g){
-    case 2:
-      g=3;
-      break;
-    case 3:
-      g=5;
-      break;
-    case 4:
-      g=6;
-      break;
-    case 5:
-      g=7;
-      break;
-  };
-  c=(c&RGB(7,0,7)) | (g<<2);
-}
-if( c&RGB(0,7,0) && !d) {
-  byte g=(c&RGB(0,7,0))>>2;
-  switch(g){
-    case 5:
-    case 6:
-    case 7:
-      g=4;
-      break;
-  };
-  c=(c&RGB(7,0,7)) | (g<<2);
-}
-/* end soft */
-         if('%'==c)
-           SPI.transfer(RGB(2,1,1));
-         else
-           SPI.transfer(c);
-      };
-    };
-    digitalWrite(pinSS, HIGH);
-    delayMicroseconds(10);
-  };
-};
-
-void SFRGBLEDMatrix::config() {
-  setupSPI();
   digitalWrite(pinSS, LOW);
-  delayMicroseconds(500);
-  SPI.transfer('%');
-  SPI.transfer(dispCount);
+  for(uint16_t p=0;p<buffSize;p++){
+    SPI.transfer(*(frameBuff + p));
+    delayMicroseconds(64);
+  }
   digitalWrite(pinSS, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(297);
 };
 
-void SFRGBLEDMatrix::printChar4p(char c, byte color, int x_offset, int y_offset){
+#define X_MAX_4P (byte)(pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P+1)-(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P))
+
+void SFRGBLEDMatrix::printChar4p(char c, Color color, int x_offset, int y_offset){
   if(c<CHAR_MIN_4P||c>CHAR_MAX_4P)
     return;
-
-  for(byte y=0;y<4;y++){
-    byte x_max=(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P+1)-(byte)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P);
-
-    if(y+y_offset>=height)
+  for(int y=0;y<4;y++){
+    if(y+y>=height)
       continue;
-
-    for(byte x=0;x<x_max;x++){
+    uint8_t x_max=X_MAX_4P;
+    for(int x=0;x<x_max;x++){
       unsigned int bitOffset;
       byte charData;
       byte pixel;
-
-      if(x+x_offset>=width)
+      if(x+x>=width)
         continue;
-
       bitOffset=(unsigned int)pgm_read_word_near(coffset_4p+c-CHAR_MIN_4P)+x;
       charData=(byte)pgm_read_word_near((byte *)pgm_read_word_near(&line_4p[y])+bitOffset/8);
       pixel=(charData>>(7-bitOffset%8)) & B00000001;
       if(pixel)
-        frameBuff[(y+y_offset)*width+x+x_offset]=color;
+        paintPixel(color, x+x_offset, y+y_offset);
     }
   }
 }
 
-void SFRGBLEDMatrix::paintPixel(byte color, int x_offset, int y_offset) {
-  if(x_offset>=0&&x_offset<width&&y_offset>=0&&y_offset<height)
-    frameBuff[width*y_offset+x_offset]=color;
+void SFRGBLEDMatrix::printString4p(char *s, Color color, int x, int y){
+  uint16_t incr;
+  for(uint16_t p=0;s[p]!='\0';p++){
+    char c;
+    c=s[p];
+    printChar4p(s[p], color, x, y);
+    x+=X_MAX_4P+1;
+  }
 }
 
-void SFRGBLEDMatrix::fill(byte color){
-  for(word p=0;p<pixels;p++)
-    frameBuff[p]=color;
+void SFRGBLEDMatrix::paintPixel(Color color, int x, int y) {
+  uint16_t startPixel;
+  uint16_t startByte;
+  // Fix coordinates for SQUARE
+  if(square){
+    if(y<8){
+      x=31-x;
+      y=7-y;
+    }else
+      x-=8;
+  }
+  // print pixel
+  startPixel=(dispCount-1-(x>>3))*DISPLAY_PIXELS + ((7-y)<<3) + (x&7);
+  startByte=startPixel*12/8;
+  // odd pixels
+  if(startPixel&0x01) {
+    // XXXX RRRR
+    frameBuff[startByte]=(frameBuff[startByte]&0xF0)|(color>>8);
+    // GGGG BBBB
+    frameBuff[startByte+1]=color&0xFF;
+  // even pixels
+  }else{
+    // RRRR GGGG
+    frameBuff[startByte]=color>>4;
+    // BBBB XXXX
+    frameBuff[startByte+1]=(frameBuff[startByte+1]&0x0F)|(color&0x0F)<<4;
+  }
+}
+
+Color SFRGBLEDMatrix::getPixel(int x, int y) {
+  return 0; // TODO
+}
+
+void SFRGBLEDMatrix::fill(Color color){
+  // TODO optimize
+  for(int x=0;x<width;x++)
+    for(int y=0;y<height;y++){
+      paintPixel(color, x, y);
+  }   
+}
+
+void SFRGBLEDMatrix::clear(){
+  fill(BLACK);
 }

@@ -1,8 +1,8 @@
 #include "Wire.h"
 #include <SPI.h>
 #include <RTCDS1307.h>
-#include <Thermistor.h>
 #include <SFRGBLEDMatrix.h>
+#include <Thermistor.h>
 #include <EEPROM.h>
 
 // Modes
@@ -16,7 +16,7 @@
 // EEPROM
 #include "EEPROM.h"
 
-#define DISP_COUNT 2
+#define DISP_COUNT 4
 
 // Globals
 Mode **mode=NULL;
@@ -24,7 +24,6 @@ byte modeCount=0;
 byte currMode=0;
 Button *button;
 RTCDS1307 *rtc;
-Thermistor *thermistor;
 SFRGBLEDMatrix *display;
 
 // Register a new mode
@@ -34,26 +33,38 @@ void addMode(Mode *m){
 }
 
 void setup(){
-  // start facilities
+  //
+  // start globals
+  //
+
+  // Arduino facilities
   Serial.begin(115200);
   Wire.begin();
   SPI.begin();
 
-  // start globals
+  // CD74HC4067
+  pinMode(PIN_CD74HC4067_S0, OUTPUT);
+  pinMode(PIN_CD74HC4067_S1, OUTPUT);
+  pinMode(PIN_CD74HC4067_S2, OUTPUT);
+  pinMode(PIN_CD74HC4067_S3, OUTPUT); 
+
+  // Common classes
   button=new Button();
   rtc=new RTCDS1307();
-  thermistor=new Thermistor(PIN_THERMISTOR);
-  display=new SFRGBLEDMatrix(SIDE, DISP_COUNT, PIN_MATRIX_SS);
-  display->fill(BLACK);
+  display=new SFRGBLEDMatrix(SQUARE, DISP_COUNT, PIN_MATRIX_SS);
   display->show();
-  
-  // register all modes
+
+  //
+  // Modes
+  //
+
+  // register modes
   addMode(new Clock());
   addMode(new Plasma);
-  
+
   // recover last mode
   currMode=EEPROM.read(EEPROM_MODE);
-  
+
   // done!
   Serial.println("Boot complete.");
 };
@@ -66,7 +77,6 @@ void loop(){
   mode[currMode]->start();
   currMode++;
 };
-
 
 
 

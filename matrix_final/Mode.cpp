@@ -21,12 +21,12 @@ void Mode::start() {
     button->update();
 
     // change mode if MODE button is pressed
-    if(button->pressed(MODE)) {
+    if(button->released(MODE)) {
       this->exit();
       return;
     }
 
-    // coll main mode method
+    // call main mode method
     this->loop();
 
     // sleep
