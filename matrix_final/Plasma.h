@@ -8,8 +8,6 @@
 
 #define PLASMA_MODES 4
 
-extern SFRGBLEDMatrix *display;
-
 class Plasma: 
 public Mode {
 private:

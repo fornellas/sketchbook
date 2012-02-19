@@ -11,13 +11,14 @@ DONE
   - Graphic Small Clock
   - Graphic Small Clock + Date
   - Plasma
-    - Procedural random bicubic interpolated pattern
+    - Procedural random bicubic interpolated pattern for each 8x8 pixels
     - Controlable speed.
 
 TODO
 
+- display XPM images
 - Plasma
-  - interpolate per individual Matrix, not whole screen
+  - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.
 - Mode change animation
   - Text scroll?
   - Icon?

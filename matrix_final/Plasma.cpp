@@ -39,55 +39,57 @@ Color spectrum(byte p){
     p-=75;
     return RGB(15, 0, 14-p);
   }
+  return 0;
 }
 
+// Bicubic interpolation code based on code found at:
 // http://www.paulinternet.nl/?page=bicubic
-double cubicInterpolate (double p[4], double x) {
-  return p[1] + 0.5 * x*(p[2] - p[0] + x*(2.0*p[0] - 5.0*p[1] + 4.0*p[2] - p[3] + x*(3.0*(p[1] - p[2]) + p[3] - p[0])));
+double cubicInterpolate (double *p, double x) {
+  return *(p+1) + 0.5 * x*(*(p+2) - *p + x*(2.0**(p+0) - 5.0**(p+1) + 4.0**(p+2) - *(p+3) + x*(3.0*(*(p+1) - *(p+2)) + *(p+3) - *p)));
 }
-double bicubicInterpolate (double p[4][4], double x, double y) {
+double bicubicInterpolate (
+double *pixmap,
+uint8_t pixmapWidth, 
+uint8_t pixmapHeight, 
+uint8_t pointX, 
+uint8_t pointY, 
+double x, 
+double y) {
   double arr[4];
-  arr[0] = cubicInterpolate(p[0], y);
-  arr[1] = cubicInterpolate(p[1], y);
-  arr[2] = cubicInterpolate(p[2], y);
-  arr[3] = cubicInterpolate(p[3], y);
-  return cubicInterpolate(arr, x);
+  arr[0] = cubicInterpolate(pixmap+pixmapWidth*(pointY-1)+pointX-1, x);
+  arr[1] = cubicInterpolate(pixmap+pixmapWidth*(pointY+0)+pointX-1, x);
+  arr[2] = cubicInterpolate(pixmap+pixmapWidth*(pointY+1)+pointX-1, x);
+  arr[3] = cubicInterpolate(pixmap+pixmapWidth*(pointY+2)+pointX-1, x);
+  return cubicInterpolate(arr, y);
 }
 
-#define ORIGIN_WIDTH 4
-#define ORIGIN_HEIGHT 4
-#define ORIGIN_MAX 64.0
+#define PIXMAP_WIDTH ((display->width>>3)+3)
+#define PIXMAP_HEIGHT ((display->height>>3)+3)
+#define PIXMAP_MAX 70.0
 
 void Plasma::fillPlasma() {
-  double origin[ORIGIN_WIDTH][ORIGIN_HEIGHT];
+  double *pixmap;
+
+  pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
 
   randomSeed(millis());
-  for(byte x=0;x<ORIGIN_WIDTH;x++)
-    for(byte y=0;y<ORIGIN_HEIGHT;y++)
-      origin[x][y]=random(ORIGIN_MAX);
+  for(byte x=0;x<PIXMAP_WIDTH;x++)
+    for(byte y=0;y<PIXMAP_HEIGHT;y++)
+      *(pixmap+PIXMAP_WIDTH*y+x)=random(PIXMAP_MAX);
 
-  for(byte x=0;x<ORIGIN_WIDTH;x++){
-    for(byte y=0;y<ORIGIN_HEIGHT;y++){
-      Serial.print(origin[x][y]);
-      Serial.print(" ");
-    }
-    Serial.println("");
-  }
-  Serial.println("");
+  for(word x=0;x<display->width;x++)
+    for(word y=0;y<display->height;y++)
+      *(plasma+y*display->width+x)=bicubicInterpolate(
+      pixmap,
+      PIXMAP_WIDTH, 
+      PIXMAP_HEIGHT,
+      (x/8)+1, 
+      (y/8)+1, 
+      double(x%8)/8.0,
+      double(y%8)/8.0
+        );
 
-  for(double x=0;x<display->width;x++)
-    for(double y=0;y<display->height;y++)
-      *(plasma+word(y)*display->width+word(x))=bicubicInterpolate(origin, x/(double)display->width, y/(double)display->height);
-
-  for(byte x=0;x<display->width;x++){
-    for(byte y=0;y<display->height;y++){
-      Serial.print(*(plasma+y*display->width+x));
-      Serial.print(" ");
-    }
-    Serial.println("");
-  }
-  Serial.println("");
-
+  free(pixmap);
 }
 
 
@@ -103,7 +105,7 @@ void Plasma::pSpeedValidate(){
 void Plasma::loop() {
   if(button->released(A)){
     display->clear();
-    display->printString4p("BUSY", WHITE, 0, 6);
+    display->print(WHITE, 0, 6, 4, "BUSY");
     display->show();
     fillPlasma();
   }
@@ -111,11 +113,12 @@ void Plasma::loop() {
   if(button->released(B)) {
     pSpeed++;
     pSpeedValidate();
+    // FIXME adjust text placement relative to screen size
     if(pSpeed>=0)
-      display->printChar4p(48+pSpeed, BLACK, 7, 6);
+      display->print(BLACK, 7, 6, 4, 48+pSpeed);
     else{
-      display->printChar4p('-', BLACK, 5, 6);
-      display->printChar4p(48+pSpeed*-1, BLACK, 8, 6);
+      display->print(BLACK, 5, 6, 4, '-');
+      display->print(BLACK, 8, 6, 4, 48+pSpeed*-1);
     }
     display->show();
     delay(200);
@@ -128,7 +131,6 @@ void Plasma::loop() {
 
   for(word x=0;x<display->width;x++)
     for(word y=0;y<display->height;y++)
-      //      display->paintPixel(word(double(*(plasma+y*word(display->width)+x)/255.0*4096.0)), x, y);
       display->paintPixel(spectrum(
       byte(
       double(
@@ -141,7 +143,7 @@ void Plasma::loop() {
 }
 
 void Plasma::enter() {
-  display->printString4p("BUSY", WHITE, 0, 6);
+  display->print(WHITE, 0, 6, 4, "BUSY");
   display->show();
   plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
   fillPlasma();
@@ -152,6 +154,10 @@ void Plasma::exit() {
   display->show();
   free(plasma);
 }
+
+
+
+
 
 
 

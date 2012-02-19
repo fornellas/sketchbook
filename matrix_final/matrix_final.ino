@@ -16,7 +16,7 @@
 // EEPROM
 #include "EEPROM.h"
 
-#define DISP_COUNT 4
+#define DISP_COUNT 5
 
 // Globals
 Mode **mode=NULL;
@@ -51,7 +51,8 @@ void setup(){
   // Common classes
   button=new Button();
   rtc=new RTCDS1307();
-  display=new SFRGBLEDMatrix(SQUARE, DISP_COUNT, PIN_MATRIX_SS);
+  //  display=new SFRGBLEDMatrix(PIN_MATRIX_SS, DISP_COUNT);
+  display=new SFRGBLEDMatrix(PIN_MATRIX_SS, 3, 2);
   display->show();
 
   //
@@ -70,6 +71,7 @@ void setup(){
 };
 
 void loop(){
+
   // cycle trhough available modes
   if(currMode>=modeCount)
     currMode=0;
@@ -77,6 +79,8 @@ void loop(){
   mode[currMode]->start();
   currMode++;
 };
+
+
 
 
 
