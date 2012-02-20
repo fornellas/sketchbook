@@ -103,14 +103,14 @@ void Plasma::pSpeedValidate(){
 }
 
 void Plasma::loop() {
-  if(button->released(A)){
+  if(button->pressed(A)){
     display->clear();
     display->print(WHITE, 0, 6, 4, "BUSY");
     display->show();
     fillPlasma();
   }
 
-  if(button->released(B)) {
+  if(button->pressed(B)) {
     pSpeed++;
     pSpeedValidate();
     // FIXME adjust text placement relative to screen size

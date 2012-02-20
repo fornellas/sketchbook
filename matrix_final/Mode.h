@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-#define LOOP_HZ 60
-
 // Parent class for all modes
 
 class Mode {

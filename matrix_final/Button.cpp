@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#define DEBOUNCE_DELAY 20
+#define DEBOUNCE_DELAY 30
 
 prog_int16_t pin[BUTTON_COUNT] PROGMEM = {
   PIN_BUTTON_MODE,
@@ -20,8 +20,7 @@ prog_int16_t addr_pin[BUTTON_COUNT] PROGMEM = {
 Button::Button() {
   for(byte b=0;b<BUTTON_COUNT;b++){
     buttonState[b]=false;
-    lastButtonState[b]=false;
-    lastDebounceTime[b]=0;
+    lastChangeTime[b]=0;
     pressedState[b]=false;
     releasedState[b]=false;
   }
@@ -29,6 +28,9 @@ Button::Button() {
 
 void Button::update(){
   for(byte b=0;b<BUTTON_COUNT;b++){
+    unsigned long currTime=millis();
+    int reading;
+
     pinMode(pgm_read_word_near(pin+b), INPUT);
     digitalWrite(pgm_read_word_near(pin+b), HIGH);
     digitalWrite(PIN_CD74HC4067_S0, pgm_read_word_near(addr_pin+b)&0x1);
@@ -36,10 +38,9 @@ void Button::update(){
     digitalWrite(PIN_CD74HC4067_S2, pgm_read_word_near(addr_pin+b)&0x4);
     digitalWrite(PIN_CD74HC4067_S3, pgm_read_word_near(addr_pin+b)&0x8);
     delay(1);
-    int reading=!digitalRead(pgm_read_word_near(pin+b));
-    if (reading != lastButtonState[b])
-      lastDebounceTime[b] = millis();
-    if ((millis() - lastDebounceTime[b]) > DEBOUNCE_DELAY) {
+    reading=!digitalRead(pgm_read_word_near(pin+b));
+    if (reading != buttonState[b] && currTime - lastChangeTime[b] > DEBOUNCE_DELAY){
+      lastChangeTime[b] = currTime;
       pressedState[b]=false;
       releasedState[b]=false;
       if(!buttonState[b]&&reading)
@@ -48,7 +49,6 @@ void Button::update(){
         releasedState[b]=true;
       buttonState[b] = reading;
     }
-    lastButtonState[b] = reading;
   }
 }
 
@@ -57,12 +57,20 @@ boolean Button::state(byte button){
 };
 
 boolean Button::pressed(byte button){
-  return pressedState[button];
+  boolean r;
+  r=pressedState[button];
+  pressedState[button]=false;
+  return r;
 }
 
 boolean Button::released(byte button){
-  return releasedState[button]; 
+  boolean r;
+  r=releasedState[button];
+  releasedState[button]=false;
+  return r; 
 }
+
+
 
 
 

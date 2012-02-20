@@ -17,20 +17,17 @@ void Mode::start() {
   this->enter();
 
   while(1){
+    // call main mode method
+    this->loop();
+
     // read buttons
     button->update();
 
     // change mode if MODE button is pressed
-    if(button->released(MODE)) {
+    if(button->pressed(MODE)) {
       this->exit();
       return;
     }
-
-    // call main mode method
-    this->loop();
-
-    // sleep
-    delay(1000/LOOP_HZ);
   }
 }
 

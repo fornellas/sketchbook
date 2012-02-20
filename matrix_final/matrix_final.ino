@@ -9,14 +9,13 @@
 #include "Mode.h"
 #include "Clock.h"
 #include "Plasma.h"
+#include "Fire.h"
 
 // Input
 #include "Button.h"
 
 // EEPROM
 #include "EEPROM.h"
-
-#define DISP_COUNT 5
 
 // Globals
 Mode **mode=NULL;
@@ -37,7 +36,7 @@ void setup(){
   // start globals
   //
 
-  // Arduino facilities
+  // Arduino facilities                                                                      
   Serial.begin(115200);
   Wire.begin();
   SPI.begin();
@@ -61,7 +60,8 @@ void setup(){
 
   // register modes
   addMode(new Clock());
-  addMode(new Plasma);
+  addMode(new Plasma());
+  addMode(new Fire());
 
   // recover last mode
   currMode=EEPROM.read(EEPROM_MODE);

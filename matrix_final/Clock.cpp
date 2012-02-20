@@ -156,7 +156,7 @@ void Clock::loop() {
   display->fill(BLACK);
 
   // change mode if MODE button is pressed
-  if(button->released(A)) {
+  if(button->pressed(A)) {
     currMode++;
     if(currMode>=CLOCK_MODES)
       currMode=0;

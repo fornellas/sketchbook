@@ -13,8 +13,7 @@
 class Button {
 private:
   boolean buttonState[BUTTON_COUNT];
-  boolean lastButtonState[BUTTON_COUNT];
-  unsigned long lastDebounceTime[BUTTON_COUNT];
+  unsigned long lastChangeTime[BUTTON_COUNT];
   boolean pressedState[BUTTON_COUNT];
   boolean releasedState[BUTTON_COUNT];
 public:
