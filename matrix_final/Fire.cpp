@@ -8,7 +8,7 @@ extern Button *button;
 #define PIXMAP(x,y) *(pixmap+(display->width+2)*(y)+(x))
 
 // Color palete
-#define INCANDESCENT_LEN 29
+#define INCANDESCENT_LEN 30
 Color incandescent(byte p){
   // WHITE
   if(p<4){
@@ -25,15 +25,16 @@ Color incandescent(byte p){
     return RGB(15, 7-(p+1), 0);
   }
   // RED
-  if(p<22){
+  if(p<27){
     p-=15;
-    return RGB(15-(p*2), 0, 0);
+    return RGB(15-p, 0, 0);
   }
   // BLACK
-  return BLACK;
+  return RGB(0, 15/8, 15/2);
 }
 
 void Fire::enter() {
+  display->gamma(true); 
   // Allocate pixmap
   pixmap=(byte *)malloc(size_t(sizeof(byte)*(display->width+2)*(display->height+2)));
   for(byte x=0;x<display->width+2;x++)
@@ -46,7 +47,7 @@ void Fire::loop() {
   static byte intensity;
 
   if(button->state(A))
-    intensity=40;
+    intensity=25;
   else
     intensity=10;
 
@@ -82,17 +83,17 @@ void Fire::loop() {
     for(byte y=0;y<display->height;y++)
       display->paintPixel(
       incandescent(INCANDESCENT_LEN-PIXMAP(x+1,y+1)),
-      x,
-      y
-        );
+      x, y);
   // And display
   display->show();
-  delay(85);
+  delay(20);
 }
 
 void Fire::exit() {
   free(pixmap);
 }
+
+
 
 
 

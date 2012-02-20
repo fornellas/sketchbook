@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#define DEBOUNCE_DELAY 30
+#define DEBOUNCE_DELAY 50
 
 prog_int16_t pin[BUTTON_COUNT] PROGMEM = {
   PIN_BUTTON_MODE,

@@ -148,6 +148,10 @@ void printDate(Date date, int x_offset, int y_offset, Color centerColor, Color m
   printInner60(date.monthDay, x_offset, y_offset, dayColor5, dayColor1);
 };
 
+void Clock::enter(){
+  display->gamma(false); 
+}
+
 void Clock::loop() {
   struct Date date;
   int light;

@@ -16,6 +16,8 @@ DONE
 
 TODO
 
+- Demo mode.
+- Video streamming via HTTP.
 - display XPM images
 - Plasma
   - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.

@@ -18,6 +18,7 @@ public:
     if(currMode>=CLOCK_MODES)
       currMode=0;
   };
+  void enter();
   void loop();
 };
 

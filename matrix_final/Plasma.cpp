@@ -65,7 +65,7 @@ double y) {
 
 #define PIXMAP_WIDTH ((display->width>>3)+3)
 #define PIXMAP_HEIGHT ((display->height>>3)+3)
-#define PIXMAP_MAX 70.0
+#define PIXMAP_MAX 48.0
 
 void Plasma::fillPlasma() {
   double *pixmap;
@@ -102,7 +102,16 @@ void Plasma::pSpeedValidate(){
     pSpeed=-6;
 }
 
+void Plasma::enter() {
+  display->gamma(true); 
+  display->print(WHITE, 0, 6, 4, "BUSY");
+  display->show();
+  plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
+  fillPlasma();
+}
+
 void Plasma::loop() {
+  // Update pimap
   if(button->pressed(A)){
     display->clear();
     display->print(WHITE, 0, 6, 4, "BUSY");
@@ -110,25 +119,28 @@ void Plasma::loop() {
     fillPlasma();
   }
 
+  // Change speed
   if(button->pressed(B)) {
-    pSpeed++;
-    pSpeedValidate();
-    // FIXME adjust text placement relative to screen size
-    if(pSpeed>=0)
-      display->print(BLACK, 7, 6, 4, 48+pSpeed);
-    else{
-      display->print(BLACK, 5, 6, 4, '-');
-      display->print(BLACK, 8, 6, 4, 48+pSpeed*-1);
-    }
-    display->show();
-    delay(200);
-    EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
-  }
+   pSpeed++;
+   pSpeedValidate();
+   // FIXME adjust text placement relative to screen size
+   if(pSpeed>=0)
+   display->print(BLACK, 7, 6, 4, 48+pSpeed);
+   else{
+   display->print(BLACK, 5, 6, 4, '-');
+   display->print(BLACK, 8, 6, 4, 48+pSpeed*-1);
+   }
+   display->show();
+   delay(200);
+   EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
+   }
 
+  // Update pixmap
   for(byte x=0;x<display->width;x++)
     for(byte y=0;y<display->height;y++)
       *(plasma+y*display->width+x)+=pSpeed;
 
+  // Paint display
   for(word x=0;x<display->width;x++)
     for(word y=0;y<display->height;y++)
       display->paintPixel(spectrum(
@@ -139,14 +151,8 @@ void Plasma::loop() {
         ))
         , x, y);
 
+  // Show
   display->show();
-}
-
-void Plasma::enter() {
-  display->print(WHITE, 0, 6, 4, "BUSY");
-  display->show();
-  plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
-  fillPlasma();
 }
 
 void Plasma::exit() {
@@ -154,6 +160,7 @@ void Plasma::exit() {
   display->show();
   free(plasma);
 }
+
 
 
 
