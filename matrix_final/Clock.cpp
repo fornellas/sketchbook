@@ -160,7 +160,7 @@ void Clock::loop() {
   display->fill(BLACK);
 
   // change mode if MODE button is pressed
-  if(button->pressed(A)) {
+  if(button->pressed(BUTTON_A)) {
     currMode++;
     if(currMode>=CLOCK_MODES)
       currMode=0;
@@ -168,17 +168,17 @@ void Clock::loop() {
   }
 
   // FIXME average reading
-  pinMode(PIN_PHOTORESISTOR_RED, INPUT);
-  digitalWrite(PIN_CD74HC4067_S0, ADDR_PHOTORESISTOR_RED & 0x1);
-  digitalWrite(PIN_CD74HC4067_S1, ADDR_PHOTORESISTOR_RED & 0x2);
-  digitalWrite(PIN_CD74HC4067_S2, ADDR_PHOTORESISTOR_RED & 0x4);
-  digitalWrite(PIN_CD74HC4067_S3, ADDR_PHOTORESISTOR_RED & 0x8);
-  light=analogRead(PIN_PHOTORESISTOR_RED);
+  pinMode(PIN_PHOTORESISTOR, INPUT);
+  digitalWrite(PIN_CD74HC4067_S0, ADDR_PHOTORESISTOR & 0x1);
+  digitalWrite(PIN_CD74HC4067_S1, ADDR_PHOTORESISTOR & 0x2);
+  digitalWrite(PIN_CD74HC4067_S2, ADDR_PHOTORESISTOR & 0x4);
+  digitalWrite(PIN_CD74HC4067_S3, ADDR_PHOTORESISTOR & 0x8);
+  light=analogRead(PIN_PHOTORESISTOR);
   light-=220;
   value=1+15*light/800;
-
+Serial.println("aaa");
   date=rtc->getDate();
-
+Serial.println("bbb");
   switch(currMode){
   case 0:
     int xOffset;
@@ -186,13 +186,13 @@ void Clock::loop() {
     xOffset=(display->width>>1)-8;
     yOffset=(display->height>>1)-4;
     xOffset=0;
-    yOffset=4;
-    display->print(RGB(value,0,0), xOffset+0, yOffset+0, 4, 48+(date.hour/10));
-    display->print(RGB(value,0,0), xOffset+4, yOffset+0, 4, 48+(date.hour%10));
-    display->print(RGB(0,value,0), xOffset+8, yOffset+0, 4, 48+(date.minute/10));
-    display->print(RGB(0,value,0), xOffset+12, yOffset+0, 4, 48+(date.minute%10));
-    display->print(RGB(0,0,value), xOffset+4, yOffset+5, 4, 48+(date.second/10));
-    display->print(RGB(0,0,value), xOffset+8, yOffset+5, 4, 48+(date.second%10));
+    yOffset=3;
+    display->print(RGB(value,0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
+    display->print(RGB(value,0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
+    display->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
+    display->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
+    display->print(RGB(0,0,value), xOffset+4, yOffset+6, 5, 48+(date.second/10));
+    display->print(RGB(0,0,value), xOffset+8, yOffset+6, 5, 48+(date.second%10));
     break;
   case 1:
     printTimeSmall(date, 0, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
@@ -204,19 +204,3 @@ void Clock::loop() {
   }
   display->show();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

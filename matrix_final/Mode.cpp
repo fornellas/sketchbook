@@ -24,7 +24,7 @@ void Mode::start() {
     button->update();
 
     // change mode if MODE button is pressed
-    if(button->pressed(MODE)) {
+    if(button->pressed(BUTTON_MODE)) {
       this->exit();
       return;
     }

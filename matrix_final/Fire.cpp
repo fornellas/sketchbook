@@ -46,12 +46,12 @@ void Fire::enter() {
 void Fire::loop() {
   static byte intensity;
 
-  if(button->state(A))
+  if(button->state(BUTTON_B))
     intensity=25;
   else
-    intensity=10;
+    intensity=5;
 
-  if(button->state(B))
+  if(button->state(BUTTON_C))
     intensity=0;
 
   // Update the row below visible screen with radom data

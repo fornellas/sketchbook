@@ -9,12 +9,14 @@ prog_int16_t pin[BUTTON_COUNT] PROGMEM = {
   PIN_BUTTON_MODE,
   PIN_BUTTON_A,
   PIN_BUTTON_B,
+  PIN_BUTTON_C,
 };
 
 prog_int16_t addr_pin[BUTTON_COUNT] PROGMEM = {
   ADDR_BUTTON_MODE,
   ADDR_BUTTON_A,
   ADDR_BUTTON_B,
+  ADDR_BUTTON_C,
 };
 
 Button::Button() {

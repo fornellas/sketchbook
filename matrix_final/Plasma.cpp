@@ -70,6 +70,10 @@ double y) {
 void Plasma::fillPlasma() {
   double *pixmap;
 
+  display->clear();
+  display->print(WHITE, 0, 6, 5, "BUSY");
+  display->show();
+
   pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
 
   randomSeed(millis());
@@ -94,46 +98,49 @@ void Plasma::fillPlasma() {
 
 
 void Plasma::pSpeedValidate(){
-  if(pSpeed==0)
-    pSpeed++;
   if(pSpeed>6)
-    pSpeed=-6;
+    pSpeed=6;
   if(pSpeed<-6)
     pSpeed=-6;
 }
 
 void Plasma::enter() {
   display->gamma(true); 
-  display->print(WHITE, 0, 6, 4, "BUSY");
-  display->show();
   plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
   fillPlasma();
 }
 
 void Plasma::loop() {
+  boolean changeSpeed=false;
+  
   // Update pimap
-  if(button->pressed(A)){
-    display->clear();
-    display->print(WHITE, 0, 6, 4, "BUSY");
-    display->show();
+  if(button->pressed(BUTTON_A)){
     fillPlasma();
   }
 
   // Change speed
-  if(button->pressed(B)) {
-   pSpeed++;
-   pSpeedValidate();
-   // FIXME adjust text placement relative to screen size
-   if(pSpeed>=0)
-   display->print(BLACK, 7, 6, 4, 48+pSpeed);
-   else{
-   display->print(BLACK, 5, 6, 4, '-');
-   display->print(BLACK, 8, 6, 4, 48+pSpeed*-1);
-   }
-   display->show();
-   delay(200);
-   EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
-   }
+  if(button->pressed(BUTTON_B)){
+    changeSpeed=true;
+    pSpeed++;
+  }
+  if(button->pressed(BUTTON_C)){
+    changeSpeed=true;
+    pSpeed--;
+  }
+ 
+  if(changeSpeed){
+    pSpeedValidate();
+    // FIXME adjust text placement relative to screen size
+    if(pSpeed>=0)
+      display->print(BLACK, 7, 6, 5, 48+pSpeed);
+    else{
+      display->print(BLACK, 5, 6, 5, '-');
+      display->print(BLACK, 8, 6, 5, 48+pSpeed*-1);
+    }
+    display->show();
+    delay(200);
+    EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
+  }
 
   // Update pixmap
   for(byte x=0;x<display->width;x++)
@@ -160,42 +167,4 @@ void Plasma::exit() {
   display->show();
   free(plasma);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

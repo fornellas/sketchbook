@@ -4,11 +4,12 @@
 #include <Arduino.h>
 #include "pins.h"
 
-#define BUTTON_COUNT 3
+#define BUTTON_COUNT 4
 
-#define MODE 0
-#define A 1
-#define B 2
+#define BUTTON_MODE 0
+#define BUTTON_A 1
+#define BUTTON_B 2
+#define BUTTON_C 3
 
 class Button {
 private:

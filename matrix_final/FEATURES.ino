@@ -16,19 +16,30 @@ DONE
 
 TODO
 
+- Mux
+  - Create class to abstract operations
+- Light
+  - Create class to abstract
+  - 0-100% light
+  - RGB
+  - Average readings
+- Matrix mode
 - Demo mode.
 - Video streamming via HTTP.
 - display XPM images
 - Plasma
+  - Save pixmap state
   - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.
 - Mode change animation
   - Text scroll?
   - Icon?
 - Clock
+  - Average light
   - Clock + Temperature
   - Binary
-- Button
-  - Create event queue.
+  - Tokyo flash style
+    - 2 variants
+  - Consolidate DX modes in one method
 - Fire
   - tunnable palette
 - Temperatue
