@@ -32,9 +32,11 @@ void Mode::start() {
 }
 
 void Mode::exit() {
+  display->gamma(false); 
   display->fill(BLACK);
   display->show(); 
 }
+
 
 
 

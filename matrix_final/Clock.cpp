@@ -173,12 +173,15 @@ void Clock::loop() {
   digitalWrite(PIN_CD74HC4067_S1, ADDR_PHOTORESISTOR & 0x2);
   digitalWrite(PIN_CD74HC4067_S2, ADDR_PHOTORESISTOR & 0x4);
   digitalWrite(PIN_CD74HC4067_S3, ADDR_PHOTORESISTOR & 0x8);
-  light=analogRead(PIN_PHOTORESISTOR);
-  light-=220;
-  value=1+15*light/800;
-Serial.println("aaa");
+  light=0;
+  for(byte i=0;i<10;i++)
+    light+=analogRead(PIN_PHOTORESISTOR);
+  light/=10;
+
+  value=light*7/1023;
+
   date=rtc->getDate();
-Serial.println("bbb");
+
   switch(currMode){
   case 0:
     int xOffset;

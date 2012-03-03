@@ -10,6 +10,7 @@
 #include "Clock.h"
 #include "Plasma.h"
 #include "Fire.h"
+#include "Lamp.h"
 
 // Input
 #include "Button.h"
@@ -61,6 +62,7 @@ void setup(){
   addMode(new Clock());
   addMode(new Plasma());
   addMode(new Fire());
+  addMode(new Lamp());
 
   // recover last mode
   currMode=EEPROM.read(EEPROM_MODE);
@@ -77,6 +79,7 @@ void loop(){
   mode[currMode]->start();
   currMode++;
 };
+
 
 
 
