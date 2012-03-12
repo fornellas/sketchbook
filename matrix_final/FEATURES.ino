@@ -16,6 +16,8 @@ DONE
 
 TODO
 
+- GOL
+- 1D celular automata
 - Mux
   - Create class to abstract operations
 - Light
