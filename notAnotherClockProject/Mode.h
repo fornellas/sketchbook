@@ -5,6 +5,7 @@
 
 class Mode {
 public:
+  virtual ~Mode(){};
   // Name
   PGM_P *getName();
   // Thil will be called in a loop
