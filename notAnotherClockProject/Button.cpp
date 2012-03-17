@@ -14,7 +14,7 @@ prog_int16_t addr_pin[BUTTON_COUNT] PROGMEM = {
 
 Button::Button() {
   for(byte b=0;b<BUTTON_COUNT;b++){
-    buttonState[b]=false;
+    buttonState[b]=true;
     lastChangeTime[b]=0;
     pressedState[b]=false;
     releasedState[b]=false;

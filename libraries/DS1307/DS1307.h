@@ -1,5 +1,5 @@
-#ifndef RTCDS1307_h
-#define RTCDS1307_h
+#ifndef DS1307_h
+#define DS1307_h
 
 #include <Arduino.h>
 
@@ -34,14 +34,9 @@ struct Date {
   int year;
 };
 
-class RTCDS1307
-{
-  private:
-    byte bcdToDec(byte val);
-    byte decToBcd(byte val);
-  public:
-    struct Date getDate();
-    void setDate(struct Date d);
+namespace DS1307 {
+  struct Date getDate();
+  void setDate(struct Date d);
 };
 
 #endif

@@ -5,6 +5,7 @@ namespace Mux {
   int aRead(byte addr);
   int dRead(byte addr);
   void dWrite(byte addr);
+  void begin();
 };
 
 #endif

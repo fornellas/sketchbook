@@ -1,4 +1,4 @@
-#include <RTCDS1307.h>
+#include <DS1307.h>
 
 #include <Arduino.h>
 // Must be included in main project file too
@@ -6,11 +6,16 @@
 
 #define DS1307_ADDRESS 0x68
 
-byte RTCDS1307::bcdToDec(byte val)  {
+namespace DS1307 {
+  byte bcdToDec(byte val);
+  byte decToBcd(byte val);
+};
+
+byte DS1307::bcdToDec(byte val)  {
   return ( (val/16*10) + (val%16) );
 }
 
-struct Date RTCDS1307::getDate() {
+struct Date DS1307::getDate() {
   int zero=0;
   struct Date d;
   Wire.beginTransmission(DS1307_ADDRESS);
@@ -27,12 +32,12 @@ struct Date RTCDS1307::getDate() {
   return d;
 }
 
-byte RTCDS1307::decToBcd(byte val){
+byte DS1307::decToBcd(byte val){
 // Convert normal decimal numbers to binary coded decimal
   return ( (val/10*16) + (val%10) );
 }
 
-void RTCDS1307::setDate(struct Date d) {
+void DS1307::setDate(struct Date d) {
   int zero=0;
   Wire.beginTransmission(DS1307_ADDRESS);
   Wire.write(zero); //stop Oscillator

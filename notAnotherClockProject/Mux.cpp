@@ -4,7 +4,7 @@
 #include "pins.h"
 
 namespace Mux {
- void setAddr(byte addr);
+  void setAddr(byte addr);
 }
 
 void Mux::setAddr(byte addr){
@@ -25,10 +25,18 @@ int Mux::dRead(byte addr){
   setAddr(addr);
   return digitalRead(PIN_CD74HC4067_SIG_D);
 };
-  
+
 void Mux::dWrite(byte addr){
   pinMode(PIN_CD74HC4067_SIG_D, OUTPUT);
   digitalWrite(PIN_CD74HC4067_SIG_D, HIGH);
   setAddr(addr);
 };
+
+void Mux::begin(){
+  pinMode(PIN_CD74HC4067_S0, OUTPUT);
+  pinMode(PIN_CD74HC4067_S1, OUTPUT);
+  pinMode(PIN_CD74HC4067_S2, OUTPUT);
+  pinMode(PIN_CD74HC4067_S3, OUTPUT); 
+}
+
 

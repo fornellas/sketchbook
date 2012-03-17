@@ -2,7 +2,7 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-RTCDS1307	KEYWORD1
+DS1307	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
