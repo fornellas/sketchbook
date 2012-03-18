@@ -1,26 +1,22 @@
 #include "Fire.h"
-#include <Thermistor.h>
-#include <SFRGBLEDMatrix.h>
-#include "Button.h"
-#include "pins.h"
 
+#include <Arduino.h>
 
-extern SFRGBLEDMatrix *display;
-extern Button *button;
+void SerialPrintPGM (PGM_P s);
 
-Fire::Fire(){
-  Serial.println("Fire()");
-}
-
-Fire::~Fire(){
-  Serial.println("~Fire()");
-}
-
-PGM_P *Fire::getName(){
-
+PGM_P * Fire::enter(){
+  SerialPrintPGM(PSTR("Fire::enter()\n"));
+  return NULL;
 }
 
 void Fire::loop(){
-  Serial.println("Fire::loop()");
+  SerialPrintPGM(PSTR("Fire::loop()\n"));
 }
+
+void Fire::exit(){
+  SerialPrintPGM(PSTR("Fire::exit()\n"));
+}
+
+
+
 

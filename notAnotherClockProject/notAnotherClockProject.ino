@@ -9,15 +9,26 @@
 #include <Thermistor.h>
 
 #include "Button.h"
-#include "Mode.h"
 #include "pins.h"
 #include "EEPROM.h"
 #include "Clock.h"
 #include "Fire.h"
 #include "Lamp.h"
+#include "Plasma.h"
 
 #define DISP_HORIZ 3
 #define DISP_VERT 2
+
+void SerialPrintPGM (PGM_P s) {
+  char c;
+  while ((c = pgm_read_byte(s++)) != 0)
+    Serial.print(c);
+}
+
+void pMem(){
+  SerialPrintPGM(PSTR("Mem: "));
+  Serial.println(freeMemory());
+}
 
 //
 // Global stuff
@@ -56,40 +67,65 @@ void setup(){
 //
 
 void loop(){
-  Mode *mode;
+  PGM_P * (*modeEnter)() = NULL;
+  void (*modeLoop)() = NULL;
+  void (*modeExit)() = NULL;
 
   // Save current mode
   EEPROM.write(EEPROM_MODE, currMode);
-  // Create Mode object
+  // Assigin mode function pointers
+  // Using classes would be more elegant, but requires more memory
   switch(currMode){
   case 0:
-    mode=(Mode *)new Clock();
+    modeEnter=Clock::enter;
+    modeLoop=Clock::loop;
+    modeExit=Clock::exit;
     break;
   case 1:
-    mode=(Mode *)new Fire();
+    modeEnter=Fire::enter;
+    modeLoop=Fire::loop;
+    modeExit=Fire::exit;
     break;
   case 2:
-      mode=(Mode *)new Lamp();
+    modeEnter=Lamp::enter;
+    modeLoop=Lamp::loop;
+    modeExit=Lamp::exit;
+    break;
+  case 3:
+    modeEnter=Plasma::enter;
+    modeLoop=Plasma::loop;
+    modeExit=Plasma::exit;
     break;
   default:
     currMode=0;
     return; 
   }
-  // loop() Mode
+  // Execute mode
+  modeEnter();
   while(1){
-    delay(1000);
-    mode->loop();
+    delay(500);
+    modeLoop();
     button->update();
     if(button->pressed(BUTTON_MODE))
       break;
   }
+  // next mode
+  modeExit();
   currMode++;
-  delete mode;
-  Serial.print("Mem: ");
-  Serial.println(freeMemory());
-  // 892 com 2 modos
-  // 860 com 3 modos
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

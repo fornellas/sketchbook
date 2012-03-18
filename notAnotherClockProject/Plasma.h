@@ -1,9 +1,9 @@
-#ifndef Lamp_h
-#define Lamp_h
+#ifndef Plasma_h
+#define Plasma_h
 
 #include <avr/pgmspace.h>
 
-namespace Lamp {
+namespace Plasma {
   PGM_P * enter();
   void loop();
   void exit();

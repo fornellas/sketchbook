@@ -1,16 +1,14 @@
 #ifndef Fire_h
 #define Fire_h
 
-#include "Mode.h"
-#include <Arduino.h>
+#include <avr/pgmspace.h>
 
-class Fire: 
-public Mode {
-public:
-  Fire();
-  ~Fire();
-  PGM_P *getName();
+namespace Fire {
+  PGM_P * enter();
   void loop();
+  void exit();
 };
 
 #endif
+
+

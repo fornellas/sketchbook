@@ -1,16 +1,12 @@
 #ifndef Clock_h
 #define Clock_h
 
-#include "Mode.h"
-#include <Arduino.h>
+#include <avr/pgmspace.h>
 
-class Clock: 
-public Mode {
-public:
-  Clock();
-  ~Clock();
-  PGM_P *getName();
+namespace Clock {
+  PGM_P * enter();
   void loop();
+  void exit();
 };
 
 #endif

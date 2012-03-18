@@ -1,26 +1,22 @@
 #include "Lamp.h"
-#include <Thermistor.h>
-#include <SFRGBLEDMatrix.h>
-#include "Button.h"
-#include "pins.h"
 
+#include <Arduino.h>
 
-extern SFRGBLEDMatrix *display;
-extern Button *button;
+void SerialPrintPGM (PGM_P s);
 
-Lamp::Lamp(){
-  Serial.println("Lamp()");
-}
-
-Lamp::~Lamp(){
-  Serial.println("~Lamp()");
-}
-
-PGM_P *Lamp::getName(){
-
+PGM_P * Lamp::enter(){
+  SerialPrintPGM(PSTR("Lamp::enter()\n"));
+  return NULL;
 }
 
 void Lamp::loop(){
-  Serial.println("Lamp::loop()");
+  SerialPrintPGM(PSTR("Lamp::loop()\n"));
 }
+
+void Lamp::exit(){
+  SerialPrintPGM(PSTR("Lamp::exit()\n"));
+}
+
+
+
 

@@ -1,27 +1,22 @@
 #include "Clock.h"
-#include <DS1307.h>
-#include <Thermistor.h>
-#include <SFRGBLEDMatrix.h>
-#include "Button.h"
-#include <EEPROM.h>
-#include "EEPROM.h"
-#include "pins.h"
 
-extern SFRGBLEDMatrix *display;
-extern Button *button;
+#include <Arduino.h>
 
-Clock::Clock(){
-  Serial.println("Clock()");
-}
+void SerialPrintPGM (PGM_P s);
 
-Clock::~Clock(){
-    Serial.println("~Clock()");
-}
-
-PGM_P *Clock::getName(){
-  
+PGM_P * Clock::enter(){
+  SerialPrintPGM(PSTR("Clock::enter()\n"));
+  return NULL;
 }
 
 void Clock::loop(){
-  Serial.println("Clock::loop()");
+  SerialPrintPGM(PSTR("Clock::loop()\n"));
 }
+
+void Clock::exit(){
+  SerialPrintPGM(PSTR("Clock::exit()\n"));
+}
+
+
+
+
