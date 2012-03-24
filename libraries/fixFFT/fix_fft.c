@@ -4,7 +4,7 @@
   to +32768 represent -1.0 to +1.0 respectively. Integer
   arithmetic is used for speed, instead of the more natural
   floating-point.
-
+ 
   For the forward FFT (time -> freq), fixed scaling is
   performed to prevent arithmetic overflow, and to map a 0dB
   sine/cosine wave (i.e. amplitude = 32767) to two -6dB freq
@@ -22,7 +22,7 @@
   integers. In practice, if the result is to be used as a
   filter, the scale_shift can usually be ignored, as the
   result will be approximately correctly normalized as is.
-
+ 
   Written by:  Tom Roberts  11/8/89
   Made portable:  Malcolm Slaney 12/15/94 malcolm@interval.com
   Enhanced:  Dimitrios P. Bouras  14 Jun 2006 dbouras@ieee.org
@@ -146,15 +146,14 @@ short Sinewave[N_WAVE-N_WAVE/4] = {
   optimization suited to a particluar DSP processor.
   Scaling ensures that result remains 16-bit.
 */
-inline short FIX_MPY(short a, short b)
-{
-	/* shift right one less bit (i.e. 15-1) */
-	int c = ((int)a * (int)b) >> 14;
-	/* last bit shifted out = rounding-bit */
-	b = c & 0x01;
-	/* last shift + rounding bit */
-	a = (c >> 1) + b;
-	return a;
+inline short FIX_MPY(short a, short b){
+  /* shift right one less bit (i.e. 15-1) */
+  int c = ((int)a * (int)b) >> 14;
+  /* last bit shifted out = rounding-bit */
+  b = c & 0x01;
+  /* last shift + rounding bit */
+  a = (c >> 1) + b;
+  return a;
 }
 
 /*
@@ -163,105 +162,106 @@ inline short FIX_MPY(short a, short b)
   RESULT (in-place FFT), with 0 <= n < 2**m; set inverse to
   0 for forward transform (FFT), or 1 for iFFT.
 */
-int fix_fft(short fr[], short fi[], short m, short inverse)
-{
-	int mr, nn, i, j, l, k, istep, n, scale, shift;
-	short qr, qi, tr, ti, wr, wi;
+int fix_fft(short fr[], short fi[], short m, short inverse){
+  int mr, nn, i, j, l, k, istep, n, scale, shift;
+  short qr, qi, tr, ti, wr, wi;
 
-	n = 1 << m;
+  n = 1 << m;
 
-	/* max FFT size = N_WAVE */
-	if (n > N_WAVE)
-		return -1;
+  /* max FFT size = N_WAVE */
+  if (n > N_WAVE)
+    return -1;
 
-	mr = 0;
-	nn = n - 1;
-	scale = 0;
+  mr = 0;
+  nn = n - 1;
+  scale = 0;
 
-	/* decimation in time - re-order data */
-	for (m=1; m<=nn; ++m) {
-		l = n;
-		do {
-			l >>= 1;
-		} while (mr+l > nn);
-		mr = (mr & (l-1)) + l;
+  /* decimation in time - re-order data */
+  for (m=1; m<=nn; ++m) {
+    l = n;
+    do {
+      l >>= 1;
+    } 
+    while (mr+l > nn);
+    mr = (mr & (l-1)) + l;
 
-		if (mr <= m)
-			continue;
-		tr = fr[m];
-		fr[m] = fr[mr];
-		fr[mr] = tr;
-		ti = fi[m];
-		fi[m] = fi[mr];
-		fi[mr] = ti;
-	}
+    if (mr <= m)
+      continue;
+    tr = fr[m];
+    fr[m] = fr[mr];
+    fr[mr] = tr;
+    ti = fi[m];
+    fi[m] = fi[mr];
+    fi[mr] = ti;
+  }
 
-	l = 1;
-	k = LOG2_N_WAVE-1;
-	while (l < n) {
-		if (inverse) {
-			/* variable scaling, depending upon data */
-			shift = 0;
-			for (i=0; i<n; ++i) {
-				j = fr[i];
-				if (j < 0)
-					j = -j;
-				m = fi[i];
-				if (m < 0)
-					m = -m;
-				if (j > 16383 || m > 16383) {
-					shift = 1;
-					break;
-				}
-			}
-			if (shift)
-				++scale;
-		} else {
-			/*
-			  fixed scaling, for proper normalization --
-			  there will be log2(n) passes, so this results
-			  in an overall factor of 1/n, distributed to
-			  maximize arithmetic accuracy.
-			*/
-			shift = 1;
-		}
-		/*
-		  it may not be obvious, but the shift will be
-		  performed on each data point exactly once,
-		  during this pass.
-		*/
-		istep = l << 1;
-		for (m=0; m<l; ++m) {
-			j = m << k;
-			/* 0 <= j < N_WAVE/2 */
-			wr =  Sinewave[j+N_WAVE/4];
-			wi = -Sinewave[j];
-			if (inverse)
-				wi = -wi;
-			if (shift) {
-				wr >>= 1;
-				wi >>= 1;
-			}
-			for (i=m; i<n; i+=istep) {
-				j = i + l;
-				tr = FIX_MPY(wr,fr[j]) - FIX_MPY(wi,fi[j]);
-				ti = FIX_MPY(wr,fi[j]) + FIX_MPY(wi,fr[j]);
-				qr = fr[i];
-				qi = fi[i];
-				if (shift) {
-					qr >>= 1;
-					qi >>= 1;
-				}
-				fr[j] = qr - tr;
-				fi[j] = qi - ti;
-				fr[i] = qr + tr;
-				fi[i] = qi + ti;
-			}
-		}
-		--k;
-		l = istep;
-	}
-	return scale;
+  l = 1;
+  k = LOG2_N_WAVE-1;
+  while (l < n) {
+    if (inverse) {
+      /* variable scaling, depending upon data */
+      shift = 0;
+      for (i=0; i<n; ++i) {
+        j = fr[i];
+        if (j < 0)
+          j = -j;
+        m = fi[i];
+        if (m < 0)
+          m = -m;
+        if (j > 16383 || m > 16383) {
+          shift = 1;
+          break;
+        }
+      }
+      if (shift)
+        ++scale;
+    } 
+    else {
+      /*
+        fixed scaling, for proper normalization --
+        there will be log2(n) passes, so this results
+        in an overall factor of 1/n, distributed to
+        maximize arithmetic accuracy.
+      */
+      shift = 1;
+    }
+    /*
+      it may not be obvious, but the shift will be
+      performed on each data point exactly once,
+      during this pass.
+    */
+    istep = l << 1;
+    for (m=0; m<l; ++m) {
+      j = m << k;
+      /* 0 <= j < N_WAVE/2 */
+      wr =  Sinewave[j+N_WAVE/4];
+      wi = -Sinewave[j];
+      if (inverse)
+        wi = -wi;
+      if (shift) {
+        wr >>= 1;
+        wi >>= 1;
+      }
+      for (i=m; i<n; i+=istep) {
+        j = i + l;
+        tr = FIX_MPY(wr,fr[j]) - FIX_MPY(wi,fi[j]);
+        ti = FIX_MPY(wr,fi[j]) + FIX_MPY(wi,fr[j]);
+        qr = fr[i];
+        qi = fi[i];
+        if (shift) {
+          qr >>= 1;
+          qi >>= 1;
+        }
+        fr[j] = qr - tr;
+        fi[j] = qi - ti;
+        fr[i] = qr + tr;
+        fi[i] = qi + ti;
+      }
+    }
+    --k;
+    l = istep;
+  }
+  return scale;
 }
 
 /*
@@ -278,20 +278,20 @@ int fix_fft(short fr[], short fi[], short m, short inverse)
   that fix_fft "sees" consecutive real samples as alternating
   real and imaginary samples in the complex array.
 */
-int fix_fftr(short f[], int m, int inverse)
-{
-	int i, N = 1<<(m-1), scale = 0;
-	short tt, *fr=f, *fi=&f[N];
+int fix_fftr(short f[], int m, int inverse){
+  int i, N = 1<<(m-1), scale = 0;
+  short tt, *fr=f, *fi=&f[N];
 
-	if (inverse)
-		scale = fix_fft(fi, fr, m-1, inverse);
-	for (i=1; i<N; i+=2) {
-		tt = f[N+i-1];
-		f[N+i-1] = f[i];
-		f[i] = tt;
-	}
-	if (! inverse)
-		scale = fix_fft(fi, fr, m-1, inverse);
-	return scale;
+  if (inverse)
+    scale = fix_fft(fi, fr, m-1, inverse);
+  for (i=1; i<N; i+=2) {
+    tt = f[N+i-1];
+    f[N+i-1] = f[i];
+    f[i] = tt;
+  }
+  if (! inverse)
+    scale = fix_fft(fi, fr, m-1, inverse);
+  return scale;
 }
+
 
