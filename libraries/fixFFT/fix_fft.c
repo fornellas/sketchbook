@@ -32,16 +32,10 @@
 #define LOG2_N_WAVE 10      /* log2(N_WAVE) */
 
 /*
-  Henceforth "short" implies 16-bit word. If this is not
-  the case in your architecture, please replace "short"
-  with a type definition which *is* a 16-bit word.
-*/
-
-/*
   Since we only use 3/4 of N_WAVE, we define only
   this many samples, in order to conserve data space.
 */
-short Sinewave[N_WAVE-N_WAVE/4] = {
+int16_t Sinewave[N_WAVE-N_WAVE/4] = {
       0,    201,    402,    603,    804,   1005,   1206,   1406,
    1607,   1808,   2009,   2209,   2410,   2610,   2811,   3011,
    3211,   3411,   3611,   3811,   4011,   4210,   4409,   4608,
@@ -146,9 +140,9 @@ short Sinewave[N_WAVE-N_WAVE/4] = {
   optimization suited to a particluar DSP processor.
   Scaling ensures that result remains 16-bit.
 */
-inline short FIX_MPY(short a, short b){
+inline int16_t FIX_MPY(int16_t a, int16_t b){
   /* shift right one less bit (i.e. 15-1) */
-  int c = ((int)a * (int)b) >> 14;
+  int32_t c = ((int32_t)a * (int32_t)b) >> 14;
   /* last bit shifted out = rounding-bit */
   b = c & 0x01;
   /* last shift + rounding bit */
@@ -162,9 +156,9 @@ inline short FIX_MPY(short a, short b){
   RESULT (in-place FFT), with 0 <= n < 2**m; set inverse to
   0 for forward transform (FFT), or 1 for iFFT.
 */
-int fix_fft(short fr[], short fi[], short m, short inverse){
-  int mr, nn, i, j, l, k, istep, n, scale, shift;
-  short qr, qi, tr, ti, wr, wi;
+int32_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse){
+  int32_t mr, nn, i, j, l, k, istep, n, scale, shift;
+  int16_t qr, qi, tr, ti, wr, wi;
 
   n = 1 << m;
 
@@ -278,9 +272,9 @@ int fix_fft(short fr[], short fi[], short m, short inverse){
   that fix_fft "sees" consecutive real samples as alternating
   real and imaginary samples in the complex array.
 */
-int fix_fftr(short f[], int m, int inverse){
-  int i, N = 1<<(m-1), scale = 0;
-  short tt, *fr=f, *fi=&f[N];
+int32_t fix_fftr(uint16_t f[], int32_t m, int32_t inverse){
+  int32_t i, N = 1<<(m-1), scale = 0;
+  uint16_t tt, *fr=f, *fi=&f[N];
 
   if (inverse)
     scale = fix_fft(fi, fr, m-1, inverse);
