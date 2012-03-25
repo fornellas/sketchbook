@@ -28,6 +28,9 @@
   Enhanced:  Dimitrios P. Bouras  14 Jun 2006 dbouras@ieee.org
 */
 
+#include <stdint.h>
+#include <avr/pgmspace.h>
+
 #define N_WAVE      1024    /* full length of Sinewave[] */
 #define LOG2_N_WAVE 10      /* log2(N_WAVE) */
 
@@ -35,7 +38,7 @@
   Since we only use 3/4 of N_WAVE, we define only
   this many samples, in order to conserve data space.
 */
-int16_t Sinewave[N_WAVE-N_WAVE/4] = {
+PROGMEM prog_int16_t Sinewave[N_WAVE-N_WAVE/4] = {
       0,    201,    402,    603,    804,   1005,   1206,   1406,
    1607,   1808,   2009,   2209,   2410,   2610,   2811,   3011,
    3211,   3411,   3611,   3811,   4011,   4210,   4409,   4608,
@@ -228,8 +231,8 @@ int32_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse){
     for (m=0; m<l; ++m) {
       j = m << k;
       /* 0 <= j < N_WAVE/2 */
-      wr =  Sinewave[j+N_WAVE/4];
-      wi = -Sinewave[j];
+      wr = pgm_read_word_near(Sinewave+j+N_WAVE/4);
+      wi = -pgm_read_word_near(Sinewave+j);
       if (inverse)
         wi = -wi;
       if (shift) {
@@ -272,9 +275,9 @@ int32_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse){
   that fix_fft "sees" consecutive real samples as alternating
   real and imaginary samples in the complex array.
 */
-int32_t fix_fftr(uint16_t f[], int32_t m, int32_t inverse){
+int32_t fix_fftr(int16_t f[], int32_t m, int32_t inverse){
   int32_t i, N = 1<<(m-1), scale = 0;
-  uint16_t tt, *fr=f, *fi=&f[N];
+  int16_t tt, *fr=f, *fi=&f[N];
 
   if (inverse)
     scale = fix_fft(fi, fr, m-1, inverse);

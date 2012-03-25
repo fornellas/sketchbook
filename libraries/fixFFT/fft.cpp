@@ -1,10 +1,16 @@
+#include <stdint.h>
+#include <math.h>
+#include <string.h>
+
+int32_t fix_fft(int16_t fr[], int16_t fi[], int16_t m, int16_t inverse);
+
 void fft(int16_t *samples, int16_t *freq, int16_t log2samples){
-  uint16_t sampleCount=1<<log2samples;
+  int16_t sampleCount=1<<log2samples;
   int16_t fi[sampleCount];
   int16_t i;
 
   // zero imaginary part
-  memset(fi, 0, sampleCount*sizeof(uint16_t));
+  memset(fi, 0, sampleCount*sizeof(int16_t));
 
   fix_fft(samples, fi, log2samples, 0);
 
