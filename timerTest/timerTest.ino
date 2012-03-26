@@ -1,7 +1,8 @@
 #include <fixFFT.h>
+#include <SPI.h>
+#include <SFRGBLEDMatrix.h>
 
-#define PIN_LINEIN_L A1
-#define PIN_LINEIN_R A2
+#include "pins.h"
 
 #define LOG2_SAMPLES 6
 #define SAMPLES_COUNT (1<<LOG2_SAMPLES)
@@ -10,18 +11,19 @@ volatile word lost=0;
 volatile byte count=0;
 volatile int16_t samples[SAMPLES_COUNT];
 
-ISR(TIMER1_COMPA_vect){
+SFRGBLEDMatrix *display;
+
+ISR(TIMER2_COMPA_vect){
   if(SAMPLES_COUNT==count) {
     lost++;
   }
   else{
-    int16_t b;
+    int16_t buff;
     // wait convertion end
     while(!(ADCSRA & (1<<ADIF)));
     // read sample
-    //    samples[count++]=ADCH;
-    b=ADCH;
-    samples[count++]=b-128;
+    buff=ADC;
+    samples[count++]=(buff-512);
     // clear bit
     ADCSRA|=(1<<ADIF);
     // start next convertion
@@ -29,31 +31,21 @@ ISR(TIMER1_COMPA_vect){
   }
 }
 
-void
-setup(){
-  Serial.begin(115200);  
-  // 16-bit Timer/Counter1
-  // 20kHz sampling (must be double of max mic freq)
+void setup(){
+  Serial.begin(115200);
+  SPI.begin();
+  display=new SFRGBLEDMatrix(PIN_MATRIX_SS, 3, 2);
+  display->fill(BLACK);
+  display->show();
 
-  TCCR1A=0;
-  //   - Clear Timer on Compare Match (CTC) Mode
-  //   - 16MHz / 8x prescaling = 2MHz
-  TCCR1B=(1<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
-  TCCR1C=0;
-  //   - Compare
-  // 100=22kHz
-  // 45 = 44444.444kHz
-  OCR1A=100;
-  //   - Enable compare interrupt
-  TIMSK1=(1<<OCIE1A);
-  TIFR1=0;
-
-  // Analog-to-Digital Converter
+  //
+  // ADC Setup
+  //
 
   //   - AVCC with external capacitor at AREF pin
   //   - ADC Left Adjust Result
   //   - Analog Channel Selection
-  ADMUX=(1<<REFS0)|(1<<ADLAR)|((PIN_LINEIN_L-14)&0x07);
+  ADMUX=(1<<REFS0)|(0<<ADLAR)|((PIN_LINEIN-14)&0x07);
   //   - ADC Enable
   //   - ADC Start Conversion
   //   - Clear ADIF
@@ -61,33 +53,57 @@ setup(){
   //     - Max 1 0 1 (32)
   //     - Min 0 1 0 (4) < more high freq noise
   ADCSRA=(1<<ADEN)|(1<<ADSC)|(1<<ADIF)|(1<<ADPS2)|(0<<ADPS1)|(1<<ADPS0);
-
   // discart first (slow) sample
   while(!(ADCSRA & (1<<ADIF)));
   ADCSRA|=(1<<ADIF);
+
+  //
+  // Timer2 @40kHz
+  //
+
+  TCCR2A=(1<<WGM21);
+  TCCR2B=(1<<CS21);
+  OCR2A=50;
+  TIFR2=0;
+  ASSR=0;
+  GTCCR=0;
+
+  //
+  // Start ADC capture and Timer2 Interrupt
+  //
   ADCSRA|=(1<<ADSC);
-
-  // enable interrupts
-  sei();
-
-  Serial.println("==Boot complete==");
+  TIMSK2=(1<<OCIE2A);
 }
 
-void
-loop(){
+void loop(){
   int16_t freq[SAMPLES_COUNT/2];
-  // convertion finished
-  if(SAMPLES_COUNT==count){
-    // process
-    Serial.println("==RAW==");
-    for(byte c=0;c<SAMPLES_COUNT;c++)
-      Serial.println(samples[c]);
 
+  // All samples acquired
+  if(SAMPLES_COUNT==count){
+    //    Serial.println("==RAW==");
+    //    for(byte c=0;c<SAMPLES_COUNT;c++)
+    //      Serial.println(samples[c]);
+
+    // FFT
     fft((int16_t *)samples, freq, LOG2_SAMPLES);
 
-    Serial.println("==FFT==");
-    for(byte c=0;c<SAMPLES_COUNT/2;c++)
-      Serial.println(freq[c]);
+    //    Serial.println("==FFT==");
+    //    for(byte c=0;c<SAMPLES_COUNT/2;c++){
+    //      Serial.print(freq[c]);
+    //      Serial.print(' ');
+    //    }     
+    //    Serial.println("");
+
+    // Draw
+    for(byte x=0;x<display->width;x++){
+      for(byte y=0;y<display->height;y++){
+        if(display->height-y<freq[x])
+          display->paintPixel(RGB(0,0,1), x, y);
+        else
+          display->paintPixel(BLACK, x, y);
+      }
+    }
+    display->show();
 
     // start next convertion
     ADCSRA|=(1<<ADSC);
@@ -97,15 +113,9 @@ loop(){
     lost=0;
     // reset counter
     count=0;
-    delay(10000);
+    //    delay(10000);
   }
 }
-
-
-
-
-
-
 
 
 
