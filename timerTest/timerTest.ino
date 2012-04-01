@@ -9,26 +9,49 @@
 
 volatile word lost=0;
 volatile byte count=0;
-volatile int16_t samples[SAMPLES_COUNT];
+volatile byte pass=0;
+volatile boolean readyToProcess=false;
+#define LOG2_PASS 6
+#define PASS_COUNT (1<<LOG2_SAMPLES)
+
+volatile int16_t samplesA[SAMPLES_COUNT];
+volatile int16_t samplesB[SAMPLES_COUNT];
+
+volatile int16_t *samplesWriting;
+volatile int16_t *samplesProcessisg;
 
 SFRGBLEDMatrix *display;
 
 ISR(TIMER2_COMPA_vect){
-  if(SAMPLES_COUNT==count) {
-    lost++;
+  if(pass==PASS_COUNT){
+    if(readyToProcess){
+      lost++;
+      return;
+    }
+    pass=0;
+    // swap buffers
+    volatile int16_t *t;
+    t=samplesWriting;
+    samplesWriting=samplesProcessisg;
+    samplesProcessisg=t;
+    readyToProcess=true;
   }
-  else{
-    int16_t buff;
-    // wait convertion end
-    while(!(ADCSRA & (1<<ADIF)));
-    // read sample
-    buff=ADC;
-    samples[count++]=(buff-512);
-    // clear bit
-    ADCSRA|=(1<<ADIF);
-    // start next convertion
-    ADCSRA|=(1<<ADSC);
+
+  if(SAMPLES_COUNT==count){
+    count=0;
+    pass++;
   }
+
+  // wait convertion end
+  while(!(ADCSRA & (1<<ADIF)));
+  // read sample
+  int16_t buff;
+  buff=ADC;
+  samplesWriting[count++]+=(buff-512);
+  // clear bit
+  ADCSRA|=(1<<ADIF);
+  // start next convertion
+  ADCSRA|=(1<<ADSC);
 }
 
 void setup(){
@@ -37,6 +60,12 @@ void setup(){
   display=new SFRGBLEDMatrix(PIN_MATRIX_SS, 3, 2);
   display->fill(BLACK);
   display->show();
+
+  // Prepare buffers
+  samplesWriting=samplesA;
+  for(byte c=0;c<SAMPLES_COUNT;c++)
+    samplesWriting[c]=0;
+  samplesProcessisg=samplesB;
 
   //
   // ADC Setup
@@ -79,20 +108,13 @@ void loop(){
   int16_t freq[SAMPLES_COUNT/2];
 
   // All samples acquired
-  if(SAMPLES_COUNT==count){
-    //    Serial.println("==RAW==");
-    //    for(byte c=0;c<SAMPLES_COUNT;c++)
-    //      Serial.println(samples[c]);
+  if(readyToProcess){
+    // divide
+    for(byte c=0;c<SAMPLES_COUNT;c++)
+      samplesProcessisg[c]=samplesProcessisg[c]>>LOG2_PASS;
 
     // FFT
-    fft((int16_t *)samples, freq, LOG2_SAMPLES);
-
-    //    Serial.println("==FFT==");
-    //    for(byte c=0;c<SAMPLES_COUNT/2;c++){
-    //      Serial.print(freq[c]);
-    //      Serial.print(' ');
-    //    }     
-    //    Serial.println("");
+    fft((int16_t *)samplesProcessisg, freq, LOG2_SAMPLES);
 
     // Draw
     for(byte x=0;x<display->width;x++){
@@ -105,17 +127,26 @@ void loop(){
     }
     display->show();
 
-    // start next convertion
-    ADCSRA|=(1<<ADSC);
+    // zero array
+    for(byte c=0;c<SAMPLES_COUNT;c++)
+      samplesProcessisg[c]=0;
+
     // print lost samples
     Serial.print("Lost samples: ");
     Serial.println(lost);
     lost=0;
-    // reset counter
-    count=0;
-    //    delay(10000);
+    
+    // Release interrupt
+    readyToProcess=false;
   }
 }
+
+
+
+
+
+
+
 
 
 
