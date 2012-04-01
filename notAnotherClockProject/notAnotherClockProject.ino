@@ -15,6 +15,7 @@
 #include "Fire.h"
 #include "Lamp.h"
 #include "Plasma.h"
+#include "Spectrum.h"
 
 #define DISP_HORIZ 3
 #define DISP_VERT 2
@@ -49,17 +50,20 @@ void setup(){
   SPI.begin();
 
   // Pins (TODO Move inside class / namespace)
-  pinMode(PIN_LINEIN_L, INPUT);
-  pinMode(PIN_LINEIN_R, INPUT);
+  pinMode(PIN_LINEIN, INPUT);
   pinMode(PIN_BUZZER, OUTPUT);
 
   // Global stuff
   button=new Button();
   display=new SFRGBLEDMatrix(PIN_MATRIX_SS, DISP_HORIZ, DISP_VERT);
+  display->fill(RED);
+  display->show();
   Mux::begin();
 
   // recover last mode
   currMode=EEPROM.read(EEPROM_MODE);
+  
+  pMem(); // 992
 }
 
 //
@@ -70,6 +74,11 @@ void loop(){
   PGM_P * (*modeEnter)() = NULL;
   void (*modeLoop)() = NULL;
   void (*modeExit)() = NULL;
+
+  // Reset display
+  display->gamma(false); 
+  display->fill(BLACK);
+  display->show(); 
 
   // Save current mode
   EEPROM.write(EEPROM_MODE, currMode);
@@ -96,6 +105,11 @@ void loop(){
     modeLoop=Plasma::loop;
     modeExit=Plasma::exit;
     break;
+  case 4:
+    modeEnter=Spectrum::enter;
+    modeLoop=Spectrum::loop;
+    modeExit=Spectrum::exit;
+    break;
   default:
     currMode=0;
     return; 
@@ -103,7 +117,6 @@ void loop(){
   // Execute mode
   modeEnter();
   while(1){
-    delay(500);
     modeLoop();
     button->update();
     if(button->pressed(BUTTON_MODE))
@@ -113,6 +126,7 @@ void loop(){
   modeExit();
   currMode++;
 }
+
 
 
 

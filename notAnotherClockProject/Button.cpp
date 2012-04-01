@@ -31,9 +31,9 @@ void Button::update(){
       lastChangeTime[b] = currTime;
       pressedState[b]=false;
       releasedState[b]=false;
-      if(!buttonState[b]&&reading)
-        pressedState[b]=true;
       if(buttonState[b]&&!reading)
+        pressedState[b]=true;
+      if(!buttonState[b]&&reading)
         releasedState[b]=true;
       buttonState[b] = reading;
     }

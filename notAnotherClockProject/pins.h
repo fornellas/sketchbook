@@ -22,8 +22,7 @@
 #define ADDR_MIC 4
 
 // Line In
-#define PIN_LINEIN_L A1
-#define PIN_LINEIN_R A2
+#define PIN_LINEIN A1
 
 // Buttons
 #define ADDR_BUTTON_MODE 9
