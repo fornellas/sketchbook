@@ -10,6 +10,7 @@ DS1307	KEYWORD1
 
 getDate	KEYWORD2
 setDate	KEYWORD2
+Date	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

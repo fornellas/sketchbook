@@ -24,19 +24,18 @@
 #define NOVEMBER 11
 #define DECEMBER 12
 
-struct Date {
-  int second;
-  int minute;
-  int hour; // 24 Hour
-  int weekDay; // 1-7 > sunday-saturday
-  int monthDay;
-  int month;
-  int year;
-};
-
 namespace DS1307 {
-  struct Date getDate();
-  void setDate(struct Date d);
+  struct Date {
+    int second;
+    int minute;
+    int hour; // 24 Hour
+    int weekDay; // 1-7 > sunday-saturday
+    int monthDay;
+    int month;
+    int year;
+  };
+  struct DS1307::Date getDate();
+  void setDate(struct DS1307::Date d);
 };
 
 #endif
