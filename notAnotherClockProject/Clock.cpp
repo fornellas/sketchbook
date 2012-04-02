@@ -20,7 +20,7 @@ PGM_P * Clock::enter(){
 }
 
 void Clock::loop(){
-  struct Date date;
+  struct DS1307::Date date;
   byte value=15;
 
   display->fill(BLACK);
