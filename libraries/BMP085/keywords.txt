@@ -1,0 +1,18 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+BMP085	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+calibration	KEYWORD2
+readTemperature	KEYWORD2
+readPressure KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
