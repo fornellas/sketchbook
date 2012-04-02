@@ -11,6 +11,7 @@
 #include <DS1307.h>
 
 #define PIN_HIH4030 A3
+#define MY_ALTITUDE 810.0
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
@@ -63,9 +64,14 @@ void loop()
           client.println("Content-Type: text/plain");
           client.println();
 
+          client.println("***********************");
+          client.println("* Arduino Web Weather *");
+          client.println("***********************");
+          client.println("");
+
           struct DS1307::Date d;
           d=DS1307::getDate();
-          client.print("Local time: ");
+          client.print("Local time:\t\t");
           client.print(d.year);
           client.print("-");
           client.print(d.month);
@@ -77,37 +83,65 @@ void loop()
           client.print(d.minute);
           client.print(":");
           client.println(d.second);
-          client.flush();
 
-          client.print("Temperature indoor: ");
+          client.print("Temperature indoor:\t");
           client.print(BMP085::readTemperature());
           client.println(" C");
-          client.flush();
 
           byte addr[]={
-            40, 200, 10, 228, 3, 0, 0, 62                                                                                                                                            };
-          client.print("Temperature outdoor: ");
+            40, 200, 10, 228, 3, 0, 0, 62                                                                                                                                                                                                        };
+          client.print("Temperature outdoor:\t");
           client.print(DS18S20::read(2, addr));
           client.println(" C");
-          client.flush();
 
-          client.print("Humidity: ");
+          client.print("Humidity:\t\t");
           client.print(HIH4030::read(PIN_HIH4030, BMP085::readTemperature()));
           client.println("%");
-          client.flush();
 
           long pressure;
-          client.print("Pressure: ");
-          client.print(pressure=BMP085::readPressure());
-          client.println(" Pa");
-          client.flush();
+          pressure=BMP085::readPressure();
+
+          client.print("Pressure:\t\t");
+          client.print(pressure/100);
+          client.println(" hPa");
+
+          const float p0 = 101325;     // Pressure at sea level (Pa)
+          // Add these to the top of your program
+          const float currentAltitude = MY_ALTITUDE; // current altitude in METERS
+          const float ePressure = p0 * pow((1-currentAltitude/44330), 5.255);  // expected pressure (in Pa) at altitude
+
+          client.print("Expected pressure:\t");
+          client.print((long)ePressure/100);
+          client.println(" hPa");
+
+          int16_t weatherDiff;
+
+          // Add this into loop(), after you've calculated the pressure
+          weatherDiff = (int16_t)pressure - (int16_t)ePressure;
+
+          client.print("Pressure difference:\t");
+          client.print(weatherDiff/100);
+          client.println(" hPa");
+
+          client.print("Weather:\t\t");
+          if(weatherDiff > 250)
+            client.println("clear.");
+          else if ((weatherDiff <= 250) || (weatherDiff >= -250))
+            client.println("partly cloudy.");
+          else if (weatherDiff > -250)
+            client.println("rain.");
 
           double t = 0;
           t = (double) pressure/101325;
           t = 1-pow(t, 0.19029);
-          client.print("Altitude: ");
-          client.print(round(44330*t));
-          client.println("m");
+          client.print("Absolute altitude:\t");
+          client.print(round(44330.0*t));
+          client.println(" m");
+
+          client.print("GPS altitude:\t\t");
+          client.print((int)MY_ALTITUDE);
+          client.println(" m");
+
           client.flush();
 
           break;
@@ -127,5 +161,11 @@ void loop()
     Serial.println("Disconnected.");
   }
 }
+
+
+
+
+
+
 
 
