@@ -1,6 +1,7 @@
 #include "Bike.h"
 
 #define WHEEL_DIAMETER 2.09 // in meters
+#define WHEEL_MAGNETS 3
 #define INT_WHEEL 0 // PIN D2
 #define MAX_SPEED 80.0 // in km/h, for hall effect sensor noise filtering
 #define MIN_REV_US 1E6/((MAX_SPEED/3.6)/WHEEL_DIAMETER) // minimum revolution time
@@ -26,7 +27,7 @@ void BikeClass::updateSpeed(unsigned long currMicros, unsigned long revolutions)
     currRevolutions+=revolutions;
     lastRevolutionsIncrementMicros=currMicros;
     if(currMicros-lastSpeedCalcMicros>SPEED_UPDATE_MS*1E3){
-      currSpeed=(WHEEL_DIAMETER*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
+      currSpeed=(WHEEL_DIAMETER/WHEEL_MAGNETS*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
       lastSpeedCalcMicros=currMicros;
       lastSpeedUpdateMicros=currMicros;
       lastSpeedCalcRevolutions=currRevolutions;
@@ -53,10 +54,10 @@ float BikeClass::getSpeed(){
   currMicros=micros();
   if(currMicros-lastSpeedUpdateMicros>SPEED_UPDATE_MS*1E3){
     if(currRevolutions==lastSpeedCalcRevolutions){
-      estimatedSpeed=WHEEL_DIAMETER/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
+      estimatedSpeed=WHEEL_DIAMETER/WHEEL_MAGNETS/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
     }
     else
-      estimatedSpeed=(WHEEL_DIAMETER*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedNotCalcMicros))/1E6)*3.6;
+      estimatedSpeed=(WHEEL_DIAMETER/WHEEL_MAGNETS*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedNotCalcMicros))/1E6)*3.6;
     if(estimatedSpeed<currSpeed){
       lastSpeedUpdateMicros=currMicros;
       currSpeed=estimatedSpeed;

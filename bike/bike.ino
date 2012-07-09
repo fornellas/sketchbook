@@ -14,8 +14,6 @@ void setup() {
   Serial.begin(115200);
 }
 
-boolean r=1;
-
 void loop() {
   show(Bike.getSpeed(), Bike.getDistance(), 23.4, 68);
 }
