@@ -5,7 +5,7 @@
 #define INT_WHEEL 0 // PIN D2
 #define MAX_SPEED 80.0 // in km/h, for hall effect sensor noise filtering
 #define MIN_REV_US 1E6/((MAX_SPEED/3.6)/WHEEL_DIAMETER) // minimum revolution time
-#define SPEED_UPDATE_MS 0
+#define SPEED_UPDATE_MS 500
 
 // pin 7 - Serial clock out (SCLK)
 // pin 6 - Serial data out (DIN)
@@ -24,10 +24,11 @@ volatile unsigned long lastSpeedCalcMicros=0;
 volatile float currSpeed;
 volatile unsigned long lastSpeedCalcRevolutions=0;
 volatile unsigned long lastSpeedUpdateMicros=0;
+volatile unsigned long lastSpeedNotCalcMicros=0;
 
-void updateSpeed(unsigned long currMicros){
+void updateSpeed(unsigned long currMicros, unsigned long revolutions){
   if(currMicros-lastRevolutionsIncrementMicros>MIN_REV_US){
-    currRevolutions++;
+    currRevolutions+=revolutions;
     lastRevolutionsIncrementMicros=currMicros;
     if(currMicros-lastSpeedCalcMicros>SPEED_UPDATE_MS*1E3){
       currSpeed=(WHEEL_DIAMETER*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
@@ -36,6 +37,8 @@ void updateSpeed(unsigned long currMicros){
       lastSpeedCalcRevolutions=currRevolutions;
     }
   }
+  else
+    lastSpeedNotCalcMicros=currMicros;
 }
 
 void incrementRevolutions(){
@@ -44,7 +47,7 @@ void incrementRevolutions(){
   if(lock)
     intMicros=us;
   else
-    updateSpeed(us);
+    updateSpeed(us, 1);
 }
 
 void setup() {    
@@ -57,39 +60,42 @@ void loop() {
   float distance;
   unsigned long currMicros;
   float estimatedSpeed;
-  float speed;
-
-  speed=currSpeed;
 
   lock=true;
   currMicros=micros();
+  Serial.print(currMicros);
+  Serial.print("\t");
+  Serial.print(currRevolutions);
+  Serial.print("\t");
   if(currMicros-lastSpeedUpdateMicros>SPEED_UPDATE_MS*1E3){
-    unsigned long r;
-    r=currRevolutions-lastSpeedCalcRevolutions;
-    if(r==0)
-      r=1;
-    estimatedSpeed=(WHEEL_DIAMETER*r)/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
+    if(currRevolutions==lastSpeedCalcRevolutions){
+      estimatedSpeed=WHEEL_DIAMETER/(float((currMicros-lastSpeedCalcMicros))/1E6)*3.6;
+    }
+    else
+      estimatedSpeed=(WHEEL_DIAMETER*(currRevolutions-lastSpeedCalcRevolutions))/(float((currMicros-lastSpeedNotCalcMicros))/1E6)*3.6;
     if(estimatedSpeed<currSpeed){
       lastSpeedUpdateMicros=currMicros;
       currSpeed=estimatedSpeed;
-      speed=estimatedSpeed;
     }
   }
   if(intMicros){
-    updateSpeed(intMicros);
+    updateSpeed(intMicros, 1);
     intMicros=0; 
   }
   lock=false;
 
   distance=WHEEL_DIAMETER*float(currRevolutions)/1000.0;
-  show(speed, distance, 23.4, 68);
+  show(currSpeed, distance, 23.4, 68);
 
-  Serial.print(currMicros);
-  Serial.print("\t");
-  Serial.print(estimatedSpeed);
-  Serial.print("\t");
-  Serial.println(speed);
+  Serial.println(currSpeed);
 }
+
+
+
+
+
+
+
 
 
 
