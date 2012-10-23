@@ -31,6 +31,8 @@ Color spectrum[]={
   RGB(7, 0, 2), RGB(7, 0, 2), RGB(7, 0, 1), RGB(7, 0, 1), RGB(7, 0, 1), RGB(7, 0, 0), RGB(7, 0, 0), 
 };
 
+int filter=1;
+
 void
 setup(){
   SPI.begin();
@@ -76,6 +78,7 @@ loop(){
       value[c]=0;
     else
       value[c]-=DC_OFFSET;
+    int clear=1;
     for(v=0;v<DISP_VERT*8;v++){
       if((8.0*DISP_VERT)*double(value[c])/(1023.0-DC_OFFSET)>v){
         /*        display->paintPixel(RGB(0,0,v+1),c*3+2,DISP_VERT*8-v-1);        
@@ -86,13 +89,25 @@ loop(){
          display->paintPixel(RGB((v>>1)+1,0,0),c*3+3,DISP_VERT*8-v-1);
          break;
          */
-        display->paintPixel(spectrum[int(float(v)/15.0*float(SPECTRUM_LEN-1))],c*3+2,DISP_VERT*8-v-1);        
-        display->paintPixel(spectrum[int(float(v)/15.0*float(SPECTRUM_LEN-1))],c*3+3,DISP_VERT*8-v-1);
+        clear=0;
+        if(!filter){
+          display->paintPixel(spectrum[int(float(v)/15.0*float(SPECTRUM_LEN-1))],c*3+2,DISP_VERT*8-v-1);        
+          display->paintPixel(spectrum[int(float(v)/15.0*float(SPECTRUM_LEN-1))],c*3+3,DISP_VERT*8-v-1);
+        }
       }
     }
+    if(clear)
+      filter=1;
+    else
+      filter=0;
   }
   display->show(); 
 }
+
+
+
+
+
 
 
 
