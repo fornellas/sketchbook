@@ -1,6 +1,9 @@
 #ifndef Button_h
 #define Button_h
 
+#include "pins.h"
+#include "Mux.h"
+
 #define BUTTON_COUNT 4
 
 #define BUTTON_MODE 0
@@ -16,7 +19,7 @@ private:
   boolean releasedState[BUTTON_COUNT];
 public:
   Button();
-  // to be called in loop or interrupt to update button status
+  // to be called in loop to update button status
   void update();
   // get the status of a button
   boolean state(byte button);

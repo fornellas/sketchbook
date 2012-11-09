@@ -1,4 +1,0 @@
-Arduino port for the fixed point FFT routine found at:
-http://www.jjj.de/fft/fftpage.html
-8bit version based on work at:
-http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1286718155

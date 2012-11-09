@@ -1,145 +1,75 @@
-#include <Arduino.h>
 #include <Wire.h>
+#include <Adafruit_MCP23017.h>
 #include <SPI.h>
-#include <EEPROM.h>
-
-#include <MemoryFree.h>
 #include <SFRGBLEDMatrix.h>
-#include <DS1307.h>
-#include <Thermistor.h>
 
-#include "Button.h"
 #include "pins.h"
-#include "EEPROM.h"
-#include "Clock.h"
-#include "Fire.h"
-#include "Lamp.h"
-#include "Plasma.h"
-#include "Spectrum.h"
+#include "Button.h"
 
+// MCP23017 I/O Expander
+Adafruit_MCP23017 ioexp;
+
+// Sparkfun RGB LED Matrix
+SFRGBLEDMatrix *display;
 #define DISP_HORIZ 3
 #define DISP_VERT 2
 
-void SerialPrintPGM (PGM_P s) {
-  char c;
-  while ((c = pgm_read_byte(s++)) != 0)
-    Serial.print(c);
-}
-
-void pMem(){
-  SerialPrintPGM(PSTR("Mem: "));
-  Serial.println(freeMemory());
-}
-
-//
-// Global stuff
-//
-
+// Button
 Button *button;
-SFRGBLEDMatrix *display;
-byte currMode=0;
+boolean updateButtons=false;
+void buttonInterrupt(){
+  updateButtons=true;
+}
 
-//
-// setup()
-//
 
-void setup(){
-  // Arduino facilities    
-  Serial.begin(115200);
-  Wire.begin();
+
+void
+setup(){
+  // Wire
+  // Wire.begin(); // ioexp.begin(); already calls it
+
+  // SPI
   SPI.begin();
 
-  // Pins (TODO Move inside class / namespace)
-  pinMode(PIN_LINEIN, INPUT);
-  pinMode(PIN_BUZZER, OUTPUT);
+  // MCP23017 I/O Expander
+  pinMode(PIN_IOEXP_RESET, OUTPUT);
+  digitalWrite(PIN_IOEXP_RESET, LOW);
+  delay(50);
+  digitalWrite(PIN_IOEXP_RESET, HIGH);
+  ioexp.begin();
 
-  // Global stuff
-  button=new Button();
+  // Sparkfun RGB LED Matrix
   display=new SFRGBLEDMatrix(PIN_MATRIX_SS, DISP_HORIZ, DISP_VERT);
-  display->fill(RED);
+  display->print_PF(WHITE, 3, 6, 5, PSTR("BOOT"));
   display->show();
-  Mux::begin();
 
-  // recover last mode
-  currMode=EEPROM.read(EEPROM_MODE);
-  
-  pMem(); // 992
+  // Button
+  button=new Button();
+  attachInterrupt(BUTTON_INT, buttonInterrupt, CHANGE);
 }
-
-//
-// loop()
-//
-
-void loop(){
-  PGM_P * (*modeEnter)() = NULL;
-  void (*modeLoop)() = NULL;
-  void (*modeExit)() = NULL;
-
-  // Reset display
-  display->gamma(false); 
+byte c;
+void
+loop(){
   display->fill(BLACK);
-  display->show(); 
 
-  // Save current mode
-  EEPROM.write(EEPROM_MODE, currMode);
-  // Assigin mode function pointers
-  // Using classes would be more elegant, but requires more memory
-  switch(currMode){
-  case 0:
-    modeEnter=Clock::enter;
-    modeLoop=Clock::loop;
-    modeExit=Clock::exit;
-    break;
-  case 1:
-    modeEnter=Fire::enter;
-    modeLoop=Fire::loop;
-    modeExit=Fire::exit;
-    break;
-  case 2:
-    modeEnter=Lamp::enter;
-    modeLoop=Lamp::loop;
-    modeExit=Lamp::exit;
-    break;
-  case 3:
-    modeEnter=Plasma::enter;
-    modeLoop=Plasma::loop;
-    modeExit=Plasma::exit;
-    break;
-  case 4:
-    modeEnter=Spectrum::enter;
-    modeLoop=Spectrum::loop;
-    modeExit=Spectrum::exit;
-    break;
-  default:
-    currMode=0;
-    return; 
-  }
-  // Execute mode
-  modeEnter();
-  while(1){
-    modeLoop();
+  if(updateButtons){
+    display->paintPixel(ORANGE,0,1);
     button->update();
-    if(button->pressed(BUTTON_MODE))
-      break;
+    updateButtons=false;
   }
-  // next mode
-  modeExit();
-  currMode++;
+
+  if(button->state(BUTTON_MODE))
+    display->paintPixel(RED,0,0);
+  if(button->state(BUTTON_A))
+    display->paintPixel(GREEN,1,0);
+  if(button->state(BUTTON_B))
+    display->paintPixel(BLUE,2,0);
+  if(button->state(BUTTON_C))
+    display->paintPixel(WHITE,3,0);
+    
+    display->print(WHITE,0,8,5,c++);
+  display->show(); 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

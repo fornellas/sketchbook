@@ -1,11 +1,7 @@
 #include <Arduino.h>
 #include <avr/pgmspace.h>
-#include <Adafruit_MCP23017.h>
 
 #include "Button.h"
-#include "pins.h"
-
-extern Adafruit_MCP23017 ioexp;
 
 #define DEBOUNCE_DELAY 50
 
@@ -17,27 +13,12 @@ prog_int16_t addr_pin[BUTTON_COUNT] PROGMEM = {
 };
 
 Button::Button() {
-  // states
   for(byte b=0;b<BUTTON_COUNT;b++){
     buttonState[b]=true;
     lastChangeTime[b]=0;
     pressedState[b]=false;
     releasedState[b]=false;
   }
-
-  for(byte b=0;b<BUTTON_COUNT;b++){
-    uint8_t addr;
-    addr=pgm_read_word_near(addr_pin+b);
-    // pull-ups
-    ioexp.pinMode(addr, INPUT);
-    ioexp.pullUp(addr, HIGH);
-    // interrupt
-//    ioexp.defaultvalue(addr, 1);
-    ioexp.interruptControl(addr, 0);
-    ioexp.interruptEnable(addr, 1);
-  }
-//  ioexp.interruptMirror(1);
-//  ioexp.interruptPolarity(1);
 }
 
 void Button::update(){
@@ -45,7 +26,7 @@ void Button::update(){
     unsigned long currTime=millis();
     int reading;
 
-    reading=ioexp.digitalRead(pgm_read_word_near(addr_pin+b));
+    reading=Mux::dRead(pgm_read_word_near(addr_pin+b));
     if (reading != buttonState[b] && currTime - lastChangeTime[b] > DEBOUNCE_DELAY){
       lastChangeTime[b] = currTime;
       pressedState[b]=false;
@@ -60,7 +41,7 @@ void Button::update(){
 }
 
 boolean Button::state(byte button){
-  return !buttonState[button];
+  return buttonState[button];
 };
 
 boolean Button::pressed(byte button){
@@ -76,8 +57,4 @@ boolean Button::released(byte button){
   releasedState[button]=false;
   return r; 
 }
-
-
-
-
 
