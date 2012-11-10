@@ -6,7 +6,8 @@
 class Equalizer: 
 public Mode {
 private:
-
+  int filter;
+  uint8_t pin;
 public:
   Equalizer();
   void loop();

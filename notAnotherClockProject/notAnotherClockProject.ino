@@ -76,7 +76,7 @@ setup(){
   lcd=new U8GLIB_ST7920_128X64(PIN_LCD_E, PIN_LCD_RW, PIN_LCD_RS, U8G_PIN_NONE, U8G_PIN_NONE);
   lcd->setColorIndex(1); 
   lcd->firstPage();
-  lcd->setFont(u8g_font_7x14);
+  lcd->setFont(u8g_font_6x10);
   do {
     byte x;
     byte y;
@@ -113,22 +113,13 @@ loop(){
   // Modes
 #define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
-  case 0:
-    mode=new Clock();
-    EEPROM.write(EEPROM_MODE, 0);
-    break;
-  case 1:
-    mode=new Lamp();
-    EEPROM.write(EEPROM_MODE, 1);
-    break;
-  case 2:
-    mode=new Fire();
-    EEPROM.write(EEPROM_MODE, 2);
-    break;
-  MODE(3,Plasma)
-  MODE(4,Equalizer)
-  default:
-    EEPROM.write(EEPROM_MODE, 0);
+    MODE(0, Clock);
+    MODE(1, Fire);
+    MODE(2,Equalizer);
+    MODE(3,Plasma)
+      //    MODE(4, Lamp);
+    default:
+      EEPROM.write(EEPROM_MODE, 0);
     return;
   }
   while(1){
@@ -152,6 +143,12 @@ loop(){
   }
   delete mode;
 }
+
+
+
+
+
+
 
 
 

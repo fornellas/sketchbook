@@ -11,7 +11,6 @@
 #define PIN_LCD_BLA 6
 #define ADDR_LCD_RST 13
 
-
 // Buttons
 #define ADDR_BUTTON_MODE 9
 #define ADDR_BUTTON_A 8
@@ -28,3 +27,8 @@
 // Photocell
 #define PIN_LIGHT A3
 
+// Equalizers
+#define ADDR_EQ_RESET 12
+#define PIN_EQ_STROBE 5
+#define PIN_EQ_MIC A1
+#define PIN_EQ_LINEIN A0
