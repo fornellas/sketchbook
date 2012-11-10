@@ -45,7 +45,7 @@ generalInfo(){
   date=DS1307::getDate();
   float temperatureOutside;
   byte addr[]={
-    40, 200, 10, 228, 3, 0, 0, 62                                                    };
+    40, 200, 10, 228, 3, 0, 0, 62                                                          };
   temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
   float temperatureInside;
   temperatureInside=BMP085::readTemperature();
@@ -170,19 +170,38 @@ setup(){
 
 void
 loop(){
-  // Update Buttons
-  if(updateButtons){
-    button->update();
-    updateButtons=false;
-  }
-  
+  Mode *mode;
+
   // Modes
   switch(EEPROM.read(EEPROM_MODE)){
   case 0:
+    mode=new Clock();
     break;
+  default:
+    EEPROM.write(EEPROM_MODE, 0);
+    return;
   }
-  generalInfo();
+  while(1){
+    mode->loop();
+    // Update Buttons
+    if(updateButtons){
+      button->update();
+      updateButtons=false;
+    }
+    // LCD FIXME
+    generalInfo();
+    // TODO detect night mode
+    // Change mode
+    if(button->pressed(BUTTON_MODE)){
+      EEPROM.write(EEPROM_MODE, EEPROM.read(EEPROM_MODE)+1);
+      break;
+    }
+  }
+  delete mode;
 }
+
+
+
 
 
 
