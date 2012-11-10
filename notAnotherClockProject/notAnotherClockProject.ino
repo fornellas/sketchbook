@@ -17,6 +17,9 @@
 #include "Clock.h"
 #include "Lamp.h"
 #include "Light.h"
+#include "Fire.h"
+#include "Plasma.h"
+#include "Equalizer.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
@@ -73,7 +76,7 @@ setup(){
   lcd=new U8GLIB_ST7920_128X64(PIN_LCD_E, PIN_LCD_RW, PIN_LCD_RS, U8G_PIN_NONE, U8G_PIN_NONE);
   lcd->setColorIndex(1); 
   lcd->firstPage();
-  lcd->setFont(u8g_font_fub14);
+  lcd->setFont(u8g_font_7x14);
   do {
     byte x;
     byte y;
@@ -108,6 +111,7 @@ loop(){
   Mode *mode;
 
   // Modes
+#define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
   case 0:
     mode=new Clock();
@@ -117,6 +121,12 @@ loop(){
     mode=new Lamp();
     EEPROM.write(EEPROM_MODE, 1);
     break;
+  case 2:
+    mode=new Fire();
+    EEPROM.write(EEPROM_MODE, 2);
+    break;
+  MODE(3,Plasma)
+  MODE(4,Equalizer)
   default:
     EEPROM.write(EEPROM_MODE, 0);
     return;

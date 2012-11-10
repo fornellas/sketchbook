@@ -1,15 +1,16 @@
 #include "Fire.h"
+
 #include <SFRGBLEDMatrix.h>
 #include "Button.h"
 
-extern SFRGBLEDMatrix *display;
+extern SFRGBLEDMatrix *ledMatrix;
 extern Button *button;
 
-#define PIXMAP(x,y) *(pixmap+(display->width+2)*(y)+(x))
+#define PIXMAP(x,y) *(pixmap+(ledMatrix->width+2)*(y)+(x))
 
 // Color palete
 #define INCANDESCENT_LEN 30
-Color incandescent(byte p){
+Color Fire::incandescent(byte p){
   // WHITE
   if(p<4){
     return RGB(15, 15, 15-(p*5));
@@ -33,17 +34,18 @@ Color incandescent(byte p){
   return RGB(0, 15/8, 15/2);
 }
 
-void Fire::enter() {
-  display->gamma(true); 
+Fire::Fire():
+Mode(PSTR("Fire")){
+  ledMatrix->gamma(true); 
   // Allocate pixmap
-  pixmap=(byte *)malloc(size_t(sizeof(byte)*(display->width+2)*(display->height+2)));
-  for(byte x=0;x<display->width+2;x++)
-    for(byte y=0;y<display->height+2;y++)
+  pixmap=(byte *)malloc(size_t(sizeof(byte)*(ledMatrix->width+2)*(ledMatrix->height+2)));
+  for(byte x=0;x<ledMatrix->width+2;x++)
+    for(byte y=0;y<ledMatrix->height+2;y++)
       PIXMAP(x,y)=0;
   randomSeed(millis());
 }
 
-void Fire::loop() {
+void Fire::loop(){
   static byte intensity;
 
   if(button->state(BUTTON_B))
@@ -55,7 +57,7 @@ void Fire::loop() {
     intensity=0;
 
   // Update the row below visible screen with radom data
-  for(byte x=4,y=display->height+1;x<display->width-2;x++){
+  for(byte x=4,y=ledMatrix->height+1;x<ledMatrix->width-2;x++){
     if(intensity){
       PIXMAP(x,y)=random(INCANDESCENT_LEN-1)+intensity;
       if(PIXMAP(x,y)>=INCANDESCENT_LEN)
@@ -66,8 +68,8 @@ void Fire::loop() {
   }
 
   // Propagate the fire, by averaging each pixel with its surroundings
-  for(int y=display->height;y>0;y--)
-    for(byte x=1;x<display->width+1;x++)
+  for(int y=ledMatrix->height;y>0;y--)
+    for(byte x=1;x<ledMatrix->width+1;x++)
       PIXMAP(x,y)=
         (
       PIXMAP(x,   y-1)+
@@ -79,33 +81,16 @@ void Fire::loop() {
         )/6;
 
   // Paint
-  for(byte x=0;x<display->width;x++)
-    for(byte y=0;y<display->height;y++)
-      display->paintPixel(
+  for(byte x=0;x<ledMatrix->width;x++)
+    for(byte y=0;y<ledMatrix->height;y++)
+      ledMatrix->paintPixel(
       incandescent(INCANDESCENT_LEN-PIXMAP(x+1,y+1)),
       x, y);
   // And display
-  display->show();
+  ledMatrix->show();
   delay(20);
 }
 
-void Fire::exit() {
+Fire::~Fire(){
   free(pixmap);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

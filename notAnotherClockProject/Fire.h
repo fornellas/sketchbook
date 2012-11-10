@@ -3,17 +3,29 @@
 
 #include "Mode.h"
 
+#include <SFRGBLEDMatrix.h>
+
 class Fire: 
 public Mode {
 private:
+  Color incandescent(byte p);
   byte *pixmap;
 public:
-  Fire() : 
-  Mode("Fire"){};
+  Fire();
   void loop();
-  void enter();
-  void exit();
+  ~Fire();
 };
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
 

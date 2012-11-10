@@ -1,15 +1,14 @@
 #include "Plasma.h"
-#include <SFRGBLEDMatrix.h>
+#include "EEPROM.h"
 #include "Button.h"
 #include <EEPROM.h>
-#include "EEPROM.h"
 
-extern SFRGBLEDMatrix *display;
+extern SFRGBLEDMatrix *ledMatrix;
 extern Button *button;
 
 #define SPECTRUM_LEN 90
 
-Color spectrum(byte p){
+Color Plasma::spectrum(byte p){
   // RED
   if(p<15){
     return RGB(15, p+1, 0);
@@ -44,17 +43,11 @@ Color spectrum(byte p){
 
 // Bicubic interpolation code based on code found at:
 // http://www.paulinternet.nl/?page=bicubic
-double cubicInterpolate (double *p, double x) {
+double Plasma::cubicInterpolate (double *p, double x) {
   return *(p+1) + 0.5 * x*(*(p+2) - *p + x*(2.0**(p+0) - 5.0**(p+1) + 4.0**(p+2) - *(p+3) + x*(3.0*(*(p+1) - *(p+2)) + *(p+3) - *p)));
 }
-double bicubicInterpolate (
-double *pixmap,
-uint8_t pixmapWidth, 
-uint8_t pixmapHeight, 
-uint8_t pointX, 
-uint8_t pointY, 
-double x, 
-double y) {
+
+double Plasma::bicubicInterpolate (double *pixmap, uint8_t pixmapWidth, uint8_t pixmapHeight, uint8_t pointX, uint8_t pointY, double x, double y) {
   double arr[4];
   arr[0] = cubicInterpolate(pixmap+pixmapWidth*(pointY-1)+pointX-1, x);
   arr[1] = cubicInterpolate(pixmap+pixmapWidth*(pointY+0)+pointX-1, x);
@@ -63,16 +56,16 @@ double y) {
   return cubicInterpolate(arr, y);
 }
 
-#define PIXMAP_WIDTH ((display->width>>3)+3)
-#define PIXMAP_HEIGHT ((display->height>>3)+3)
+#define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
+#define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)
 #define PIXMAP_MAX 48.0
 
 void Plasma::fillPlasma() {
   double *pixmap;
 
-  display->clear();
-  display->print(WHITE, 0, 6, 5, "BUSY");
-  display->show();
+  ledMatrix->clear();
+  ledMatrix->print(WHITE, 0, 6, 5, "BUSY");
+  ledMatrix->show();
 
   pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
 
@@ -81,9 +74,9 @@ void Plasma::fillPlasma() {
     for(byte y=0;y<PIXMAP_HEIGHT;y++)
       *(pixmap+PIXMAP_WIDTH*y+x)=random(PIXMAP_MAX);
 
-  for(word x=0;x<display->width;x++)
-    for(word y=0;y<display->height;y++)
-      *(plasma+y*display->width+x)=bicubicInterpolate(
+  for(word x=0;x<ledMatrix->width;x++)
+    for(word y=0;y<ledMatrix->height;y++)
+      *(plasma+y*ledMatrix->width+x)=bicubicInterpolate(
       pixmap,
       PIXMAP_WIDTH, 
       PIXMAP_HEIGHT,
@@ -96,7 +89,6 @@ void Plasma::fillPlasma() {
   free(pixmap);
 }
 
-
 void Plasma::pSpeedValidate(){
   if(pSpeed>6)
     pSpeed=6;
@@ -104,15 +96,18 @@ void Plasma::pSpeedValidate(){
     pSpeed=-6;
 }
 
-void Plasma::enter() {
-  display->gamma(true); 
-  plasma=(byte *)malloc((size_t)(display->pixels)*sizeof(byte));
+Plasma::Plasma():
+Mode(PSTR("Plasma")){
+  ledMatrix->gamma(true); 
+  pSpeed=EEPROM.read(EEPROM_PLASMA_SPEED);
+  pSpeedValidate();
+  plasma=(byte *)malloc((size_t)(ledMatrix->pixels)*sizeof(byte));
   fillPlasma();
 }
 
-void Plasma::loop() {
+void Plasma::loop(){
   boolean changeSpeed=false;
-  
+
   // Update pimap
   if(button->pressed(BUTTON_A)){
     fillPlasma();
@@ -127,44 +122,42 @@ void Plasma::loop() {
     changeSpeed=true;
     pSpeed--;
   }
- 
+
   if(changeSpeed){
     pSpeedValidate();
     // FIXME adjust text placement relative to screen size
     if(pSpeed>=0)
-      display->print(BLACK, 7, 6, 5, 48+pSpeed);
+      ledMatrix->print(BLACK, 7, 6, 5, 48+pSpeed);
     else{
-      display->print(BLACK, 5, 6, 5, '-');
-      display->print(BLACK, 8, 6, 5, 48+pSpeed*-1);
+      ledMatrix->print(BLACK, 5, 6, 5, '-');
+      ledMatrix->print(BLACK, 8, 6, 5, 48+pSpeed*-1);
     }
-    display->show();
+    ledMatrix->show();
     delay(200);
     EEPROM.write(EEPROM_PLASMA_SPEED, pSpeed);
   }
 
   // Update pixmap
-  for(byte x=0;x<display->width;x++)
-    for(byte y=0;y<display->height;y++)
-      *(plasma+y*display->width+x)+=pSpeed;
+  for(byte x=0;x<ledMatrix->width;x++)
+    for(byte y=0;y<ledMatrix->height;y++)
+      *(plasma+y*ledMatrix->width+x)+=pSpeed;
 
   // Paint display
-  for(word x=0;x<display->width;x++)
-    for(word y=0;y<display->height;y++)
-      display->paintPixel(spectrum(
+  for(word x=0;x<ledMatrix->width;x++)
+    for(word y=0;y<ledMatrix->height;y++)
+      ledMatrix->paintPixel(spectrum(
       byte(
       double(
-      *(plasma+y*word(display->width)+x)
+      *(plasma+y*word(ledMatrix->width)+x)
         ) / 255.0 * double(SPECTRUM_LEN-1)
         ))
         , x, y);
 
   // Show
-  display->show();
+  ledMatrix->show();
 }
 
-void Plasma::exit() {
-  display->fill(BLACK);
-  display->show();
+Plasma::~Plasma(){
   free(plasma);
 }
 
