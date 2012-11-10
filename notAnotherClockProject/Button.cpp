@@ -32,12 +32,9 @@ Button::Button() {
     ioexp.pinMode(addr, INPUT);
     ioexp.pullUp(addr, HIGH);
     // interrupt
-//    ioexp.defaultvalue(addr, 1);
     ioexp.interruptControl(addr, 0);
     ioexp.interruptEnable(addr, 1);
   }
-//  ioexp.interruptMirror(1);
-//  ioexp.interruptPolarity(1);
 }
 
 void Button::update(){
