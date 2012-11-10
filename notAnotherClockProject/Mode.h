@@ -5,8 +5,8 @@
 
 class Mode {
 public:
-  const char *name;
-  Mode(const char *name);
+  PROGMEM char *name;
+  Mode(PROGMEM char *name);
   virtual void loop()=0;
   virtual ~Mode();
 };

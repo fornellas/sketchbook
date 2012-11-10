@@ -25,3 +25,6 @@
 // HIH4030
 #define PIN_HUMIDITY A2
 
+// Photocell
+#define PIN_LIGHT A3
+
