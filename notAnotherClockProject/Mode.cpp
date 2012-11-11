@@ -1,27 +1,16 @@
 #include "Mode.h"
+#include "Light.h"
 
 #include <SFRGBLEDMatrix.h>
 #include <U8glib.h>
 
 extern SFRGBLEDMatrix *ledMatrix;
 extern U8GLIB_ST7920_128X64 *lcd;
+extern Light *light;
 
 Mode::Mode(PROGMEM char *name) {
   this->name=name;
-  // Clear LCD
-  lcd->firstPage();
-  do {
-  } 
-  while( lcd->nextPage() );
-  // TV Out LED Matrix
-  ledMatrix->gamma(false); 
-  for(byte p=0;p<(ledMatrix->height<ledMatrix->width?ledMatrix->height:ledMatrix->width)/2;p++){
-    ledMatrix->box(BLACK,p, p, ledMatrix->width-1-p, ledMatrix->height-1-p);
-    ledMatrix->show();
-  }  
-  delay(300);
   // Draw name on LCD
-  lcd->setColorIndex(1);
   lcd->firstPage();
   do {
     byte x;
@@ -31,13 +20,33 @@ Mode::Mode(PROGMEM char *name) {
     lcd->drawStrP(x, y, (u8g_pgm_uint8_t *)name);
   } 
   while( lcd->nextPage() );
-  delay(400);
-  //TODO entrance animation
+
+  // CRT Out LED Matrix
+  ledMatrix->gamma(false); 
+  for(byte p=0;p<ledMatrix->height/2-1;p++){
+    if(p)
+      ledMatrix->box(BLACK, p-1, p-1, ledMatrix->width-1-p+1, ledMatrix->height-1-p+1);
+    ledMatrix->box(RGB(light->read(MAX_C), light->read(MAX_C), light->read(MAX_C)), p, p, ledMatrix->width-1-p, ledMatrix->height-1-p);
+    ledMatrix->show();
+  }  
+  for(byte p=ledMatrix->height/2-1;p<ledMatrix->width/2;p++){
+    ledMatrix->box(BLACK, p-1, ledMatrix->height/2-2-1, ledMatrix->width-1-p+1, ledMatrix->height/2+1+1);
+    ledMatrix->box(RGB(light->read(MAX_C), light->read(MAX_C), light->read(MAX_C)), p, ledMatrix->height/2-2, ledMatrix->width-1-p, ledMatrix->height/2+1);
+    ledMatrix->show();
+  }
+  for(byte p=ledMatrix->height/2-2;p<ledMatrix->height/2;p++){
+    ledMatrix->box(BLACK, ledMatrix->width/2-2, p, ledMatrix->width/2+1, ledMatrix->height-p-1);
+    ledMatrix->show();
+  }
 }
 
 Mode::~Mode() {
   // TODO ending animation
 }
+
+
+
+
 
 
 

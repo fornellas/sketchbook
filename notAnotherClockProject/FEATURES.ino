@@ -26,10 +26,11 @@ Other
 
 Bugs
 
-- Read buttons inside interrupt to avoid loosing events
+- Read buttons inside interrupt to avoid loosing events (volatile vars)
 - fill(BLACK) em Mode::Mode as vezes deixa alguns pontos coloridos na tela
 
 TODO
+- Apply gamma to auto-intensity.
 - Resolver problema de imagem corrompida no Plasma (parece ser falta de memoria)
 - Unificar spectrum em classe
 - Dew point

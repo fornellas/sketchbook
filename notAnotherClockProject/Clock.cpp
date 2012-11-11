@@ -34,6 +34,7 @@ Clock::lcdInfo(){
   temperatureInside=BMP085::readTemperature();
   byte humidity;
   humidity=HIH4030::read(PIN_HUMIDITY, temperatureInside);
+  long pressure=BMP085::readPressure()/100;
   char buff[10]; // revisar tamanho
   // LCD
   lcd->firstPage();
@@ -81,6 +82,13 @@ Clock::lcdInfo(){
     buff[1]='C';
     buff[2]='\0';
     lcd->drawStr(x, y, buff);
+    // Pressure
+    x=lcd->getWidth()-lcd->getStrWidth(ltoa(pressure, buff, 10))-
+      lcd->getStrWidthP(U8G_PSTR("kPa"));
+    y=lcd->getHeight()-lcd->getFontAscent()-1;
+    lcd->drawStr(x, y, ltoa(pressure, buff, 10));
+    x+=lcd->getStrWidth(ltoa(pressure, buff, 10));
+    lcd->drawStrP(x, y, U8G_PSTR("kPa"));
     // Humidity
     x=lcd->getWidth()-lcd->getStrWidth(itoa(humidity, buff, 10))-
       lcd->getStrWidthP(U8G_PSTR("%"));
@@ -235,7 +243,7 @@ void Clock::printDate(struct DS1307::Date date, int x_offset, int y_offset, Colo
 Clock::Clock():
 Mode(PSTR("Clock")){
   lastLCDUpdate=millis();
-  loop();
+  lastLCDUpdate=0;
 }
 
 void Clock::loop(){
@@ -265,21 +273,21 @@ void Clock::loop(){
     xOffset=(ledMatrix->width>>1)-8;
     yOffset=(ledMatrix->height>>1)-11/2;
 
-    ledMatrix->print(RGB(light->read(7),0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
-    ledMatrix->print(RGB(light->read(7),0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
-    ledMatrix->print(RGB(0,light->read(7),0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
-    ledMatrix->print(RGB(0,light->read(7),0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
-    ledMatrix->print(RGB(0,0,light->read(7)), xOffset+4, yOffset+6, 5, 48+(date.second/10));
-    ledMatrix->print(RGB(0,0,light->read(7)), xOffset+8, yOffset+6, 5, 48+(date.second%10));
+    ledMatrix->print(RGB(light->read(MAX_C),0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
+    ledMatrix->print(RGB(light->read(MAX_C),0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
+    ledMatrix->print(RGB(0,light->read(MAX_C),0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
+    ledMatrix->print(RGB(0,light->read(MAX_C),0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
+    ledMatrix->print(RGB(0,0,light->read(MAX_C)), xOffset+4, yOffset+6, 5, 48+(date.second/10));
+    ledMatrix->print(RGB(0,0,light->read(MAX_C)), xOffset+8, yOffset+6, 5, 48+(date.second%10));
     break;
     // DX time date
   case 1:
-    printTimeSmall(date, 0, 0, RGB(light->read(7),light->read(7),light->read(7)), RGB(light->read(7),0,0), RGB(light->read(7),light->read(7),0), RGB(0,light->read(7),0), RGB(0,0,light->read(7)));
-    printDate(date, 8, 0, RGB(light->read(7),light->read(7),light->read(7)), RGB(light->read(7),0,0), RGB(light->read(7),light->read(7),0), RGB(0,light->read(7),0));
+    printTimeSmall(date, 0, 0, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0), RGB(0,0,light->read(MAX_C)));
+    printDate(date, 8, 0, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0));
     break;
     // DX Time
   case 2:
-    printTimeBig(date, RGB(light->read(7),light->read(7),light->read(7)), RGB(light->read(7),0,0), RGB(light->read(7),light->read(7),0), RGB(0,light->read(7),0), RGB(0,0,light->read(7)));
+    printTimeBig(date, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0), RGB(0,0,light->read(MAX_C)));
     break;
   default:
     EEPROM.write(EEPROM_CLOCK_MODE, 0);
