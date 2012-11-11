@@ -84,11 +84,11 @@ Clock::lcdInfo(){
     lcd->drawStr(x, y, buff);
     // Pressure
     x=lcd->getWidth()-lcd->getStrWidth(ltoa(pressure, buff, 10))-
-      lcd->getStrWidthP(U8G_PSTR("kPa"));
+      lcd->getStrWidthP(U8G_PSTR("hPa"));
     y=lcd->getHeight()-lcd->getFontAscent()-1;
     lcd->drawStr(x, y, ltoa(pressure, buff, 10));
     x+=lcd->getStrWidth(ltoa(pressure, buff, 10));
-    lcd->drawStrP(x, y, U8G_PSTR("kPa"));
+    lcd->drawStrP(x, y, U8G_PSTR("hPa"));
     // Humidity
     x=lcd->getWidth()-lcd->getStrWidth(itoa(humidity, buff, 10))-
       lcd->getStrWidthP(U8G_PSTR("%"));
