@@ -159,7 +159,7 @@ loop(){
     if(millis()-lastLightUpdate>700){
       light->update();
       lastLightUpdate=millis();
-      analogWrite(PIN_LCD_BLA, light->read(254)+1);
+      analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
     }
     // Change mode
     if(button->pressed(BUTTON_MODE)){

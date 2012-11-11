@@ -28,7 +28,7 @@ Clock::lcdInfo(){
   date=DS1307::getDate();
   float temperatureOutside;
   byte addr[]={
-    40, 200, 10, 228, 3, 0, 0, 62                                                                            };
+    40, 200, 10, 228, 3, 0, 0, 62                                                                              };
   temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
   float temperatureInside;
   temperatureInside=BMP085::readTemperature();
@@ -103,9 +103,9 @@ Clock::lcdInfo(){
 
 void Clock::printOuter12(byte value, int x_offset, int y_offset, Color color) {
   byte x[12] = {
-    5,6,6,6,5,3,1,0,0,0,1,3                            };
+    5,6,6,6,5,3,1,0,0,0,1,3                              };
   byte y[12] = {
-    0,1,3,5,6,6,6,5,3,1,0,0                            };
+    0,1,3,5,6,6,6,5,3,1,0,0                              };
   for(byte h=1;h<13;h++){
     if(value>=h||value==0)
       ledMatrix->paintPixel(color, x_offset+x[h-1], y_offset+y[h-1]);
@@ -114,9 +114,9 @@ void Clock::printOuter12(byte value, int x_offset, int y_offset, Color color) {
 
 void Clock::printInner60(byte value, int x_offset, int y_offset, Color colorOuter, Color colorInner) {
   byte x[12] = {
-    4,5,5,5,4,3,2,1,1,1,2,3                            };
+    4,5,5,5,4,3,2,1,1,1,2,3                              };
   byte y[12] = {
-    1,2,3,4,5,5,5,4,3,2,1,1                            };
+    1,2,3,4,5,5,5,4,3,2,1,1                              };
   for(byte m=5;m<=60;m+=5){
     if(value>=m)
       ledMatrix->paintPixel(colorOuter, x_offset+x[m/5-1], y_offset+y[m/5-1]);
@@ -167,13 +167,13 @@ void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hour
   if(hour>=13)
     hour-=12;
   byte hx1[12] = {
-    11,14,15,14,11,7,3,1,0,1,3,7                            };
+    11,14,15,14,11,7,3,1,0,1,3,7                              };
   byte hy1[12] = {
-    1,3,7,11,14,15,14,11,7,3,1,0                            };
+    1,3,7,11,14,15,14,11,7,3,1,0                              };
   byte hx2[12] = {
-    12,14,15,14,12,8,4,1,0,1,4,8                            };
+    12,14,15,14,12,8,4,1,0,1,4,8                              };
   byte hy2[12] = {
-    1,4,8,12,14,15,14,12,8,4,1,0                            };
+    1,4,8,12,14,15,14,12,8,4,1,0                              };
   for(byte h=1;h<13;h++){
     if(hour>=h||hour==0) {
       ledMatrix->paintPixel(hourColor, xOff+hx1[h-1], hy1[h-1]);
@@ -183,13 +183,13 @@ void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hour
 
   // minute
   byte mx1[12] = {
-    10,12,13,12,10,7,4,3,2,3,4,7                            };
+    10,12,13,12,10,7,4,3,2,3,4,7                              };
   byte my1[12] = {
-    3,4,7,10,12,13,12,10,7,4,3,2                            };
+    3,4,7,10,12,13,12,10,7,4,3,2                              };
   byte mx2[12] = {
-    11,12,13,12,11,8,5,3,2,3,5,8                            };
+    11,12,13,12,11,8,5,3,2,3,5,8                              };
   byte my2[12] = {
-    3,5,8,11,12,13,12,11,8,5,3,2                            };
+    3,5,8,11,12,13,12,11,8,5,3,2                              };
   for(byte m=5;m<=60;m+=5){
     if(date.minute>=m){
       ledMatrix->paintPixel(minuteColor5, xOff+mx1[m/5-1], +my1[m/5-1]);
@@ -248,6 +248,14 @@ Mode(PSTR("Clock")){
 
 void Clock::loop(){
   struct DS1307::Date date;
+  byte value;
+
+  // intensity
+  value=light->read(MAX_C);
+  value+=1;
+  if(value>MAX_C) //tunning
+    value=MAX_C;
+  value=V_GAMMA(value);
 
   // LCD
   if(millis()-lastLCDUpdate>1000){
@@ -273,21 +281,21 @@ void Clock::loop(){
     xOffset=(ledMatrix->width>>1)-8;
     yOffset=(ledMatrix->height>>1)-11/2;
 
-    ledMatrix->print(RGB(light->read(MAX_C),0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
-    ledMatrix->print(RGB(light->read(MAX_C),0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
-    ledMatrix->print(RGB(0,light->read(MAX_C),0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
-    ledMatrix->print(RGB(0,light->read(MAX_C),0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
-    ledMatrix->print(RGB(0,0,light->read(MAX_C)), xOffset+4, yOffset+6, 5, 48+(date.second/10));
-    ledMatrix->print(RGB(0,0,light->read(MAX_C)), xOffset+8, yOffset+6, 5, 48+(date.second%10));
+    ledMatrix->print(RGB(value,0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
+    ledMatrix->print(RGB(value,0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
+    ledMatrix->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
+    ledMatrix->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
+    ledMatrix->print(RGB(0,0,value), xOffset+4, yOffset+6, 5, 48+(date.second/10));
+    ledMatrix->print(RGB(0,0,value), xOffset+8, yOffset+6, 5, 48+(date.second%10));
     break;
     // DX time date
   case 1:
-    printTimeSmall(date, 0, 0, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0), RGB(0,0,light->read(MAX_C)));
-    printDate(date, 8, 0, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0));
+    printTimeSmall(date, 0, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
+    printDate(date, 8, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0));
     break;
     // DX Time
   case 2:
-    printTimeBig(date, RGB(light->read(MAX_C),light->read(MAX_C),light->read(MAX_C)), RGB(light->read(MAX_C),0,0), RGB(light->read(MAX_C),light->read(MAX_C),0), RGB(0,light->read(MAX_C),0), RGB(0,0,light->read(MAX_C)));
+    printTimeBig(date, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
     break;
   default:
     EEPROM.write(EEPROM_CLOCK_MODE, 0);
@@ -295,6 +303,7 @@ void Clock::loop(){
   }
   ledMatrix->show();
 }
+
 
 
 
