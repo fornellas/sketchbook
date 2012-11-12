@@ -64,7 +64,7 @@ void Plasma::fillPlasma() {
   double *pixmap;
 
   ledMatrix->clear();
-  ledMatrix->print(WHITE, 0, 6, 5, "BUSY");
+  ledMatrix->print(WHITE, 4, 6, 5, "BUSY");
   ledMatrix->show();
 
   pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
@@ -127,10 +127,10 @@ void Plasma::loop(){
     pSpeedValidate();
     // FIXME adjust text placement relative to screen size
     if(pSpeed>=0)
-      ledMatrix->print(BLACK, 7, 6, 5, 48+pSpeed);
+      ledMatrix->print(BLACK, 11, 6, 5, 48+pSpeed);
     else{
-      ledMatrix->print(BLACK, 5, 6, 5, '-');
-      ledMatrix->print(BLACK, 8, 6, 5, 48+pSpeed*-1);
+      ledMatrix->print(BLACK, 9, 6, 5, '-');
+      ledMatrix->print(BLACK, 12, 6, 5, 48+pSpeed*-1);
     }
     ledMatrix->show();
     delay(200);

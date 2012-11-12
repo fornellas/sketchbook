@@ -17,6 +17,8 @@ private:
   void printTimeSmall(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor);
   void printTimeBig(struct DS1307::Date date, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor);
   void printDate(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color monthColor, Color dayColor5, Color dayColor1);
+  void drawBCDdigit(byte value, int x, int y, byte digit);
+  void drawBigDigit(Color color, int x, int y, byte digit);
 public:
   Clock();
   void loop();
