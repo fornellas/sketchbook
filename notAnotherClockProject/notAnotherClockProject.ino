@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include <SFRGBLEDMatrix.h>
 #include <Wire.h>
-#include <Adafruit_MCP23017.h>
 #include <U8glib.h>
 #include <DS1307.h>
 #include <HIH4030.h>
@@ -20,23 +19,20 @@
 #include "Fire.h"
 #include "Plasma.h"
 #include "Equalizer.h"
+#include "ECA.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
 #define LEDMATRIX_HORIZ 3
 #define LEDMATRIX_VERT 2
 
-// MCP23017 I/O Expander
-Adafruit_MCP23017 ioexp;
-
 // LCD12864
 U8GLIB_ST7920_128X64 *lcd;
 
 // Button
 Button *button;
-boolean updateButtons=false;
 void buttonInterrupt(){
-  updateButtons=true;
+  button->update();
 }
 
 // Light
@@ -47,63 +43,52 @@ unsigned long lastLightUpdate;
 // setup()
 //
 
-#define BOOT_STEPS 7
+#define BOOT_STEPS 8
 
 void
 setup(){
   byte step=0;
+  byte x;
+  byte y;
 
-  // Prematurely light up LCD  
-  pinMode(PIN_LCD_BLA, OUTPUT);
-  digitalWrite(PIN_LCD_BLA, HIGH);
-
-  // Wire
-  // Wire.begin(); // ioexp.begin(); already calls it
+  // Wait for LED Matrices to boot
+  delay(800);
 
   // SPI
   SPI.begin();
 
   // Sparkfun RGB LED Matrix
-  delay(500); // Wait for LED Matrices to boot
   ledMatrix=new SFRGBLEDMatrix(PIN_MATRIX_SS, LEDMATRIX_HORIZ, LEDMATRIX_VERT);
 
   // Progress bar
   ledMatrix->progressBarInit(WHITE);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // MCP23017 I/O Expander
-  pinMode(PIN_IOEXP_RESET, OUTPUT);
-  digitalWrite(PIN_IOEXP_RESET, LOW);
-  delay(50);
-  digitalWrite(PIN_IOEXP_RESET, HIGH);
-  ioexp.begin();
+  // Wire
+  Wire.begin();
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // LCD12864
   // reset without u8g to allow pin to ioexp
-  ioexp.pinMode(ADDR_LCD_RST, OUTPUT);
-  ioexp.digitalWrite(ADDR_LCD_RST, LOW);
-  delay((15*16)+2);
-  ioexp.digitalWrite(ADDR_LCD_RST, HIGH);
-  lcd=new U8GLIB_ST7920_128X64(PIN_LCD_E, PIN_LCD_RW, PIN_LCD_RS, U8G_PIN_NONE, U8G_PIN_NONE);
+  lcd=new U8GLIB_ST7920_128X64(PIN_LCD_E, PIN_LCD_RW, PIN_LCD_RS, U8G_PIN_NONE, PIN_LCD_RST);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   lcd->setColorIndex(1); 
   lcd->firstPage();
-  lcd->setFont(u8g_font_6x12);
   do {
-    byte x;
-    byte y;
-    x=lcd->getWidth()/2-lcd->getStrWidthP(U8G_PSTR("Boot"))/2;
-    y=lcd->getHeight()/2+lcd->getFontAscent()/2;
-    lcd->drawStrP(x, y, U8G_PSTR("Boot"));
   } 
   while( lcd->nextPage() );
+  // light up LCD  
+  pinMode(PIN_LCD_BLA, OUTPUT);
+  digitalWrite(PIN_LCD_BLA, HIGH);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Button
   button=new Button();
-  attachInterrupt(BUTTON_INT, buttonInterrupt, FALLING);
+  attachInterrupt(INT_BUTTON_MODE, buttonInterrupt, CHANGE);
+  attachInterrupt(INT_BUTTON_A, buttonInterrupt, CHANGE);
+  attachInterrupt(INT_BUTTON_B, buttonInterrupt, CHANGE);
+  attachInterrupt(INT_BUTTON_C, buttonInterrupt, CHANGE);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // HIH4030
@@ -115,6 +100,10 @@ setup(){
   light->update();
   lastLightUpdate=millis();
   analogWrite(PIN_LCD_BLA, light->read(255));
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // Random
+  randomSeed(BMP085::readPressure()+BMP085::readTemperature());
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 }
 
@@ -131,9 +120,10 @@ loop(){
   switch(EEPROM.read(EEPROM_MODE)){
     MODE(0, Clock);
     MODE(1, Equalizer);
-    //MODE(1, Plasma)
-      // MODE(3, Lamp);
-      //MODE(2, Fire);
+    MODE(2, ECA);
+    MODE(3, Plasma)
+    MODE(4, Lamp);
+    MODE(5, Fire);
   default:
     EEPROM.write(EEPROM_MODE, 0);
     return;
@@ -141,11 +131,6 @@ loop(){
   while(1){
     unsigned long time;
     mode->loop();
-    // Update Buttons
-    if(updateButtons){
-      button->update();
-      updateButtons=false;
-    }
     // Light update
     if((time=millis())-lastLightUpdate>700){
       light->update();
@@ -160,32 +145,3 @@ loop(){
   }
   delete mode;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

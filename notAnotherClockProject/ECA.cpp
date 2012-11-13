@@ -14,6 +14,7 @@ void ECA::newAutomata(){
   // new rule
   rule=random(255);
   // show on LCD
+  lcd->setFont(u8g_font_fub49n);
   x=lcd->getWidth()/2-lcd->getStrWidth(itoa(rule, buff, 10))/2;
   y=lcd->getHeight()/2+lcd->getFontAscent()/2;
   lcd->firstPage();
@@ -44,7 +45,7 @@ byte ECA::getPattern(int x, int y){
 }
 
 ECA::ECA():
-Mode(PSTR("ECA")){
+Mode(PSTR("1D Automata")){
   newAutomata();
 }
 

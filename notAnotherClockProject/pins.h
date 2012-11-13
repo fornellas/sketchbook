@@ -1,22 +1,22 @@
 // Sparkfun RGB LED Matrix
-#define PIN_MATRIX_SS 9
-
-// MCP23017 I/O Expander
-#define PIN_IOEXP_RESET 3
+#define PIN_MATRIX_SS 49
 
 // LCD12864
-#define PIN_LCD_RS 8 // CS
-#define PIN_LCD_RW 0 // MOSI
-#define PIN_LCD_E 1 // SCK
-#define PIN_LCD_BLA 6
-#define ADDR_LCD_RST 13
+#define PIN_LCD_RS    8 // CS
+#define PIN_LCD_RW   22 // MOSI
+#define PIN_LCD_E    23 // SCK
+#define PIN_LCD_BLA   6
+#define PIN_LCD_RST 24
 
 // Buttons
-#define ADDR_BUTTON_MODE 9
-#define ADDR_BUTTON_A 8
-#define ADDR_BUTTON_B 11
-#define ADDR_BUTTON_C 10
-#define BUTTON_INT 0
+#define PIN_BUTTON_MODE 2
+#define PIN_BUTTON_A    3
+#define PIN_BUTTON_B    18
+#define PIN_BUTTON_C    19
+#define INT_BUTTON_MODE 0
+#define INT_BUTTON_A    1
+#define INT_BUTTON_B    5
+#define INT_BUTTON_C    4
 
 // DS18S20
 #define PIN_TEMP_EXT 7
@@ -25,10 +25,10 @@
 #define PIN_HUMIDITY A2
 
 // Photocell
-#define PIN_LIGHT A3
+#define PIN_LIGHT A7
 
 // Equalizers
-#define ADDR_EQ_RESET 12
+#define PIN_EQ_RESET 43
 #define PIN_EQ_STROBE 5
 #define PIN_EQ_MIC A1
 #define PIN_EQ_LINEIN A0

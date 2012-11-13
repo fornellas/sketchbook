@@ -297,7 +297,7 @@ void Clock::loop(){
 
   // intensity
   value=light->read(MAX_C);
-  value+=1;
+  value+=2;
   if(value>MAX_C) //tunning
     value=MAX_C;
   value=V_GAMMA(value);

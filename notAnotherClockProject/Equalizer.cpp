@@ -2,10 +2,8 @@
 
 #include "pins.h"
 #include <SFRGBLEDMatrix.h>
-#include <Adafruit_MCP23017.h>
 #include "Button.h"
 
-extern Adafruit_MCP23017 ioexp;
 extern SFRGBLEDMatrix *ledMatrix;
 extern Button *button;
 
@@ -23,14 +21,14 @@ Mode(PSTR("Equalizer")){
   pinMode(PIN_EQ_STROBE, OUTPUT);
   digitalWrite(PIN_EQ_STROBE, LOW);
 
-  ioexp.pinMode(ADDR_EQ_RESET, OUTPUT);
-  ioexp.digitalWrite(ADDR_EQ_RESET, LOW);  
+  pinMode(PIN_EQ_RESET, OUTPUT);
+  digitalWrite(PIN_EQ_RESET, LOW);  
 
-  // ADDR_EQ_RESET
-  ioexp.digitalWrite(ADDR_EQ_RESET, HIGH);  
+  // PIN_EQ_RESET
+  digitalWrite(PIN_EQ_RESET, HIGH);  
   // minimum pulse width 100ns
   delayMicroseconds(1);
-  ioexp.digitalWrite(ADDR_EQ_RESET, LOW);  
+  digitalWrite(PIN_EQ_RESET, LOW);  
   digitalWrite(PIN_EQ_STROBE, HIGH);
   // minimum delay after: 72us
   delayMicroseconds(72);

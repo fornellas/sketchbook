@@ -6,7 +6,6 @@ TODO
 - Data logging / graphing
 - Dew point
 - GOL
-- 1D celular automata
 - Matrix mode
 - Demo mode.
 - Plasma
