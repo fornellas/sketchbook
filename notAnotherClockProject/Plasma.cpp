@@ -27,19 +27,23 @@ double Plasma::bicubicInterpolate (double *pixmap, uint8_t pixmapWidth, uint8_t 
 
 void Plasma::fillPlasma() {
   double *pixmap;
+  int max, step=0;
 
-  ledMatrix->clear();
-  ledMatrix->print(WHITE, 4, 6, 5, "BUSY");
-  ledMatrix->show();
+  // progress bar
+  ledMatrix->progressBarInit(WHITE);
+  max=(int)PIXMAP_WIDTH+(int)ledMatrix->width;
 
   pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
 
   randomSeed(millis());
-  for(byte x=0;x<PIXMAP_WIDTH;x++)
+  for(byte x=0;x<PIXMAP_WIDTH;x++){
+    ledMatrix->progressBarUpdate(BLUE, ++step, max);
     for(byte y=0;y<PIXMAP_HEIGHT;y++)
       *(pixmap+PIXMAP_WIDTH*y+x)=random(PIXMAP_MAX);
+  }
 
-  for(word x=0;x<ledMatrix->width;x++)
+  for(word x=0;x<ledMatrix->width;x++){
+    ledMatrix->progressBarUpdate(BLUE, ++step, max);
     for(word y=0;y<ledMatrix->height;y++)
       *(plasma+y*ledMatrix->width+x)=bicubicInterpolate(
       pixmap,
@@ -50,6 +54,7 @@ void Plasma::fillPlasma() {
       double(x%8)/8.0,
       double(y%8)/8.0
         );
+  }
 
   free(pixmap);
 }
@@ -124,5 +129,8 @@ void Plasma::loop(){
 Plasma::~Plasma(){
   free(plasma);
 }
+
+
+
 
 

@@ -68,11 +68,8 @@ setup(){
   ledMatrix=new SFRGBLEDMatrix(PIN_MATRIX_SS, LEDMATRIX_HORIZ, LEDMATRIX_VERT);
 
   // Progress bar
-  //ledMatrix->box(WHITE, 0, ledMatrix->height/2-3, ledMatrix->width, ledMatrix->height+2);
-  ledMatrix->box(WHITE, 0, ledMatrix->height/2-2, ledMatrix->width-1, ledMatrix->height/2+1);
-  ledMatrix->show();
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarInit(WHITE);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // MCP23017 I/O Expander
   pinMode(PIN_IOEXP_RESET, OUTPUT);
@@ -80,8 +77,7 @@ setup(){
   delay(50);
   digitalWrite(PIN_IOEXP_RESET, HIGH);
   ioexp.begin();
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // LCD12864
   // reset without u8g to allow pin to ioexp
@@ -90,8 +86,7 @@ setup(){
   delay((15*16)+2);
   ioexp.digitalWrite(ADDR_LCD_RST, HIGH);
   lcd=new U8GLIB_ST7920_128X64(PIN_LCD_E, PIN_LCD_RW, PIN_LCD_RS, U8G_PIN_NONE, U8G_PIN_NONE);
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   lcd->setColorIndex(1); 
   lcd->firstPage();
@@ -104,28 +99,23 @@ setup(){
     lcd->drawStrP(x, y, U8G_PSTR("Boot"));
   } 
   while( lcd->nextPage() );
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Button
   button=new Button();
   attachInterrupt(BUTTON_INT, buttonInterrupt, FALLING);
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // HIH4030
   HIH4030::setup(PIN_HUMIDITY);
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Light
   light=new Light(PIN_LIGHT);
   light->update();
   lastLightUpdate=millis();
   analogWrite(PIN_LCD_BLA, light->read(255));
-  ledMatrix->box(BLUE, 1, ledMatrix->height/2-1, (int)++step*(int)(ledMatrix->width-2)/BOOT_STEPS, ledMatrix->height/2);
-  ledMatrix->show();
-
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 }
 
 //

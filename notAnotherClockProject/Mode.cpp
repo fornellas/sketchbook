@@ -28,21 +28,8 @@ Mode::Mode(PROGMEM char *name) {
 Mode::~Mode() {
   // CRT Out LED Matrix
   ledMatrix->gamma(false); 
-  for(byte p=0;p<ledMatrix->height/2-1;p++){
-    if(p)
-      ledMatrix->box(BLACK, p-1, p-1, ledMatrix->width-1-p+1, ledMatrix->height-1-p+1);
-    ledMatrix->box(RGB(light->read(MAX_C), light->read(MAX_C), light->read(MAX_C)), p, p, ledMatrix->width-1-p, ledMatrix->height-1-p);
-    ledMatrix->show();
-  }  
-  for(byte p=ledMatrix->height/2-1;p<ledMatrix->width/2;p++){
-    ledMatrix->box(BLACK, p-1, ledMatrix->height/2-2-1, ledMatrix->width-1-p+1, ledMatrix->height/2+1+1);
-    ledMatrix->box(RGB(light->read(MAX_C), light->read(MAX_C), light->read(MAX_C)), p, ledMatrix->height/2-2, ledMatrix->width-1-p, ledMatrix->height/2+1);
-    ledMatrix->show();
-  }
-  for(byte p=ledMatrix->height/2-2;p<ledMatrix->height/2;p++){
-    ledMatrix->box(BLACK, ledMatrix->width/2-2, p, ledMatrix->width/2+1, ledMatrix->height-p-1);
-    ledMatrix->show();
-  }
+  ledMatrix->CRT(BLACK, RGB(light->read(MAX_C), light->read(MAX_C), light->read(MAX_C)));
+  return;
 }
 
 
