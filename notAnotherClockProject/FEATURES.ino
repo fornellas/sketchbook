@@ -2,7 +2,11 @@
 
 TODO
 
-- Unify spectrum methods.
+- gfx
+  - spectrum
+  - progress bar
+  - crt out
+
 - Data logging / graphing
 - Dew point
 - GOL
@@ -13,9 +17,6 @@ TODO
   - Save pixmap state
   - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.
 - Clock
-
-  - Tokyo flash style
-    - 2 variants
   - Consolidate DX modes in one method
 - Fire
   - tunnable palette

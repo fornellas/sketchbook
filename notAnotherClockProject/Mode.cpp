@@ -20,7 +20,12 @@ Mode::Mode(PROGMEM char *name) {
     lcd->drawStrP(x, y, (u8g_pgm_uint8_t *)name);
   } 
   while( lcd->nextPage() );
+  // Clear screen
+  ledMatrix->clear();
+  ledMatrix->show();
+}
 
+Mode::~Mode() {
   // CRT Out LED Matrix
   ledMatrix->gamma(false); 
   for(byte p=0;p<ledMatrix->height/2-1;p++){
@@ -38,10 +43,6 @@ Mode::Mode(PROGMEM char *name) {
     ledMatrix->box(BLACK, ledMatrix->width/2-2, p, ledMatrix->width/2+1, ledMatrix->height-p-1);
     ledMatrix->show();
   }
-}
-
-Mode::~Mode() {
-  // TODO ending animation
 }
 
 

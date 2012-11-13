@@ -10,7 +10,6 @@
 class Plasma: 
 public Mode {
 private:
-  Color spectrum(byte p);
   byte *plasma;
   double cubicInterpolate (double *p, double x);
   double bicubicInterpolate(double *pixmap, uint8_t pixmapWidth, uint8_t pixmapHeight, uint8_t pointX, uint8_t pointY, double x, double y);

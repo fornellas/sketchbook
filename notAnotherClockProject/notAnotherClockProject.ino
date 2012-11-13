@@ -13,7 +13,7 @@
 #include "pins.h"
 #include "Button.h"
 #include "Mode.h"
-#include "EEPROM.h"
+#include "EEPROM_addr.h"
 #include "Clock.h"
 #include "Lamp.h"
 #include "Light.h"
@@ -95,7 +95,7 @@ setup(){
 
   lcd->setColorIndex(1); 
   lcd->firstPage();
-  lcd->setFont(u8g_font_6x10);
+  lcd->setFont(u8g_font_6x12);
   do {
     byte x;
     byte y;
@@ -139,16 +139,17 @@ loop(){
   // Modes
 #define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
-    MODE(0, Clock);
-        MODE(1,Plasma)
-//            MODE(1,Equalizer);
-    //    MODE(4, Lamp);
-//        MODE(1, Fire);
-  default:
-    EEPROM.write(EEPROM_MODE, 0);
+    //    MODE(0, Clock);
+    MODE(0, Equalizer);
+    MODE(1, Plasma)
+      // MODE(3, Lamp);
+       MODE(2, Fire);
+    default:
+      EEPROM.write(EEPROM_MODE, 0);
     return;
   }
   while(1){
+    unsigned long time;
     mode->loop();
     // Update Buttons
     if(updateButtons){
@@ -156,9 +157,9 @@ loop(){
       updateButtons=false;
     }
     // Light update
-    if(millis()-lastLightUpdate>700){
+    if((time=millis())-lastLightUpdate>700){
       light->update();
-      lastLightUpdate=millis();
+      lastLightUpdate=time;
       analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
     }
     // Change mode
@@ -169,6 +170,9 @@ loop(){
   }
   delete mode;
 }
+
+
+
 
 
 

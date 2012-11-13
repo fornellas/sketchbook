@@ -11,7 +11,7 @@
 #include <avr/pgmspace.h>
 #include "Light.h"
 #include "Button.h"
-#include "EEPROM.h"
+#include "EEPROM_addr.h"
 
 extern SFRGBLEDMatrix *ledMatrix;
 extern U8GLIB_ST7920_128X64 *lcd;
@@ -305,6 +305,7 @@ Mode(PSTR("Clock")){
 void Clock::loop(){
   struct DS1307::Date date;
   byte value;
+  unsigned long time;
 
   // intensity
   value=light->read(MAX_C);
@@ -314,8 +315,8 @@ void Clock::loop(){
   value=V_GAMMA(value);
 
   // LCD
-  if(millis()-lastLCDUpdate>1000){
-    lastLCDUpdate=millis();
+  if((time=millis())-lastLCDUpdate>1000){
+    lastLCDUpdate=time;
     lcdInfo();
   }
 

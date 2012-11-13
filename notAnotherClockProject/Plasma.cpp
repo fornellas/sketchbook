@@ -1,45 +1,14 @@
 #include "Plasma.h"
-#include "EEPROM.h"
+#include "EEPROM_addr.h"
 #include "Button.h"
 #include <EEPROM.h>
 
 extern SFRGBLEDMatrix *ledMatrix;
 extern Button *button;
 
-#define SPECTRUM_LEN 90
-
-Color Plasma::spectrum(byte p){
-  // RED
-  if(p<15){
-    return RGB(15, p+1, 0);
-  }
-  // YELLOW
-  if(p<30){
-    p-=15;
-    return RGB(14-p, 15, 0);
-  }
-  // GREEN
-  if(p<45){
-    p-=30;
-    return RGB(0, 15, p+1);
-  }
-  // CYAN
-  if(p<60){
-    p-=45;
-    return RGB(0, 14-p, 15);
-  }
-  // BLUE
-  if(p<75){
-    p-=60;
-    return RGB(p+1, 0, 15);
-  }
-  // MAGENTA
-  if(p<90){
-    p-=75;
-    return RGB(15, 0, 14-p);
-  }
-  return 0;
-}
+#define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
+#define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)
+#define PIXMAP_MAX 48.0
 
 // Bicubic interpolation code based on code found at:
 // http://www.paulinternet.nl/?page=bicubic
@@ -55,10 +24,6 @@ double Plasma::bicubicInterpolate (double *pixmap, uint8_t pixmapWidth, uint8_t 
   arr[3] = cubicInterpolate(pixmap+pixmapWidth*(pointY+2)+pointX-1, x);
   return cubicInterpolate(arr, y);
 }
-
-#define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
-#define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)
-#define PIXMAP_MAX 48.0
 
 void Plasma::fillPlasma() {
   double *pixmap;
@@ -145,13 +110,12 @@ void Plasma::loop(){
   // Paint display
   for(word x=0;x<ledMatrix->width;x++)
     for(word y=0;y<ledMatrix->height;y++)
-      ledMatrix->paintPixel(spectrum(
-      byte(
-      double(
-      *(plasma+y*word(ledMatrix->width)+x)
-        ) / 255.0 * double(SPECTRUM_LEN-1)
-        ))
-        , x, y);
+      ledMatrix->paintPixel(
+      ledMatrix->spectrum(
+      *(plasma+y*word(ledMatrix->width)+x),
+      255),
+      x,
+      y);
 
   // Show
   ledMatrix->show();
@@ -160,4 +124,5 @@ void Plasma::loop(){
 Plasma::~Plasma(){
   free(plasma);
 }
+
 

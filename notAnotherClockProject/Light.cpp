@@ -24,7 +24,7 @@ void Light::update(){
 }
 
 int Light::read(int m){
-  return round(((double)total/(double)NUMREADINGS)*(double)m/(double)1023);;
+  return round(((double)total/(double)NUMREADINGS)*(double)m/(double)1023);
 }
 
 
