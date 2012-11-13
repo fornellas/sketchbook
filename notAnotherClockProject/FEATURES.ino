@@ -2,10 +2,6 @@
 
 TODO
 
-- gfx
-  - spectrum
-  - progress bar
-  - crt out
 
 - Data logging / graphing
 - Dew point

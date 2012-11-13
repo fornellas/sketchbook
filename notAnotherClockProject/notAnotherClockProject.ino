@@ -129,13 +129,13 @@ loop(){
   // Modes
 #define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
-    //    MODE(0, Clock);
-    MODE(0, Equalizer);
-    MODE(1, Plasma)
+    MODE(0, Clock);
+    MODE(1, Equalizer);
+    //MODE(1, Plasma)
       // MODE(3, Lamp);
-       MODE(2, Fire);
-    default:
-      EEPROM.write(EEPROM_MODE, 0);
+      //MODE(2, Fire);
+  default:
+    EEPROM.write(EEPROM_MODE, 0);
     return;
   }
   while(1){
@@ -160,6 +160,7 @@ loop(){
   }
   delete mode;
 }
+
 
 
 

@@ -10,21 +10,29 @@
 class Clock: 
 public Mode {
 private:
+  struct DS1307::Date date;
+  byte value; // light intensity
+  // LCD
   unsigned long lastLCDUpdate;
   void lcdInfo();
-  void printOuter12(byte value, int x_offset, int y_offset, Color color);
-  void printInner60(byte value, int x_offset, int y_offset, Color colorOuter, Color colorInner);
-  void printTimeSmall(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor);
-  void printTimeBig(struct DS1307::Date date, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor);
-  void printDate(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color monthColor, Color dayColor5, Color dayColor1);
+  // Digital
+  void showDigital();
+  // Binary
   void drawBCDdigit(byte value, int x, int y, byte digit);
+  void showBinary();
+  // DX Time
+  void showDX();
+  // Big digit
   void drawBigDigit(Color color, int x, int y, byte digit);
+  void showBigDigit();
 public:
   Clock();
   void loop();
 };
 
 #endif
+
+
 
 
 

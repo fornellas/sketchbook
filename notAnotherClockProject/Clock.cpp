@@ -18,9 +18,7 @@ extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
 extern Button *button;
 
-//
-// generalInfo
-//
+// LCD
 
 void
 Clock::lcdInfo(){
@@ -28,7 +26,7 @@ Clock::lcdInfo(){
   date=DS1307::getDate();
   float temperatureOutside;
   byte addr[]={
-    40, 200, 10, 228, 3, 0, 0, 62                                                                                                                                                    };
+    40, 200, 10, 228, 3, 0, 0, 62                                                                                                                                                            };
   temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
   float temperatureInside;
   temperatureInside=BMP085::readTemperature();
@@ -101,59 +99,55 @@ Clock::lcdInfo(){
   while( lcd->nextPage() );
 }
 
-void Clock::printOuter12(byte value, int x_offset, int y_offset, Color color) {
-  byte x[12] = {
-    5,6,6,6,5,3,1,0,0,0,1,3                                                                                                    };
-  byte y[12] = {
-    0,1,3,5,6,6,6,5,3,1,0,0                                                                                                    };
-  for(byte h=1;h<13;h++){
-    if(value>=h||value==0)
-      ledMatrix->paintPixel(color, x_offset+x[h-1], y_offset+y[h-1]);
-  }
+// Digital
+
+void Clock::showDigital(){
+  int xOffset;
+  int yOffset;
+  xOffset=(ledMatrix->width>>1)-8;
+  yOffset=(ledMatrix->height>>1)-11/2-1;
+  ledMatrix->print(RGB(value,0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
+  ledMatrix->print(RGB(value,0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
+  ledMatrix->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
+  ledMatrix->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
+  ledMatrix->print(RGB(0,0,value), xOffset+4, yOffset+7, 5, 48+(date.second/10));
+  ledMatrix->print(RGB(0,0,value), xOffset+8, yOffset+7, 5, 48+(date.second%10));
 }
 
-void Clock::printInner60(byte value, int x_offset, int y_offset, Color colorOuter, Color colorInner) {
-  byte x[12] = {
-    4,5,5,5,4,3,2,1,1,1,2,3                                                                                                    };
-  byte y[12] = {
-    1,2,3,4,5,5,5,4,3,2,1,1                                                                                                    };
-  for(byte m=5;m<=60;m+=5){
-    if(value>=m)
-      ledMatrix->paintPixel(colorOuter, x_offset+x[m/5-1], y_offset+y[m/5-1]);
-  }
-  if(value%5>=1)
-    ledMatrix->paintPixel(colorInner, x_offset+3, y_offset+2);
-  if(value%5>=2)
-    ledMatrix->paintPixel(colorInner, x_offset+4, y_offset+3);
-  if(value%5>=3)
-    ledMatrix->paintPixel(colorInner, x_offset+3, y_offset+4);
-  if(value%5>=4)
-    ledMatrix->paintPixel(colorInner, x_offset+2, y_offset+3);
+// Binary
+
+void Clock::drawBCDdigit(byte value, int x, int y, byte digit){
+  if(digit&(1<<3))
+    ledMatrix->box(RGB(value, value, value), x, y, x+1, y+1);
+  if(digit&(1<<2))
+    ledMatrix->box(RGB(0, 0, value), x, y+3, x+1, y+1+3);
+  if(digit&(1<<1))
+    ledMatrix->box(RGB(0, value, 0), x, y+6, x+1, y+1+6);
+  if(digit&1)
+    ledMatrix->box(RGB(value, 0, 0), x, y+9, x+1, y+1+9);
 }
 
-void Clock::printTimeSmall(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor) {
-  // Middle point
-  ledMatrix->paintPixel(centerColor, x_offset+3, y_offset+3);
-  // Hour
-  int hour;
-  hour=date.hour;
-  if(hour>=13)
-    hour-=12;
-  printOuter12(hour, x_offset, y_offset, hourColor);
-  // minute
-  printInner60(date.minute, x_offset, y_offset, minuteColor5, minuteColor1);
-  // Second
-  if(date.second%5>=1)
-    ledMatrix->paintPixel(secondColor, x_offset+4, y_offset+2);
-  if(date.second%5>=2)
-    ledMatrix->paintPixel(secondColor, x_offset+4, y_offset+4);
-  if(date.second%5>=3)
-    ledMatrix->paintPixel(secondColor, x_offset+2, y_offset+4);
-  if(date.second%5>=4)
-    ledMatrix->paintPixel(secondColor, x_offset+2, y_offset+2);
-};
+void Clock::showBinary(){
+  drawBCDdigit(value, 2, 3, date.hour/10);
+  drawBCDdigit(value, 5, 3, date.hour%10);
+  drawBCDdigit(value, 10, 3, date.minute/10);
+  drawBCDdigit(value, 13, 3, date.minute%10);
+  drawBCDdigit(value, 18, 3, date.second/10); 
+  drawBCDdigit(value, 21, 3, date.second%10); 
+  ledMatrix->paintPixel(RGB(value, value, value), 8, 6);
+  ledMatrix->paintPixel(RGB(value, value, value), 8, 10);
+  ledMatrix->paintPixel(RGB(value, value, value), 16, 6);
+  ledMatrix->paintPixel(RGB(value, value, value), 16, 10);
+}
 
-void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hourColor, Color minuteColor5, Color minuteColor1, Color secondColor) {
+// DX Time
+
+void Clock::showDX() {
+  Color centerColor=RGB(value,value,value);
+  Color hourColor=RGB(value,0,0);
+  Color minuteColor5=RGB(value,value,0);
+  Color minuteColor1=RGB(0,value,0);
+  Color secondColor=RGB(0,0,value);
   int xOff;
   xOff=4;
   // Middle point
@@ -167,13 +161,13 @@ void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hour
   if(hour>=13)
     hour-=12;
   byte hx1[12] = {
-    11,14,15,14,11,7,3,1,0,1,3,7                                                                                                    };
+    11,14,15,14,11,7,3,1,0,1,3,7                                                                                                            };
   byte hy1[12] = {
-    1,3,7,11,14,15,14,11,7,3,1,0                                                                                                    };
+    1,3,7,11,14,15,14,11,7,3,1,0                                                                                                            };
   byte hx2[12] = {
-    12,14,15,14,12,8,4,1,0,1,4,8                                                                                                    };
+    12,14,15,14,12,8,4,1,0,1,4,8                                                                                                            };
   byte hy2[12] = {
-    1,4,8,12,14,15,14,12,8,4,1,0                                                                                                    };
+    1,4,8,12,14,15,14,12,8,4,1,0                                                                                                            };
   for(byte h=1;h<13;h++){
     if(hour>=h||hour==0) {
       ledMatrix->paintPixel(hourColor, xOff+hx1[h-1], hy1[h-1]);
@@ -183,13 +177,13 @@ void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hour
 
   // minute
   byte mx1[12] = {
-    10,12,13,12,10,7,4,3,2,3,4,7                                                                                                    };
+    10,12,13,12,10,7,4,3,2,3,4,7                                                                                                            };
   byte my1[12] = {
-    3,4,7,10,12,13,12,10,7,4,3,2                                                                                                    };
+    3,4,7,10,12,13,12,10,7,4,3,2                                                                                                            };
   byte mx2[12] = {
-    11,12,13,12,11,8,5,3,2,3,5,8                                                                                                    };
+    11,12,13,12,11,8,5,3,2,3,5,8                                                                                                            };
   byte my2[12] = {
-    3,5,8,11,12,13,12,11,8,5,3,2                                                                                                    };
+    3,5,8,11,12,13,12,11,8,5,3,2                                                                                                            };
   for(byte m=5;m<=60;m+=5){
     if(date.minute>=m){
       ledMatrix->paintPixel(minuteColor5, xOff+mx1[m/5-1], +my1[m/5-1]);
@@ -231,25 +225,7 @@ void Clock::printTimeBig(struct DS1307::Date date, Color centerColor, Color hour
   }
 }
 
-void Clock::printDate(struct DS1307::Date date, int x_offset, int y_offset, Color centerColor, Color monthColor, Color dayColor5, Color dayColor1) {
-  // Middle point
-  ledMatrix->paintPixel(centerColor, x_offset+3, y_offset+3);
-  // Month
-  printOuter12(date.month, x_offset, y_offset, monthColor);
-  // Day
-  printInner60(date.monthDay, x_offset, y_offset, dayColor5, dayColor1);
-};
-
-void Clock::drawBCDdigit(byte value, int x, int y, byte digit){
-  if(digit&(1<<3))
-    ledMatrix->box(RGB(value, value, value), x, y, x+1, y+1);
-  if(digit&(1<<2))
-    ledMatrix->box(RGB(0, 0, value), x, y+3, x+1, y+1+3);
-  if(digit&(1<<1))
-    ledMatrix->box(RGB(0, value, 0), x, y+6, x+1, y+1+6);
-  if(digit&1)
-    ledMatrix->box(RGB(value, 0, 0), x, y+9, x+1, y+1+9);
-}
+// Big digit
 
 void Clock::drawBigDigit(Color color, int x, int y, byte digit){
   switch(digit){
@@ -296,6 +272,20 @@ void Clock::drawBigDigit(Color color, int x, int y, byte digit){
   }
 }
 
+void Clock::showBigDigit(){
+  ledMatrix->line(RGB(0, 0, value), 0, 0, ledMatrix->width-1, 0);
+  ledMatrix->line(RGB(0, 0, value), 0, ledMatrix->height-1, ledMatrix->width-1, ledMatrix->height-1);
+  ledMatrix->line(RGB(0, 0, value), 5, 1, 5, ledMatrix->height-2);
+  ledMatrix->line(RGB(0, 0, value), 18, 1, 18, ledMatrix->height-2);
+  ledMatrix->box(RGB(0, 0, value), ledMatrix->width/2-1, 1, ledMatrix->width/2, ledMatrix->height-2);
+  drawBigDigit(RGB(0, 0, value), 0, 1, date.hour/10);
+  drawBigDigit(RGB(0, 0, value), 6, 1, date.hour%10);
+  drawBigDigit(RGB(0, 0, value), 13, 1, date.minute/10);
+  drawBigDigit(RGB(0, 0, value), 19, 1, date.minute%10);
+}
+
+// main stuff
+
 Clock::Clock():
 Mode(PSTR("Clock")){
   lastLCDUpdate=millis();
@@ -303,8 +293,6 @@ Mode(PSTR("Clock")){
 }
 
 void Clock::loop(){
-  struct DS1307::Date date;
-  byte value;
   unsigned long time;
 
   // intensity
@@ -333,59 +321,30 @@ void Clock::loop(){
   switch(EEPROM.read(EEPROM_CLOCK_MODE)){
     // Digital
   case 0:
-    int xOffset;
-    int yOffset;
-    xOffset=(ledMatrix->width>>1)-8;
-    yOffset=(ledMatrix->height>>1)-11/2-1;
-    ledMatrix->print(RGB(value,0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
-    ledMatrix->print(RGB(value,0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
-    ledMatrix->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
-    ledMatrix->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
-    ledMatrix->print(RGB(0,0,value), xOffset+4, yOffset+7, 5, 48+(date.second/10));
-    ledMatrix->print(RGB(0,0,value), xOffset+8, yOffset+7, 5, 48+(date.second%10));
+    showDigital();
     break;
     // Binary
   case 1:
-    drawBCDdigit(value, 2, 3, date.hour/10);
-    drawBCDdigit(value, 5, 3, date.hour%10);
-    drawBCDdigit(value, 10, 3, date.minute/10);
-    drawBCDdigit(value, 13, 3, date.minute%10);
-    drawBCDdigit(value, 18, 3, date.second/10); 
-    drawBCDdigit(value, 21, 3, date.second%10); 
-    ledMatrix->paintPixel(RGB(value, value, value), 8, 6);
-    ledMatrix->paintPixel(RGB(value, value, value), 8, 10);
-    ledMatrix->paintPixel(RGB(value, value, value), 16, 6);
-    ledMatrix->paintPixel(RGB(value, value, value), 16, 10);
+    showBinary();
     break;
-    // DX Time
+    // showDX
   case 2:
-    printTimeBig(date, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
+    showDX();
     break;
-    // big digit, inspired by http://www.tokyoflash.com/en/watches/kisai/stencil/
+    // Big digit, inspired by http://www.tokyoflash.com/en/watches/kisai/stencil/
   case 3:
-    ledMatrix->line(RGB(0, 0, value), 0, 0, ledMatrix->width-1, 0);
-    ledMatrix->line(RGB(0, 0, value), 0, ledMatrix->height-1, ledMatrix->width-1, ledMatrix->height-1);
-    ledMatrix->line(RGB(0, 0, value), 5, 1, 5, ledMatrix->height-2);
-    ledMatrix->line(RGB(0, 0, value), 18, 1, 18, ledMatrix->height-2);
-    ledMatrix->box(RGB(0, 0, value), ledMatrix->width/2-1, 1, ledMatrix->width/2, ledMatrix->height-2);
-    drawBigDigit(RGB(0, 0, value), 0, 1, date.hour/10);
-    drawBigDigit(RGB(0, 0, value), 6, 1, date.hour%10);
-    drawBigDigit(RGB(0, 0, value), 13, 1, date.minute/10);
-    drawBigDigit(RGB(0, 0, value), 19, 1, date.minute%10);
+    showBigDigit();
     break;
-    /*
-    // DX time date
-     case 1:
-     printTimeSmall(date, 0, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0), RGB(0,0,value));
-     printDate(date, 8, 0, RGB(value,value,value), RGB(value,0,0), RGB(value,value,0), RGB(0,value,0));
-     break;
-     */
   default:
     EEPROM.write(EEPROM_CLOCK_MODE, 0);
     return;
   }
   ledMatrix->show();
 }
+
+
+
+
 
 
 
