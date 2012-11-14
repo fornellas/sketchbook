@@ -8,7 +8,7 @@ extern Button *button;
 
 #define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
 #define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)
-#define PIXMAP_MAX 48.0
+#define PIXMAP_DEPTH 150.0
 
 // Bicubic interpolation code based on code found at:
 // http://www.paulinternet.nl/?page=bicubic
@@ -39,7 +39,7 @@ void Plasma::fillPlasma() {
   for(byte x=0;x<PIXMAP_WIDTH;x++){
     ledMatrix->progressBarUpdate(BLUE, ++step, max);
     for(byte y=0;y<PIXMAP_HEIGHT;y++)
-      *(pixmap+PIXMAP_WIDTH*y+x)=random(PIXMAP_MAX);
+      *(pixmap+PIXMAP_WIDTH*y+x)=random(PIXMAP_DEPTH);
   }
 
   for(word x=0;x<ledMatrix->width;x++){
