@@ -2,6 +2,8 @@
 #define DS1307_h
 
 #include <Arduino.h>
+#include <avr/pgmspace.h>
+#include <stdint.h>
 
 #define SUNDAY 1
 #define MONDAY 2
@@ -26,16 +28,18 @@
 
 namespace DS1307 {
   struct Date {
-    int second;
-    int minute;
-    int hour; // 24 Hour
-    int weekDay; // 1-7 > sunday-saturday
-    int monthDay;
-    int month;
-    int year;
+    uint8_t second;
+    uint8_t minute;
+    uint8_t hour; // 24 Hour
+    uint8_t weekDay; // 1-7 > sunday-saturday
+    uint8_t monthDay;
+    uint8_t month;
+    uint16_t year;
   };
   struct DS1307::Date getDate();
   void setDate(struct DS1307::Date d);
+  const PROGMEM char *getWeekDayName(uint8_t weekDay);
+  const PROGMEM char *getMonthName(uint8_t month);
 };
 
 #endif

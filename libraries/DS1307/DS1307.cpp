@@ -3,6 +3,7 @@
 #include <Arduino.h>
 // Must be included in main project file too
 #include "Wire.h"
+#include <avr/pgmspace.h>
 
 #define DS1307_ADDRESS 0x68
 
@@ -51,3 +52,52 @@ void DS1307::setDate(struct DS1307::Date d) {
   Wire.write(zero); //start 
   Wire.endTransmission();
 }
+
+const PROGMEM char *DS1307::getWeekDayName(uint8_t weekDay){
+  switch(weekDay){
+    case 1:
+      return PSTR("Sunday");
+    case 2:
+      return PSTR("Monday");
+    case 3:
+      return PSTR("Tuesday");
+    case 4:
+      return PSTR("Wednesday");
+    case 5:
+      return PSTR("Thrusday");
+    case 6:
+      return PSTR("Friday");
+    case 7:
+      return PSTR("Saturday");
+  }
+}
+
+const PROGMEM char *DS1307::getMonthName(uint8_t month){
+  switch(month){
+    case 1:
+      return PSTR("January");
+    case 2:
+      return PSTR("February");
+    case 3:
+      return PSTR("March");
+    case 4:
+      return PSTR("April");
+    case 5:
+      return PSTR("May");
+    case 6:
+      return PSTR("June");
+    case 7:
+      return PSTR("July");
+    case 8:
+      return PSTR("August");
+    case 9:
+      return PSTR("September");
+    case 10:
+      return PSTR("October");
+    case 11:
+      return PSTR("November");
+    case 12:
+      return PSTR("December");
+  }
+}
+
