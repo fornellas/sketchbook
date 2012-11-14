@@ -43,7 +43,7 @@ unsigned long lastLightUpdate;
 // setup()
 //
 
-#define BOOT_STEPS 8
+#define BOOT_STEPS 9
 
 void
 setup(){
@@ -62,6 +62,10 @@ setup(){
 
   // Progress bar
   ledMatrix->progressBarInit(WHITE);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // Serial
+  Serial.begin(115200);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Wire
