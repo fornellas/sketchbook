@@ -1,11 +1,13 @@
 #include "ECA.h"
 
+#include "Button.h"
 #include <U8glib.h>
 
 #define CHANGE_MS 5000
 
 extern U8GLIB_ST7920_128X64 *lcd;
 extern SFRGBLEDMatrix *ledMatrix;
+extern Button *button;
 
 void ECA::newAutomata(){
   byte x;
@@ -36,11 +38,17 @@ void ECA::newAutomata(){
 byte ECA::getPattern(int x, int y){
   byte p;
   if(ledMatrix->getPixel(x-1, y-1)==color)
-    p=4;
+    if(row==1&&x==0)
+      p=random(0, 2)<<2;
+    else
+      p=4;
   if(ledMatrix->getPixel(x, y-1)==color)
     p=p|2;
   if(ledMatrix->getPixel(x+1, y-1)==color)
-    p=p|1;
+    if(row==1&&y==ledMatrix->width-1)
+      p=p|(random(0, 2));
+    else
+      p=p|1;
   return p;
 }
 
@@ -52,6 +60,10 @@ Mode(PSTR("1D Automata")){
 void ECA::loop(){
   unsigned long time;
   time=millis();
+  if(button->pressed(BUTTON_A)) {
+    newAutomata();
+    return;
+  }
   for(int c=0;c<ledMatrix->width;c++)
     if(rule&(1<<getPattern(c, row)))
       ledMatrix->paintPixel(color, c, row);
@@ -61,7 +73,6 @@ void ECA::loop(){
   if(++row>=ledMatrix->height){
     if(time-lastLCDUpdate>CHANGE_MS){
       newAutomata();
-      lastLCDUpdate=time;
     }
   }
 }
