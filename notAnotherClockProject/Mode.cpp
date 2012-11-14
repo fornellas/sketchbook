@@ -14,6 +14,7 @@ Mode::Mode(PROGMEM char *name) {
   this->name=name;
   // Draw name on LCD
   lcd->setFont(u8g_font_fub14);
+  lcd->setFontPosBaseline();
   x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)name)/2;
   y=lcd->getHeight()/2+lcd->getFontAscent()/2;
   lcd->firstPage();

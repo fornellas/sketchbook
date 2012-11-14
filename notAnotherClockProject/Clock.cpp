@@ -22,79 +22,83 @@ extern Button *button;
 
 void
 Clock::lcdInfo(){
-  struct DS1307::Date date;
-  date=DS1307::getDate();
+  byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
   float temperatureOutside;
-  byte addr[]={
-    40, 200, 10, 228, 3, 0, 0, 62                                                                                                                                                            };
-  temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
-  float temperatureInside;
-  temperatureInside=BMP085::readTemperature();
-  byte humidity;
-  humidity=HIH4030::read(PIN_HUMIDITY, temperatureInside);
   long pressure=BMP085::readPressure()/100;
   char buff[10]; // revisar tamanho
+  float temperatureInside;
+  byte humidity;
+  byte t;
+
+  // read values
+  temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
+  temperatureInside=BMP085::readTemperature();
+  humidity=HIH4030::read(PIN_HUMIDITY, temperatureInside);
   // LCD
   lcd->firstPage();
   do {
     byte x;
     byte y;
-    // HH:MM
-    byte z;
-    z=0;  
-    if(date.minute<10)
-      z=lcd->getStrWidthP(U8G_PSTR("0"));
-    x=lcd->getWidth()/2-(
-    lcd->getStrWidth(itoa(date.hour, buff, 10))+
-      lcd->getStrWidthP(U8G_PSTR(":"))+
-      z+
-      lcd->getStrWidth(itoa(date.minute, buff, 10))
-      )/2;
-    y=lcd->getFontAscent();
-    lcd->drawStr(x, y, itoa(date.hour, buff, 10));
-    x+=lcd->getStrWidth(itoa(date.hour, buff, 10));
-    lcd->drawStrP(x, y, U8G_PSTR(":"));
-    x+=lcd->getStrWidthP(U8G_PSTR(":"));
-    if(z){
-      lcd->drawStrP(x, y, U8G_PSTR("0"));
-      x+=lcd->getStrWidthP(U8G_PSTR("0"));
-    }
-    lcd->drawStr(x, y, itoa(date.minute, buff, 10));
-    // Week day
-    // Day, month year
-    // Temperature outsite
+    // Temperature names
     x=0;
-    y=lcd->getHeight();
-    lcd->drawStr(x, y, dtostrf(temperatureOutside, -2, 1, buff));
-    x+=lcd->getStrWidth(dtostrf(temperatureOutside, -2, 1, buff));
-    buff[0]=176;
-    buff[1]='C';
-    buff[2]='\0';
-    lcd->drawStr(x, y, buff);
-    // Temperature inside
+    y=0;
+    lcd->setFont(u8g_font_5x7);
+    lcd->setFontPosTop();
+    lcd->drawStrP(x, y, U8G_PSTR("Indoor"));
+    x=lcd->getWidth()-lcd->getStrWidthP(U8G_PSTR("Outdoor"));
+    lcd->drawStrP(x, y, U8G_PSTR("Outdoor"));
+    // Temperature indoor
     x=0;
-    y=lcd->getHeight()-lcd->getFontAscent()-1;
+    y=lcd->getFontAscent()+1;
+    lcd->setFont(u8g_font_fub14);
+    lcd->setFontPosTop();
     lcd->drawStr(x, y, dtostrf(temperatureInside, -2, 1, buff));
     x+=lcd->getStrWidth(dtostrf(temperatureInside, -2, 1, buff));
     buff[0]=176;
     buff[1]='C';
     buff[2]='\0';
     lcd->drawStr(x, y, buff);
-    // Pressure
-    x=lcd->getWidth()-lcd->getStrWidth(ltoa(pressure, buff, 10))-
-      lcd->getStrWidthP(U8G_PSTR("hPa"));
-    y=lcd->getHeight()-lcd->getFontAscent()-1;
-    lcd->drawStr(x, y, ltoa(pressure, buff, 10));
-    x+=lcd->getStrWidth(ltoa(pressure, buff, 10));
-    lcd->drawStrP(x, y, U8G_PSTR("hPa"));
+    // Temperature outdoor
+    dtostrf(temperatureOutside, -2, 1, buff);
+    t=strlen(buff);
+    buff[t++]=176;
+    buff[t++]='C';
+    buff[t]='\0';
+    x=lcd->getWidth()-lcd->getStrWidth(buff);
+    lcd->drawStr(x, y, buff);
     // Humidity
-    x=lcd->getWidth()-lcd->getStrWidth(itoa(humidity, buff, 10))-
-      lcd->getStrWidthP(U8G_PSTR("%"));
-    y=lcd->getHeight();
+    x=0;
+    y+=lcd->getFontAscent()+1;
     lcd->drawStr(x, y, itoa(humidity, buff, 10));
     x+=lcd->getStrWidth(itoa(humidity, buff, 10));
     lcd->drawStrP(x, y, U8G_PSTR("%"));
-
+    // Pressure
+    ltoa(pressure, buff, 10);
+    t=strlen(buff);
+    buff[t++]='h';
+    buff[t++]='P';
+    buff[t++]='a';
+    buff[t]='\0';
+    x=lcd->getWidth()-lcd->getStrWidth(buff);
+    lcd->drawStr(x, y, buff);
+    // Week day
+    y+=lcd->getFontAscent()+1;
+    lcd->setFont(u8g_font_7x14);
+    lcd->setFontPosTop();
+    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getWeekDayName(date.weekDay))/2;
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getWeekDayName(date.weekDay));
+    // Date
+    y+=lcd->getFontAscent()+1;
+    x=0;
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getMonthName(date.month));
+    t=lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getMonthName(date.month));
+    itoa(date.year, buff, 10);
+    x=lcd->getWidth()-lcd->getStrWidth(buff);
+    lcd->drawStr(x, y, buff);
+    x=t+(lcd->getWidth()-t-lcd->getStrWidth(buff))/2;
+    itoa(date.monthDay, buff, 10);
+    x=x-lcd->getStrWidth(buff)/2;
+    lcd->drawStr(x, y, buff);
   } 
   while( lcd->nextPage() );
 }
@@ -297,10 +301,13 @@ void Clock::loop(){
 
   // intensity
   value=light->read(MAX_C);
-  value+=2;
+  value+=3;
   if(value>MAX_C) //tunning
     value=MAX_C;
   value=V_GAMMA(value);
+
+  // Date
+  date=DS1307::getDate();
 
   // LCD
   if((time=millis())-lastLCDUpdate>1000){
@@ -315,8 +322,6 @@ void Clock::loop(){
   if(button->pressed(BUTTON_A)) {
     EEPROM.write(EEPROM_CLOCK_MODE, EEPROM.read(EEPROM_CLOCK_MODE)+1);
   }
-
-  date=DS1307::getDate();
 
   switch(EEPROM.read(EEPROM_CLOCK_MODE)){
     // Digital
