@@ -4,7 +4,6 @@
 #include "Button.h"
 
 extern SFRGBLEDMatrix *ledMatrix;
-extern Button *button;
 
 #define PIXMAP(x,y) *(pixmap+(ledMatrix->width+2)*(y)+(x))
 
@@ -48,12 +47,12 @@ Mode(PSTR("Fire")){
 void Fire::loop(){
   static byte intensity;
 
-  if(button->state(BUTTON_B))
+  if(button.state(BUTTON_B))
     intensity=25;
   else
     intensity=5;
 
-  if(button->state(BUTTON_C))
+  if(button.state(BUTTON_C))
     intensity=0;
 
   // Update the row below visible screen with radom data

@@ -7,7 +7,6 @@
 
 extern U8GLIB_ST7920_128X64 *lcd;
 extern SFRGBLEDMatrix *ledMatrix;
-extern Button *button;
 
 void ECA::newAutomata(){
   byte x;
@@ -60,7 +59,7 @@ Mode(PSTR("1D Automata")){
 void ECA::loop(){
   unsigned long time;
   time=millis();
-  if(button->pressed(BUTTON_A)) {
+  if(button.pressed(BUTTON_A)) {
     newAutomata();
     return;
   }

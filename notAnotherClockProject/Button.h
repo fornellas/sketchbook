@@ -25,4 +25,6 @@ public:
   boolean released(byte button);
 };
 
+extern Button button;
+
 #endif

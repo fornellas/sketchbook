@@ -16,7 +16,6 @@
 extern SFRGBLEDMatrix *ledMatrix;
 extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
-extern Button *button;
 
 // LCD
 
@@ -319,7 +318,7 @@ void Clock::loop(){
   ledMatrix->fill(BLACK);
 
   // change mode if MODE button is pressed
-  if(button->pressed(BUTTON_A)) {
+  if(button.pressed(BUTTON_A)) {
     EEPROM.write(EEPROM_CLOCK_MODE, EEPROM.read(EEPROM_CLOCK_MODE)+1);
   }
 

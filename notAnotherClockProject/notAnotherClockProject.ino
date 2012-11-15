@@ -1,18 +1,24 @@
+// AVR Libc
+#include <avr/interrupt.h>
+// Arduino
 #include <SPI.h>
-#include <SFRGBLEDMatrix.h>
 #include <Wire.h>
+#include <EEPROM.h>
+// Custom
+#include <SFRGBLEDMatrix.h>
 #include <U8glib.h>
 #include <DS1307.h>
 #include <HIH4030.h>
 #include <OneWire.h>
 #include <DS18S20.h>
 #include <BMP085.h>
-#include <EEPROM.h>
 
+// Util
 #include "pins.h"
 #include "Button.h"
-#include "Mode.h"
 #include "EEPROM_addr.h"
+// Modes
+#include "Mode.h"
 #include "Clock.h"
 #include "Lamp.h"
 #include "Light.h"
@@ -30,12 +36,6 @@ SFRGBLEDMatrix *ledMatrix;
 // LCD12864
 U8GLIB_ST7920_128X64 *lcd;
 
-// Button
-Button *button;
-void buttonInterrupt(){
-  button->update();
-}
-
 // Light
 Light *light;
 unsigned long lastLightUpdate;
@@ -48,7 +48,7 @@ int lastLightReading;
 // setup()
 //
 
-#define BOOT_STEPS 9
+#define BOOT_STEPS 7
 
 void
 setup(){
@@ -92,14 +92,6 @@ setup(){
   digitalWrite(PIN_LCD_BLA, HIGH);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // Button
-  button=new Button();
-  attachInterrupt(INT_BUTTON_MODE, buttonInterrupt, CHANGE);
-  attachInterrupt(INT_BUTTON_A, buttonInterrupt, CHANGE);
-  attachInterrupt(INT_BUTTON_B, buttonInterrupt, CHANGE);
-  attachInterrupt(INT_BUTTON_C, buttonInterrupt, CHANGE);
-  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
-
   // HIH4030
   HIH4030::setup(PIN_HUMIDITY);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
@@ -129,7 +121,7 @@ loop(){
     MODE(MODE_BIG_CLOCK, BigClock);
     MODE(2, ECA);
     MODE(3, Plasma)
-    MODE(4, Lamp);
+      MODE(4, Lamp);
     MODE(5, Fire);
     MODE(6, Equalizer);
   default:
@@ -158,10 +150,12 @@ loop(){
       }
     }
     // Change mode
-    if(button->pressed(BUTTON_MODE)){
+    if(button.pressed(BUTTON_MODE)){
       EEPROM.write(EEPROM_MODE, EEPROM.read(EEPROM_MODE)+1);
       break;
     }
   }
   delete mode;
 }
+
+

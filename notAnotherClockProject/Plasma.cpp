@@ -4,7 +4,6 @@
 #include <EEPROM.h>
 
 extern SFRGBLEDMatrix *ledMatrix;
-extern Button *button;
 
 #define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
 #define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)
@@ -79,16 +78,16 @@ void Plasma::loop(){
   boolean changeSpeed=false;
 
   // Update pimap
-  if(button->pressed(BUTTON_A)){
+  if(button.pressed(BUTTON_A)){
     fillPlasma();
   }
 
   // Change speed
-  if(button->pressed(BUTTON_B)){
+  if(button.pressed(BUTTON_B)){
     changeSpeed=true;
     pSpeed++;
   }
-  if(button->pressed(BUTTON_C)){
+  if(button.pressed(BUTTON_C)){
     changeSpeed=true;
     pSpeed--;
   }

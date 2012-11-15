@@ -6,12 +6,18 @@
 
 #define DEBOUNCE_DELAY 50
 
+Button button;
+
 prog_int16_t pin[BUTTON_COUNT] PROGMEM = {
   PIN_BUTTON_MODE,
   PIN_BUTTON_A,
   PIN_BUTTON_B,
   PIN_BUTTON_C,
 };
+
+ISR(PCINT2_vect){
+  button.update();
+}
 
 Button::Button() {
   // states
@@ -29,6 +35,8 @@ Button::Button() {
     pinMode(addr, INPUT);
     digitalWrite(addr, HIGH);
   }
+  PCICR=1<<PCIE2;
+  PCMSK2=(1<<PCINT23)|(1<<PCINT22)|(1<<PCINT21)|(1<<PCINT20);
 }
 
 void Button::update(){

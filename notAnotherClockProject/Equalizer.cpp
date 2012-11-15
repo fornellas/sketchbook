@@ -5,7 +5,6 @@
 #include "Button.h"
 
 extern SFRGBLEDMatrix *ledMatrix;
-extern Button *button;
 
 #define BANDS 7
 
@@ -42,7 +41,7 @@ void Equalizer::loop(){
   int value[BANDS];
   int c, v;
 
-  if(button->pressed(BUTTON_A)) {
+  if(button.pressed(BUTTON_A)) {
     if(pin==PIN_EQ_MIC)
       pin=PIN_EQ_LINEIN;
     else

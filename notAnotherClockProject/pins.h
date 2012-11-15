@@ -9,14 +9,10 @@
 #define PIN_LCD_RST 24
 
 // Buttons
-#define PIN_BUTTON_MODE 2
-#define PIN_BUTTON_A    3
-#define PIN_BUTTON_B    18
-#define PIN_BUTTON_C    19
-#define INT_BUTTON_MODE 0
-#define INT_BUTTON_A    1
-#define INT_BUTTON_B    5
-#define INT_BUTTON_C    4
+#define PIN_BUTTON_MODE 69
+#define PIN_BUTTON_A    68
+#define PIN_BUTTON_B    67
+#define PIN_BUTTON_C    66
 
 // DS18S20
 #define PIN_TEMP_EXT 7
