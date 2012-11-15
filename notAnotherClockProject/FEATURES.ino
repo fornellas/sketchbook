@@ -2,22 +2,13 @@
 
 TODO
 
-
+- RTC lib
+  - NTP
+  - Detect unconfigured time
+  - Detect disconected RTC
 - Data logging / graphing
 - Dew point
 - GOL
-- Matrix mode
-- Demo mode.
-- Plasma
-  - Save pixmap state
-  - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.
-- Clock
-  - Consolidate DX modes in one method
-- Fire
-  - tunnable palette
-- Temperatue
-  - Max / min
-  - Plot
 - Weather icons
   - clear
   - cloudy
@@ -25,11 +16,16 @@ TODO
   - day / night
     - sky color
     - sun / moon
-- RTC lib
-  - NTP
-  - Detect unconfigured time
-  - Detect disconected RTC
-- Read buttons inside interrupt to avoid loosing events (volatile vars)
+- Matrix mode
+- Demo mode.
+- Plasma
+  - Save pixmap state
+  - Change pixmap overtime: distribute fillPlasma() load over main loop, than fade old pixmap to new pimap.
+- Fire
+  - tunnable palette
+- Temperatue
+  - Max / min
+  - Plot
 
 DONE
 - LED Matrix

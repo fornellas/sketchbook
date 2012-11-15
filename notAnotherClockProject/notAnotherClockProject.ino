@@ -20,6 +20,7 @@
 #include "Plasma.h"
 #include "Equalizer.h"
 #include "ECA.h"
+#include "BigClock.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
@@ -38,6 +39,10 @@ void buttonInterrupt(){
 // Light
 Light *light;
 unsigned long lastLightUpdate;
+#define BIG_CLOCK_THRESHOLD 68
+int lastLightReading;
+#define MODE_CLOCK 0
+#define MODE_BIG_CLOCK 1
 
 //
 // setup()
@@ -101,10 +106,8 @@ setup(){
 
   // Light
   light=new Light(PIN_LIGHT);
-  light->update();
-  lastLightUpdate=millis();
-  analogWrite(PIN_LCD_BLA, light->read(255));
-  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+  lastLightUpdate=0;
+  lastLightReading=light->read(1023);
 
   // Random
   randomSeed(BMP085::readPressure()+BMP085::readTemperature());
@@ -122,12 +125,13 @@ loop(){
   // Modes
 #define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
-    MODE(0, Clock);
-    MODE(1, Equalizer);
+    MODE(MODE_CLOCK, Clock);
+    MODE(MODE_BIG_CLOCK, BigClock);
     MODE(2, ECA);
     MODE(3, Plasma)
     MODE(4, Lamp);
     MODE(5, Fire);
+    MODE(6, Equalizer);
   default:
     EEPROM.write(EEPROM_MODE, 0);
     return;
@@ -140,6 +144,18 @@ loop(){
       light->update();
       lastLightUpdate=time;
       analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
+      // Change to Big Clock when it gets dark
+      if(lastLightReading>BIG_CLOCK_THRESHOLD && light->read(1023)<=BIG_CLOCK_THRESHOLD) {
+        lastLightReading=light->read(1023);
+        EEPROM.write(EEPROM_MODE, MODE_BIG_CLOCK);
+        break;
+      }
+      // Return to Clock when it is light again
+      if(lastLightReading<=BIG_CLOCK_THRESHOLD && light->read(1023)>=BIG_CLOCK_THRESHOLD){
+        lastLightReading=light->read(1023);
+        EEPROM.write(EEPROM_MODE, MODE_CLOCK);
+        break;
+      }
     }
     // Change mode
     if(button->pressed(BUTTON_MODE)){
