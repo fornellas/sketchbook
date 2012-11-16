@@ -28,3 +28,6 @@
 #define PIN_EQ_STROBE 5
 #define PIN_EQ_MIC A1
 #define PIN_EQ_LINEIN A0
+
+// SD
+#define PIN_CS_USD 4

@@ -1,5 +1,3 @@
-#include <MemoryFree.h>
-
 // AVR Libc
 #include <avr/interrupt.h>
 // Arduino
@@ -17,6 +15,8 @@
 #include <BMP085.h>
 #include <Ethernet.h>
 #include <EthernetInterrupt.h>
+#include <MemoryFree.h>
+#include <WebServer.h>
 // Util
 #include "pins.h"
 #include "Button.h"
@@ -57,7 +57,7 @@ Net *net;
 // setup()
 //
 
-#define BOOT_STEPS 9
+#define BOOT_STEPS 10
 
 void
 setup(){
@@ -114,6 +114,14 @@ setup(){
   HTTPServer::begin();
   net->addProcessor(HTTPServer::loop);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // SD
+  if(SD.begin(PIN_CS_USD))
+    ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+  else{
+    ledMatrix->progressBarUpdate(RED, ++step, BOOT_STEPS);
+    while(1);
+  }
 
   // Random
   randomSeed(BMP085::readPressure()+BMP085::readTemperature());
