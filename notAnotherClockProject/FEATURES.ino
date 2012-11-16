@@ -2,6 +2,12 @@
 
 TODO
 
+- Ethernet
+  - NTP
+  - File server
+  - Sensor info
+  - RPi MOTD
+- Move light updates to interrupt (MSTIMER2?)
 - RTC lib
   - NTP
   - Detect unconfigured time

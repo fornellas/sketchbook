@@ -1,9 +1,12 @@
+#include <MemoryFree.h>
+
 // AVR Libc
 #include <avr/interrupt.h>
 // Arduino
 #include <SPI.h>
 #include <Wire.h>
 #include <EEPROM.h>
+#include <SD.h>
 // Custom
 #include <SFRGBLEDMatrix.h>
 #include <U8glib.h>
@@ -12,11 +15,13 @@
 #include <OneWire.h>
 #include <DS18S20.h>
 #include <BMP085.h>
-
+#include <Ethernet.h>
+#include <EthernetInterrupt.h>
 // Util
 #include "pins.h"
 #include "Button.h"
 #include "EEPROM_addr.h"
+#include "Net.h"
 // Modes
 #include "Mode.h"
 #include "Clock.h"
@@ -27,6 +32,7 @@
 #include "Equalizer.h"
 #include "ECA.h"
 #include "BigClock.h"
+#include "Webserver.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
@@ -44,17 +50,18 @@ int lastLightReading;
 #define MODE_CLOCK 0
 #define MODE_BIG_CLOCK 1
 
+// Net
+Net *net;
+
 //
 // setup()
 //
 
-#define BOOT_STEPS 7
+#define BOOT_STEPS 9
 
 void
 setup(){
   byte step=0;
-  byte x;
-  byte y;
 
   // Wait for LED Matrices to boot
   delay(800);
@@ -100,6 +107,13 @@ setup(){
   light=new Light(PIN_LIGHT);
   lastLightUpdate=0;
   lastLightReading=light->read(1023);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // Ethernet
+  net=new Net();
+  Webserver::begin();
+  net->addProcessor(Webserver::loop);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Random
   randomSeed(BMP085::readPressure()+BMP085::readTemperature());
@@ -113,15 +127,14 @@ setup(){
 void
 loop(){
   Mode *mode;
-
   // Modes
 #define MODE(number, name) case number:mode=new name();EEPROM.write(EEPROM_MODE, number);break;
   switch(EEPROM.read(EEPROM_MODE)){
     MODE(MODE_CLOCK, Clock);
     MODE(MODE_BIG_CLOCK, BigClock);
     MODE(2, ECA);
-    MODE(3, Plasma)
-      MODE(4, Lamp);
+    MODE(3, Plasma);
+    MODE(4, Lamp);
     MODE(5, Fire);
     MODE(6, Equalizer);
   default:
@@ -131,6 +144,8 @@ loop(){
   while(1){
     unsigned long time;
     mode->loop();
+    // Ethernet
+    net->processAll();
     // Light update
     if((time=millis())-lastLightUpdate>700){
       light->update();
@@ -157,5 +172,9 @@ loop(){
   }
   delete mode;
 }
+
+
+
+
 
 
