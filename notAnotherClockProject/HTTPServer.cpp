@@ -2,7 +2,7 @@
 
 #include <SD.h>
 
-#define FILE_READ_BUFFER 512
+#define FILE_READ_BUFFER 64
 
 WebServer webserver("", 80);
 
@@ -23,7 +23,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   // no path
   if(!strlen(path)){
     server.httpFail();
-    server.printP(PSTR("Missing path."));
+    server.printP(PSTR("Missing file path."));
     return;
   }
   // File not found
@@ -46,6 +46,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
     server.httpSuccess();
     server.print(path);
     server.printP(PSTR("<br/>\n"));
+    file.rewindDirectory();
     while(File entry=file.openNextFile()){
       server.printP(PSTR("<a href=\"sd?"));
       server.print(path);
@@ -61,11 +62,17 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
     }
   // dump files
   } else {
-    char buffer[FILE_READ_BUFFER];
+    char *buffer;
     int size;
-    server.httpSuccess("text/plain; charset=utf-8", NULL); // fixme, use PSTR
-    while(size=file.read(buffer, FILE_READ_BUFFER))
-      server.write(buffer, size);
+    if(buffer=(char *)malloc(FILE_READ_BUFFER)){
+      server.httpSuccess("text/plain; charset=utf-8", NULL); // fixme, use PSTR
+      while(size=file.read(buffer, FILE_READ_BUFFER))
+        server.write(buffer, size);
+      free(buffer);
+    }else{
+      server.httpFail();
+      server.printP(PSTR("Unable to allocate buffer."));
+    }
   }
   file.close();
 }
