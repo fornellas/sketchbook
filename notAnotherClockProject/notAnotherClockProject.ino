@@ -32,7 +32,7 @@
 #include "Equalizer.h"
 #include "ECA.h"
 #include "BigClock.h"
-#include "Webserver.h"
+#include "HTTPServer.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
@@ -111,8 +111,8 @@ setup(){
 
   // Ethernet
   net=new Net();
-  Webserver::begin();
-  net->addProcessor(Webserver::loop);
+  HTTPServer::begin();
+  net->addProcessor(HTTPServer::loop);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Random
