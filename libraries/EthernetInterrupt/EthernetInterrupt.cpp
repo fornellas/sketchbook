@@ -5,6 +5,11 @@
 
 void EthernetInterrupt::w5100IntProc(){
   w5100int=1;
+  /* It seems that the W5100 will not keep /INT low when there is a new
+     interrupt, as stated at the datasheet. /INT oscilates, and generates a LOT
+     of unnecessary interrupts, leaving virtually no CPU time for other tasks.
+     This is a workarround for that bougus behaviour.
+  */
   detachInterrupt(interrupt);
 }
 
@@ -37,6 +42,7 @@ void EthernetInterrupt::begin(uint8_t i){
 
 uint8_t EthernetInterrupt::available(){
   if(w5100int){
+    w5100int=0;
     writeS0_IR(readS0_IR());
     writeS1_IR(readS1_IR());
     writeS2_IR(readS2_IR());
