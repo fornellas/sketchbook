@@ -23,7 +23,6 @@ Net::Net(){
 
 void Net::processAll(){  
   if(EthernetInterrupt::available()){
-Serial.println("EtherInt");
     for(uint8_t c=0;c<processorCount;c++){
       processor[c]();
     }
