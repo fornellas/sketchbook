@@ -67,7 +67,7 @@ Clock::lcdInfo(){
     lcd->drawStr(x, y, buff);
     // Humidity
     x=0;
-    y+=lcd->getFontAscent()+1;
+    y+=lcd->getFontAscent()+3;
     lcd->drawStr(x, y, itoa(humidity, buff, 10));
     x+=lcd->getStrWidth(itoa(humidity, buff, 10));
     lcd->drawStrP(x, y, U8G_PSTR("%"));
@@ -87,7 +87,7 @@ Clock::lcdInfo(){
     x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getWeekDayName(date.weekDay))/2;
     lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getWeekDayName(date.weekDay));
     // Date
-    y+=lcd->getFontAscent()+1;
+    y+=lcd->getFontAscent()+2;
     x=0;
     lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getMonthName(date.month));
     t=lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getMonthName(date.month));
