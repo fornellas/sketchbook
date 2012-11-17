@@ -11,20 +11,9 @@ public:
   Net();
   void processAll();
   void addProcessor(void (*l)());
+  void removeProcessor(void (*l)());
   ~Net();
 };
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
 

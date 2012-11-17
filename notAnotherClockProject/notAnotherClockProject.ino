@@ -57,7 +57,7 @@ Net *net;
 // setup()
 //
 
-#define BOOT_STEPS 10
+#define BOOT_STEPS 11
 
 void
 setup(){
@@ -125,6 +125,12 @@ setup(){
 
   // Random
   randomSeed(BMP085::readPressure()+BMP085::readTemperature());
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // RGB LED
+  pinMode(PIN_R, OUTPUT);
+  pinMode(PIN_G, OUTPUT);
+  pinMode(PIN_B, OUTPUT);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 }
 

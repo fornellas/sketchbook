@@ -1,4 +1,5 @@
 #include "Net.h"
+#include "pins.h"
 
 #include <stdlib.h>
 
@@ -23,10 +24,14 @@ Net::Net(){
 
 void Net::processAll(){  
   if(EthernetInterrupt::available()){
+    digitalWrite(PIN_R, HIGH);
+    digitalWrite(PIN_G, HIGH);
     for(uint8_t c=0;c<processorCount;c++){
       processor[c]();
     }
     EthernetInterrupt::next();
+    digitalWrite(PIN_R, LOW);
+    digitalWrite(PIN_G, LOW);
   }
 }
 
@@ -39,6 +44,25 @@ void Net::addProcessor(void (*l)()){
     * ++processorCount
   );
   processor[processorCount-1]=l;
+}
+
+void Net::removeProcessor(void (*l)()){
+  for(uint8_t c=0;c<processorCount;c++){
+    if(processor[c]==l){
+      for(uint8_t d=c;d<processorCount-1;c++){
+        processor[d]=processor[d+1];
+      }
+      processorCount--;
+      processor=(void (**)())realloc(
+        processor,
+        sizeof(
+            void (*)
+        )
+        * ++processorCount
+      );
+      break;
+    }
+  }
 }
 
 Net::~Net(){

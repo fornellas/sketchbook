@@ -31,3 +31,8 @@
 
 // SD
 #define PIN_CS_USD 4
+
+// RGB LED
+#define PIN_R 12
+#define PIN_G 9
+#define PIN_B 11
