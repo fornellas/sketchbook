@@ -1,10 +1,13 @@
 #include "Net.h"
 #include "pins.h"
+#include "Light.h"
 
 #include <stdlib.h>
 
 #include <Ethernet.h>
 #include <EthernetInterrupt.h>
+
+extern Light *light;
 
 Net::Net(){
   // Initialize Ethernet
@@ -24,13 +27,11 @@ Net::Net(){
 
 void Net::processAll(){  
   if(EthernetInterrupt::available()){
-    digitalWrite(PIN_R, HIGH);
-    digitalWrite(PIN_G, HIGH);
+    analogWrite(PIN_G, light->read(255));
     for(uint8_t c=0;c<processorCount;c++){
       processor[c]();
     }
     EthernetInterrupt::next();
-    digitalWrite(PIN_R, LOW);
     digitalWrite(PIN_G, LOW);
   }
 }
@@ -42,7 +43,7 @@ void Net::addProcessor(void (*l)()){
         void (*)
     ) 
     * ++processorCount
-  );
+  ); // FIXME Error reporting
   processor[processorCount-1]=l;
 }
 
@@ -59,7 +60,7 @@ void Net::removeProcessor(void (*l)()){
             void (*)
         )
         * ++processorCount
-      );
+      ); // FIXME Error reporting
       break;
     }
   }

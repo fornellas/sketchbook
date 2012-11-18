@@ -3,7 +3,7 @@
 
 #include <inttypes.h>
 
-#define NUMREADINGS 5
+#define NUMREADINGS 3
 
 class Light {
 private:
@@ -18,6 +18,3 @@ public:
 };
 
 #endif
-
-
-

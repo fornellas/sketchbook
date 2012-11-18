@@ -13,6 +13,8 @@
 #include "Button.h"
 #include "EEPROM_addr.h"
 
+#define BUFF_LCD_MSG 8
+
 extern SFRGBLEDMatrix *ledMatrix;
 extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
@@ -24,7 +26,7 @@ Clock::lcdInfo(){
   byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
   float temperatureOutside;
   long pressure=BMP085::readPressure()/100;
-  char buff[10]; // revisar tamanho
+  char buff[BUFF_LCD_MSG];
   float temperatureInside;
   byte humidity;
   byte t;
@@ -345,54 +347,3 @@ void Clock::loop(){
   }
   ledMatrix->show();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

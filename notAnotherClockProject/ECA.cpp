@@ -4,6 +4,7 @@
 #include <U8glib.h>
 
 #define CHANGE_MS 5000
+#define BUFF_RULE 4
 
 extern U8GLIB_ST7920_128X64 *lcd;
 extern SFRGBLEDMatrix *ledMatrix;
@@ -11,7 +12,7 @@ extern SFRGBLEDMatrix *ledMatrix;
 void ECA::newAutomata(){
   byte x;
   byte y;
-  char buff[10];
+  char buff[BUFF_RULE];
   // new rule
   rule=random(255);
   // show on LCD

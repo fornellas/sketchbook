@@ -32,7 +32,7 @@ void Plasma::fillPlasma() {
   ledMatrix->progressBarInit(WHITE);
   max=(int)PIXMAP_WIDTH+(int)ledMatrix->width;
 
-  pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT));
+  pixmap=(double *)malloc(sizeof(double)*(PIXMAP_WIDTH*PIXMAP_HEIGHT)); // FIXME Error reporting
 
   randomSeed(millis());
   for(byte x=0;x<PIXMAP_WIDTH;x++){
@@ -70,7 +70,7 @@ Mode(PSTR("Plasma")){
   ledMatrix->gamma(true); 
   pSpeed=EEPROM.read(EEPROM_PLASMA_SPEED);
   pSpeedValidate();
-  plasma=(byte *)malloc((size_t)(ledMatrix->pixels)*sizeof(byte));
+  plasma=(byte *)malloc((size_t)(ledMatrix->pixels)*sizeof(byte)); // FIXME Error reporting
   fillPlasma();
 }
 

@@ -37,7 +37,7 @@ Fire::Fire():
 Mode(PSTR("Fire")){
   ledMatrix->gamma(true); 
   // Allocate pixmap
-  pixmap=(byte *)malloc(size_t(sizeof(byte)*(ledMatrix->width+2)*(ledMatrix->height+2)));
+  pixmap=(byte *)malloc(size_t(sizeof(byte)*(ledMatrix->width+2)*(ledMatrix->height+2))); // FIXME error reporting
   for(byte x=0;x<ledMatrix->width+2;x++)
     for(byte y=0;y<ledMatrix->height+2;y++)
       PIXMAP(x,y)=0;

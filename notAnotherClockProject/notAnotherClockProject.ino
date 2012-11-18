@@ -22,6 +22,7 @@
 #include "Button.h"
 #include "EEPROM_addr.h"
 #include "Net.h"
+#include "Logger.h"
 // Modes
 #include "Mode.h"
 #include "Clock.h"
@@ -49,15 +50,19 @@ unsigned long lastLightUpdate;
 int lastLightReading;
 #define MODE_CLOCK 0
 #define MODE_BIG_CLOCK 1
+#define LIGHT_UPDATE_MS 1000
 
 // Net
 Net *net;
+
+// Logger
+Logger *logger;
 
 //
 // setup()
 //
 
-#define BOOT_STEPS 11
+#define BOOT_STEPS 12
 
 void
 setup(){
@@ -115,11 +120,15 @@ setup(){
   net->addProcessor(HTTPServer::loop);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
+  // Logger
+  logger=new Logger();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
   // SD
   if(SD.begin(PIN_CS_USD))
     ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
   else{
-    ledMatrix->progressBarUpdate(RED, ++step, BOOT_STEPS);
+    ledMatrix->progressBarUpdate(RED, ++step, BOOT_STEPS); // FIXME better error reporting
     while(1);
   }
 
@@ -156,15 +165,15 @@ loop(){
     return;
   }
   while(1){
-    unsigned long time;
     mode->loop();
     // Ethernet
     net->processAll();
-    // Light update
-    if((time=millis())-lastLightUpdate>700){
+    // Light update / Logger
+    if(millis()-lastLightUpdate>LIGHT_UPDATE_MS){
       light->update();
-      lastLightUpdate=time;
+      lastLightUpdate+=LIGHT_UPDATE_MS;
       analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
+      logger->update();
       // Change to Big Clock when it gets dark
       if(lastLightReading>BIG_CLOCK_THRESHOLD && light->read(1023)<=BIG_CLOCK_THRESHOLD) {
         lastLightReading=light->read(1023);

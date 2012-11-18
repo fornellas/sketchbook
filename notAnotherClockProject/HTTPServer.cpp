@@ -1,9 +1,10 @@
 #include "HTTPServer.h"
-
 #include <SD.h>
 #include <MemoryFree.h>
 
-#define FILE_READ_BUFFER 64
+#define BUFF_READ 64
+#define BUFF_TAIL 37
+#define BUFF_MIME 26
 
 WebServer webserver("", 80);
 
@@ -18,7 +19,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   // small buffer 
   if(!tail_complete){
     server.httpFail();
-    server.printP(PSTR("Buffer is not big enough."));
+    server.printP(PSTR("URL buffer is not big enough."));
     return;
   }
   // no path
@@ -27,8 +28,14 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
     server.printP(PSTR("Missing file path."));
     return;
   }
+  // Missing leading /
+  if(path[0]!='/'){
+    server.httpFail();
+    server.printP(PSTR("Path must begin with /"));
+    return;
+  }
   // File not found
-  if(!(path[0]=='/'&&path[1]=='\0'))
+  if(path[1]!='\0')
     if(!SD.exists(path)){
       server.httpFail();
       server.printP(PSTR("File not found."));
@@ -45,7 +52,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   // list directories
   if(file.isDirectory()){
     server.httpSuccess();
-    server.print(path);
+    server.print(path); // TODO add .. link
     server.printP(PSTR("<br/>\n"));
     file.rewindDirectory();
     while(File entry=file.openNextFile()){
@@ -63,26 +70,12 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
     }
   // dump files
   } else {
-    char *readBuffer;
-    char *mimeBuffer;
+    char readBuffer[BUFF_READ];
+    char mimeBuffer[BUFF_MIME];
     int size;
-    const PROGMEM char *mime=PSTR("text/plain; charset=utf-8");
-    if(mimeBuffer=(char *)malloc(strlen_P(mime)+1)){
-      strcpy_P(mimeBuffer, mime);
-      if(readBuffer=(char *)malloc(FILE_READ_BUFFER)){
-        server.httpSuccess(mimeBuffer, NULL);
-        while(size=file.read(readBuffer, FILE_READ_BUFFER))
-          server.write(readBuffer, size);
-        free(readBuffer);
-      }else{
-        server.httpFail();
-        server.printP(PSTR("Unable to allocate reading buffer."));
-      }
-      free(mimeBuffer);
-    }else{
-      server.httpFail();
-      server.printP(PSTR("Unable to allocate message buffer."));
-    }
+    server.httpSuccess(strcpy_P(mimeBuffer, PSTR("text/plain; charset=utf-8")), NULL);
+    while(size=file.read(readBuffer, BUFF_READ))
+      server.write(readBuffer, size);
   }
   file.close();
 }
@@ -117,12 +110,14 @@ void status(WebServer &server, WebServer::ConnectionType type, char *path, bool 
 
 void HTTPServer::begin(){
   webserver.begin();
-  webserver.addCommand("status", &status); // FIXME save string to Flash
-  webserver.addCommand("sd", &fileServer); // FIXME save string to Flash
+  webserver.addCommand("status", &status);
+  webserver.addCommand("sd", &fileServer);
 }
 
 void HTTPServer::loop(){
-  webserver.processConnection();
+  char buff[BUFF_TAIL];
+  int len=BUFF_TAIL;
+  webserver.processConnection(buff, &len);
   while(webserver.available())
-    webserver.processConnection();
+    webserver.processConnection(buff, &len);
 }

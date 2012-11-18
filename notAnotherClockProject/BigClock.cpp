@@ -3,6 +3,7 @@
 #include <U8glib.h>
 #include <DS1307.h>
 
+#define BUFF_DATE 3
 
 extern U8GLIB_ST7920_128X64 *lcd;
 
@@ -24,7 +25,7 @@ void BigClock::loop(){
     byte z;
     int x;
     int y;
-    char buff[10];
+    char buff[BUFF_DATE];
     z=0;  
     if(date.minute<10)
       z=lcd->getStrWidthP(U8G_PSTR("0"));
