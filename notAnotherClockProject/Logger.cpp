@@ -7,7 +7,8 @@
 #include <SD.h>
 #include <BMP085.h>
 #include "pins.h"
-
+#include <DS18S20.h>
+#include <HIH4030.h>
 
 extern Light *light;
 
@@ -22,14 +23,11 @@ Logger::Logger(){
 
 void Logger::update(){
   if(millis()-lastLoggerUpdate>LOGGER_UPDATE_MS){
-    File file;
-    uint8_t len;
     // Path: DATA/AAAA/MM/DD/HH/12345678.txt
     char path[BUFF_PATH];
-    char buff[BUFF_FILE];
     struct DS1307::Date date;
 
-    analogWrite(PIN_R, light->read(255));
+    analogWrite(PIN_R, light->read(255-20)+20);
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
     date=DS1307::getDate();
@@ -58,24 +56,59 @@ void Logger::update(){
     if(!SD.mkdir(path)){
       while(true)Serial.println("Error creating dir."); // FIXME better error reporting
     }
-    // indoor temperature
-    strcpy_P(path+PATH_SUFFIX, PSTR("TEMPINDO.TXT"));
-    itoa((uint16_t)date.minute*60+(uint16_t)date.second, buff, 10);
-    len=strlen(buff);
-    buff[len]='\t';
-    dtostrf(BMP085::readTemperature(), -2, 2, buff+len+1);
-    len=strlen(buff);
-    buff[len]='\n';
-    buff[len+1]='\0';
-    if(!(file=SD.open(path, FILE_WRITE))){
-      while(true)Serial.println("Error opening file"); // FIXME better error reporting
-    }
-    if(file.write(buff)!=len+1){
-      while(true)Serial.println("Error writing to file"); // FIXME better error reporting
-    }
-    file.close();
-
+    // Indoor Temperature
+    float temperatureInside;
+     byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
+    save(PSTR("TEMPINDO.TXT"), path, &date, temperatureInside=BMP085::readTemperature());
+    // Outdoor Temperature
+    save(PSTR("TEMPOUTD.TXT"), path, &date, DS18S20::read(PIN_TEMP_EXT, addr));
+    // Humidity
+    save(PSTR("HUMIDITY.TXT"), path, &date, HIH4030::read(PIN_HUMIDITY, temperatureInside));
+    save(PSTR("PRESSURE.TXT"), path, &date, BMP085::readPressure());
     
     digitalWrite(PIN_R, LOW);
   }
+}
+
+// Append file name to path, add date\t to txt
+#define FILL_BUFF(fileName, path, date, value) \
+  char txt[BUFF_FILE]; \
+  uint8_t len; \
+  strcpy_P(path+PATH_SUFFIX, fileName); \
+  itoa((uint16_t)date->minute*60+(uint16_t)date->second, txt, 10); \
+  len=strlen(txt); \
+  txt[len]='\t';
+
+// save values to SD
+void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, double value){
+  FILL_BUFF(fileName, path, date, value);
+  dtostrf(value, -2, 2, txt+len+1);
+  writeToFile(path, txt);
+}
+void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, int value){
+  FILL_BUFF(fileName, path, date, value);
+  itoa(value, txt+len+1, 10);
+  writeToFile(path, txt);
+}
+void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, long int value){
+  FILL_BUFF(fileName, path, date, value);
+  ltoa(value, txt+len+1, 10);
+  writeToFile(path, txt);
+}
+
+// append \n and save
+void Logger::writeToFile(char *path, char *txt){
+  uint8_t len;
+  File file;
+
+  len=strlen(txt);
+  txt[len]='\n';
+  txt[len+1]='\0';
+  if(!(file=SD.open(path, FILE_WRITE))){
+    while(true)Serial.println("Error opening file"); // FIXME better error reporting
+  }
+  if(file.write(txt)!=len+1){
+    while(true)Serial.println("Error writing to file"); // FIXME better error reporting
+  }
+  file.close();
 }

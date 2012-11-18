@@ -5,13 +5,15 @@
 #include <avr/pgmspace.h>
 
 
-#define LOGGER_UPDATE_MS (5*1000)
+#define LOGGER_UPDATE_MS (30*1000)
 
 class Logger {
 private:
   unsigned long lastLoggerUpdate;
-  void fillBuff(PGM_P fileName, char *path, struct DS1307::Date *date, double value);
-  void fillBuff(PGM_P fileName, char *path, struct DS1307::Date *date, int value);
+  void writeToFile(char *path, char *txt);
+  void save(PGM_P fileName, char *path, struct DS1307::Date *date, double value);
+  void save(PGM_P fileName, char *path, struct DS1307::Date *date, int value);
+  void save(PGM_P fileName, char *path, struct DS1307::Date *date, long int value);
 public:
   Logger();
   void update();

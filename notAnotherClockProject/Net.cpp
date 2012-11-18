@@ -27,7 +27,7 @@ Net::Net(){
 
 void Net::processAll(){  
   if(EthernetInterrupt::available()){
-    analogWrite(PIN_G, light->read(255));
+    analogWrite(PIN_G, light->read(255-20)+20);
     for(uint8_t c=0;c<processorCount;c++){
       processor[c]();
     }
