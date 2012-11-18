@@ -52,6 +52,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   // list directories
   if(file.isDirectory()){
     server.httpSuccess();
+    server.printP(PSTR("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\n<html>\n<title>Arduino File Server</title>\n<body>\n"));
     server.print(path); // TODO add .. link
     server.printP(PSTR("<br/>\n"));
     file.rewindDirectory();
@@ -68,14 +69,14 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
       server.printP(PSTR("</a><br/>\n"));
       entry.close();
     }
+    server.printP(PSTR("</body>\n</html>\n"));
   // dump files
   } else {
     char readBuffer[BUFF_READ];
     char mimeBuffer[BUFF_MIME];
-    int size;
     server.httpSuccess(strcpy_P(mimeBuffer, PSTR("text/plain; charset=utf-8")), NULL);
-    while(size=file.read(readBuffer, BUFF_READ))
-      server.write(readBuffer, size);
+    while(file.read(readBuffer, BUFF_READ))
+      server.write(readBuffer, size); // No verification if failed to write to client
   }
   file.close();
 }
@@ -116,8 +117,12 @@ void HTTPServer::begin(){
 
 void HTTPServer::loop(){
   char buff[BUFF_TAIL];
-  int len=BUFF_TAIL;
+  int len;
+
+  len=BUFF_TAIL;
   webserver.processConnection(buff, &len);
-  while(webserver.available())
+  while(webserver.available()){
+    len=BUFF_TAIL;
     webserver.processConnection(buff, &len);
+  }
 }
