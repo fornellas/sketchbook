@@ -20,6 +20,7 @@ extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
 extern DS18S20 *temperatureOutside;
 extern BMP085 *pressure;
+extern DS1307 *time;
 
 // LCD
 
@@ -88,18 +89,18 @@ Clock::lcdInfo(){
     y+=lcd->getFontAscent()+1;
     lcd->setFont(u8g_font_7x14);
     lcd->setFontPosTop();
-    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getWeekDayName(date.weekDay))/2;
-    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getWeekDayName(date.weekDay));
+    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getWeekDayName(date.wday))/2;
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getWeekDayName(date.wday));
     // Date
     y+=lcd->getFontAscent()+2;
     x=0;
-    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)DS1307::getMonthName(date.month));
-    t=lcd->getStrWidthP((u8g_pgm_uint8_t *)DS1307::getMonthName(date.month));
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getMonthName(date.mon));
+    t=lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getMonthName(date.mon));
     itoa(date.year, buff, 10);
     x=lcd->getWidth()-lcd->getStrWidth(buff);
     lcd->drawStr(x, y, buff);
     x=t+(lcd->getWidth()-t-lcd->getStrWidth(buff))/2;
-    itoa(date.monthDay, buff, 10);
+    itoa(date.mday, buff, 10);
     x=x-lcd->getStrWidth(buff)/2;
     lcd->drawStr(x, y, buff);
   } 
@@ -115,10 +116,10 @@ void Clock::showDigital(){
   yOffset=(ledMatrix->height>>1)-11/2-1;
   ledMatrix->print(RGB(value,0,0), xOffset+0, yOffset+0, 5, 48+(date.hour/10));
   ledMatrix->print(RGB(value,0,0), xOffset+4, yOffset+0, 5, 48+(date.hour%10));
-  ledMatrix->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.minute/10));
-  ledMatrix->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.minute%10));
-  ledMatrix->print(RGB(0,0,value), xOffset+4, yOffset+7, 5, 48+(date.second/10));
-  ledMatrix->print(RGB(0,0,value), xOffset+8, yOffset+7, 5, 48+(date.second%10));
+  ledMatrix->print(RGB(0,value,0), xOffset+8, yOffset+0, 5, 48+(date.min/10));
+  ledMatrix->print(RGB(0,value,0), xOffset+12, yOffset+0, 5, 48+(date.min%10));
+  ledMatrix->print(RGB(0,0,value), xOffset+4, yOffset+7, 5, 48+(date.sec/10));
+  ledMatrix->print(RGB(0,0,value), xOffset+8, yOffset+7, 5, 48+(date.sec%10));
 }
 
 // Binary
@@ -137,10 +138,10 @@ void Clock::drawBCDdigit(byte value, int x, int y, byte digit){
 void Clock::showBinary(){
   drawBCDdigit(value, 2, 3, date.hour/10);
   drawBCDdigit(value, 5, 3, date.hour%10);
-  drawBCDdigit(value, 10, 3, date.minute/10);
-  drawBCDdigit(value, 13, 3, date.minute%10);
-  drawBCDdigit(value, 18, 3, date.second/10); 
-  drawBCDdigit(value, 21, 3, date.second%10); 
+  drawBCDdigit(value, 10, 3, date.min/10);
+  drawBCDdigit(value, 13, 3, date.min%10);
+  drawBCDdigit(value, 18, 3, date.sec/10); 
+  drawBCDdigit(value, 21, 3, date.sec%10); 
   ledMatrix->paintPixel(RGB(value, value, value), 8, 6);
   ledMatrix->paintPixel(RGB(value, value, value), 8, 10);
   ledMatrix->paintPixel(RGB(value, value, value), 16, 6);
@@ -192,41 +193,41 @@ void Clock::showDX() {
   byte my2[12] = {
     3,5,8,11,12,13,12,11,8,5,3,2                                                                                                            };
   for(byte m=5;m<=60;m+=5){
-    if(date.minute>=m){
+    if(date.min>=m){
       ledMatrix->paintPixel(minuteColor5, xOff+mx1[m/5-1], +my1[m/5-1]);
       ledMatrix->paintPixel(minuteColor5, xOff+mx2[m/5-1], +my2[m/5-1]);
     }
   }
-  if(date.minute%5>=1){
+  if(date.min%5>=1){
     ledMatrix->paintPixel(minuteColor1, xOff+7, 4);
     ledMatrix->paintPixel(minuteColor1, xOff+8, 4);
   }
-  if(date.minute%5>=2){
+  if(date.min%5>=2){
     ledMatrix->paintPixel(minuteColor1, xOff+11, 7);
     ledMatrix->paintPixel(minuteColor1, xOff+11, 8);
   }
-  if(date.minute%5>=3){
+  if(date.min%5>=3){
     ledMatrix->paintPixel(minuteColor1, xOff+7, 11);
     ledMatrix->paintPixel(minuteColor1, xOff+8, 11);
   }
-  if(date.minute%5>=4){
+  if(date.min%5>=4){
     ledMatrix->paintPixel(minuteColor1, xOff+4, 7);
     ledMatrix->paintPixel(minuteColor1, xOff+4, 8);
   }
   // Second
-  if(date.second%5>=1){
+  if(date.sec%5>=1){
     ledMatrix->paintPixel(secondColor, xOff+7, 6);
     ledMatrix->paintPixel(secondColor, xOff+8, 6);
   }
-  if(date.second%5>=2){
+  if(date.sec%5>=2){
     ledMatrix->paintPixel(secondColor, xOff+9, 7);
     ledMatrix->paintPixel(secondColor, xOff+9, 8);
   }
-  if(date.second%5>=3){
+  if(date.sec%5>=3){
     ledMatrix->paintPixel(secondColor, xOff+7, 9);
     ledMatrix->paintPixel(secondColor, xOff+8, 9);
   }
-  if(date.second%5>=4){
+  if(date.sec%5>=4){
     ledMatrix->paintPixel(secondColor, xOff+6, 7);
     ledMatrix->paintPixel(secondColor, xOff+6, 8);
   }
@@ -287,8 +288,8 @@ void Clock::showBigDigit(){
   ledMatrix->box(RGB(0, 0, value), ledMatrix->width/2-1, 1, ledMatrix->width/2, ledMatrix->height-2);
   drawBigDigit(RGB(0, 0, value), 0, 1, date.hour/10);
   drawBigDigit(RGB(0, 0, value), 6, 1, date.hour%10);
-  drawBigDigit(RGB(0, 0, value), 13, 1, date.minute/10);
-  drawBigDigit(RGB(0, 0, value), 19, 1, date.minute%10);
+  drawBigDigit(RGB(0, 0, value), 13, 1, date.min/10);
+  drawBigDigit(RGB(0, 0, value), 19, 1, date.min%10);
 }
 
 // main stuff
@@ -300,7 +301,7 @@ Mode(PSTR("Clock")){
 }
 
 void Clock::loop(){
-  unsigned long time;
+  unsigned long now;
 
   // intensity
   value=light->read(MAX_C);
@@ -310,11 +311,11 @@ void Clock::loop(){
   value=V_GAMMA(value);
 
   // Date
-  date=DS1307::getDate();
+  date=time->readBTimeRTC();
 
   // LCD
-  if((time=millis())-lastLCDUpdate>1000){
-    lastLCDUpdate=time;
+  if((now=millis())-lastLCDUpdate>1000){
+    lastLCDUpdate=now;
     lcdInfo();
   }
 

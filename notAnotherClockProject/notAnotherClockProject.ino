@@ -8,6 +8,7 @@
 // Custom
 #include <SFRGBLEDMatrix.h>
 #include <U8glib.h>
+#include <Time.h>
 #include <DS1307.h>
 #include <HIH4030.h>
 #include <OneWire.h>
@@ -53,6 +54,10 @@ int lastLightReading;
 #define MODE_CLOCK 0
 #define MODE_BIG_CLOCK 1
 #define LIGHT_UPDATE_MS 1000
+
+// DS1307
+DS1307 *time;
+#define TIMEZONE -3
 
 // OneWire
 OneWire *ow;
@@ -125,6 +130,9 @@ setup(){
   lastLightUpdate=0;
   lastLightReading=light->read(1023);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // DS1307
+  time=new DS1307(TIMEZONE); // FIXME make configurable
 
   // OneWire
   ow=new OneWire(PIN_ONEWIRE);

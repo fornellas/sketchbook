@@ -6,16 +6,17 @@
 #define BUFF_DATE 3
 
 extern U8GLIB_ST7920_128X64 *lcd;
+extern DS1307 *time;
 
 BigClock::BigClock():
 Mode(PSTR("Big Clock")){
 }
 
 void BigClock::loop(){
-  struct DS1307::Date date;
+  btime_t date;
 
   // Date
-  date=DS1307::getDate();
+  date=time->getBtime();
 
   // LCD
   lcd->firstPage();
@@ -27,13 +28,13 @@ void BigClock::loop(){
     int y;
     char buff[BUFF_DATE];
     z=0;  
-    if(date.minute<10)
+    if(date.min<10)
       z=lcd->getStrWidthP(U8G_PSTR("0"));
     x=lcd->getWidth()/2-(
     lcd->getStrWidth(itoa(date.hour, buff, 10))+
       lcd->getStrWidthP(U8G_PSTR(":"))+
       z+
-      lcd->getStrWidth(itoa(date.minute, buff, 10))
+      lcd->getStrWidth(itoa(date.min, buff, 10))
       )/2;
     y=lcd->getHeight()/2-lcd->getFontAscent()/2;
     lcd->drawStr(x, y, itoa(date.hour, buff, 10));
@@ -44,7 +45,7 @@ void BigClock::loop(){
       lcd->drawStrP(x, y, U8G_PSTR("0"));
       x+=lcd->getStrWidthP(U8G_PSTR("0"));
     }
-    lcd->drawStr(x, y, itoa(date.minute, buff, 10));
+    lcd->drawStr(x, y, itoa(date.min, buff, 10));
   }
   while( lcd->nextPage() );
 }

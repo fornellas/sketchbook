@@ -1,38 +1,49 @@
-#include <DS1307.h>
 #include <Wire.h>
+#include <Time.h>
+#include <DS1307.h>
+
+#define TIMEZONE -3
+
+DS1307 *time;
 
 void setup(){
-  struct DS1307::Date d;
+  btime_t bt;
 
   Serial.begin(115200);
   Wire.begin();
+  time=new DS1307(TIMEZONE);
 
-  d.second=50;
-  d.minute=18;
-  d.hour=0;
-  d.weekDay=TUESDAY;
-  d.monthDay=7;
-  d.month=FEBRUARY;
-  d.year=2012;
-  DS1307::setDate(d);
+  bt.sec=50;
+  bt.min=21;
+  bt.hour=21;
+  bt.wday=MONDAY;
+  bt.mday=19;
+  bt.mon=NOVEMBER;
+  bt.year=2012;
+  bt.zone=TIMEZONE;
+
+//  time->setRTC(bt);
 }
 
 void loop(){
-  struct DS1307::Date d;
+  btime_t bt;
 
-  d=DS1307::getDate();
-  Serial.print(d.monthDay);
+  bt=time->readBTimeRTC();
+  Serial.print("TZ(");
+  Serial.print(bt.zone);
+  Serial.print(") ");
+  Serial.print(bt.mday);
   Serial.print("/");
-  Serial.print(d.month);
+  Serial.print(bt.mon);
   Serial.print("/");
-  Serial.print(d.year);
+  Serial.print(bt.year);
   Serial.print(" ");
-  Serial.print(d.weekDay);
+  Serial.print(bt.wday);
   Serial.print(" ");
-  Serial.print(d.hour);
+  Serial.print(bt.hour);
   Serial.print(":");
-  Serial.print(d.minute);
+  Serial.print(bt.min);
   Serial.print(":");
-  Serial.println(d.second);
+  Serial.println(bt.sec);
   delay(1000);
 }

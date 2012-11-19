@@ -13,6 +13,7 @@
 extern Light *light;
 extern DS18S20 *temperatureOutside;
 extern BMP085 *pressure;
+extern DS1307 *time;
 
 #define BUFF_PATH 32
 #define BUFF_FILE 13
@@ -27,26 +28,26 @@ void Logger::update(){
   if(millis()-lastLoggerUpdate>LOGGER_UPDATE_MS){
     // Path: DATA/AAAA/MM/DD/HH/12345678.txt
     char path[BUFF_PATH];
-    struct DS1307::Date date;
+    btime_t date;
 
     analogWrite(PIN_R, light->read(255-20)+20);
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
-    date=DS1307::getDate();
+    date=time->readBTimeRTC();
     strcpy_P(path, PSTR("DATA/"));
     itoa(date.year, path+5, 10);
     path[9]='/';
-    if(date.month<10){
+    if(date.mon<10){
       path[10]='0';
-      itoa(date.month, path+11, 10);
+      itoa(date.mon, path+11, 10);
     }else
-      itoa(date.month, path+10, 10);
+      itoa(date.mon, path+10, 10);
     path[12]='/';
-    if(date.monthDay<10){
+    if(date.mday<10){
       path[13]='0';
-      itoa(date.monthDay, path+14, 10);
+      itoa(date.mday, path+14, 10);
     }else
-      itoa(date.monthDay, path+13, 10);
+      itoa(date.mday, path+13, 10);
     path[15]='/';
     if(date.hour<10){
       path[16]='0';
@@ -77,22 +78,22 @@ void Logger::update(){
   char txt[BUFF_FILE]; \
   uint8_t len; \
   strcpy_P(path+PATH_SUFFIX, fileName); \
-  itoa((uint16_t)date->minute*60+(uint16_t)date->second, txt, 10); \
+  itoa((uint16_t)date->min*60+(uint16_t)date->sec, txt, 10); \
   len=strlen(txt); \
   txt[len]='\t';
 
 // save values to SD
-void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, double value){
+void Logger::save(PGM_P fileName, char *path, btime_t *date, double value){
   FILL_BUFF(fileName, path, date, value);
   dtostrf(value, -2, 2, txt+len+1);
   writeToFile(path, txt);
 }
-void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, int value){
+void Logger::save(PGM_P fileName, char *path, btime_t *date, int value){
   FILL_BUFF(fileName, path, date, value);
   itoa(value, txt+len+1, 10);
   writeToFile(path, txt);
 }
-void Logger::save(PGM_P fileName, char *path, struct DS1307::Date *date, long int value){
+void Logger::save(PGM_P fileName, char *path, btime_t *date, long int value){
   FILL_BUFF(fileName, path, date, value);
   ltoa(value, txt+len+1, 10);
   writeToFile(path, txt);

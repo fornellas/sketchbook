@@ -10,7 +10,7 @@
 class Clock: 
 public Mode {
 private:
-  struct DS1307::Date date;
+  btime_t date;
   byte value; // light intensity
   // LCD
   unsigned long lastLCDUpdate;

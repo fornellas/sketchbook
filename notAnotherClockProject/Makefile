@@ -7,6 +7,7 @@ ARDUINO_LIBS=\
   U8glib \
   U8glib/utility \
   HIH4030 \
+  Time \
   DS18S20 \
   BMP085 \
   Wire \
