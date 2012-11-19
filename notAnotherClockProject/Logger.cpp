@@ -11,6 +11,8 @@
 #include <HIH4030.h>
 
 extern Light *light;
+extern DS18S20 *temperatureOutside;
+extern BMP085 *pressure;
 
 #define BUFF_PATH 32
 #define BUFF_FILE 13
@@ -59,12 +61,12 @@ void Logger::update(){
     // Indoor Temperature
     float temperatureInside;
      byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
-    save(PSTR("TEMPINDO.TXT"), path, &date, temperatureInside=BMP085::readTemperature());
+    save(PSTR("TEMPINDO.TXT"), path, &date, pressure->readC());
     // Outdoor Temperature
-    save(PSTR("TEMPOUTD.TXT"), path, &date, DS18S20::read(PIN_TEMP_EXT, addr));
+    save(PSTR("TEMPOUTD.TXT"), path, &date, temperatureOutside->readC());
     // Humidity
     save(PSTR("HUMIDITY.TXT"), path, &date, HIH4030::read(PIN_HUMIDITY, temperatureInside));
-    save(PSTR("PRESSURE.TXT"), path, &date, BMP085::readPressure());
+    save(PSTR("PRESSURE.TXT"), path, &date, (long int)pressure->readPa());
     
     digitalWrite(PIN_R, LOW);
   }

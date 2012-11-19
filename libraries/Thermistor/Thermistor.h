@@ -16,10 +16,15 @@
 #define Thermistor_h
 
 #include <inttypes.h>
+#include <Temperature.h>
 
-namespace Thermistor
-{
-  double read(uint8_t pin);
+class Thermistor:
+public Temperature{
+private:
+  uint8_t pin;
+public
+  double readK();
+  Thermistor(uint8_t pin);
 };
 
 #endif

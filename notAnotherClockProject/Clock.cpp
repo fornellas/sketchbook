@@ -18,23 +18,25 @@
 extern SFRGBLEDMatrix *ledMatrix;
 extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
+extern DS18S20 *temperatureOutside;
+extern BMP085 *pressure;
 
 // LCD
 
 void
 Clock::lcdInfo(){
-  byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
-  float temperatureOutside;
-  long pressure=BMP085::readPressure()/100;
+  float tOut;
+  long Pa;
   char buff[BUFF_LCD_MSG];
-  float temperatureInside;
+  float tIn;
   byte humidity;
   byte t;
 
   // read values
-  temperatureOutside=DS18S20::read(PIN_TEMP_EXT, addr);
-  temperatureInside=BMP085::readTemperature();
-  humidity=HIH4030::read(PIN_HUMIDITY, temperatureInside);
+  tOut=temperatureOutside->readC();
+  Pa=pressure->readHPa();
+  tIn=pressure->readC();
+  humidity=HIH4030::read(PIN_HUMIDITY, tIn);
   // LCD
   lcd->firstPage();
   do {
@@ -53,14 +55,14 @@ Clock::lcdInfo(){
     y=lcd->getFontAscent()+1;
     lcd->setFont(u8g_font_fub14);
     lcd->setFontPosTop();
-    lcd->drawStr(x, y, dtostrf(temperatureInside, -2, 1, buff));
-    x+=lcd->getStrWidth(dtostrf(temperatureInside, -2, 1, buff));
+    lcd->drawStr(x, y, dtostrf(tIn, -2, 1, buff));
+    x+=lcd->getStrWidth(dtostrf(tIn, -2, 1, buff));
     buff[0]=176;
     buff[1]='C';
     buff[2]='\0';
     lcd->drawStr(x, y, buff);
     // Temperature outdoor
-    dtostrf(temperatureOutside, -2, 1, buff);
+    dtostrf(tOut, -2, 1, buff);
     t=strlen(buff);
     buff[t++]=176;
     buff[t++]='C';
@@ -74,7 +76,7 @@ Clock::lcdInfo(){
     x+=lcd->getStrWidth(itoa(humidity, buff, 10));
     lcd->drawStrP(x, y, U8G_PSTR("%"));
     // Pressure
-    ltoa(pressure, buff, 10);
+    ltoa(Pa, buff, 10);
     t=strlen(buff);
     buff[t++]='h';
     buff[t++]='P';

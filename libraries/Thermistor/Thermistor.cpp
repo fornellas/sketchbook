@@ -1,11 +1,6 @@
-
-
-extern "C" {
-  #include <inttypes.h>
-  #include <math.h>
-}
-
-#include <Thermistor.h>
+#include "Thermistor.h"
+#include <inttypes.h>
+#include <math.h>
 #include <Arduino.h>
 
 // Constants for Vishay part NTCLE100E3103JB0:
@@ -19,7 +14,7 @@ extern "C" {
 #define TC1 0.000002620131
 #define TD1 0.00000006383091
 
-double Thermistor::read(uint8_t pin) {
+double Thermistor::readK() {
   double RT;
   double temperature;
   double logRtRref;
@@ -34,7 +29,11 @@ double Thermistor::read(uint8_t pin) {
       TB1 * logRtRref +
       TC1 * logRtRref2 +
       TD1 * logRtRref2 * logRtRref
-    ) - 273.15;
+    );
 
   return temperature;
+}
+
+Thermistor::Thermistor(uint8_t p){
+  pin=p;
 }

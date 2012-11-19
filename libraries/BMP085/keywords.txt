@@ -8,11 +8,15 @@ BMP085	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-calibration	KEYWORD2
-readTemperature	KEYWORD2
-readPressure KEYWORD2
+readK	KEYWORD2
+readPa	KEYWORD2
+setOversampling KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+BMP085_ULTRALOWPOWER LITERAL1
+BMP085_STANDARD      LITERAL1
+BMP085_HIGHRES       LITERAL1
+BMP085_ULTRAHIGHRES  LITERAL1

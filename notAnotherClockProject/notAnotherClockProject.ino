@@ -11,7 +11,9 @@
 #include <DS1307.h>
 #include <HIH4030.h>
 #include <OneWire.h>
+#include <Temperature.h>
 #include <DS18S20.h>
+#include <Pressure.h>
 #include <BMP085.h>
 #include <Ethernet.h>
 #include <EthernetInterrupt.h>
@@ -52,6 +54,16 @@ int lastLightReading;
 #define MODE_BIG_CLOCK 1
 #define LIGHT_UPDATE_MS 1000
 
+// OneWire
+OneWire *ow;
+
+// DS18S20
+DS18S20 *temperatureOutside;
+byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
+
+// BMP085
+BMP085 *pressure;
+
 // Net
 Net *net;
 
@@ -62,7 +74,7 @@ Logger *logger;
 // setup()
 //
 
-#define BOOT_STEPS 12
+#define BOOT_STEPS 15
 
 void
 setup(){
@@ -114,6 +126,18 @@ setup(){
   lastLightReading=light->read(1023);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
+  // OneWire
+  ow=new OneWire(PIN_ONEWIRE);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // DS18S20
+  temperatureOutside=new DS18S20(addr, ow);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // BMP085
+  pressure=new BMP085(BMP085_ULTRAHIGHRES);
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
   // Ethernet
   net=new Net();
   HTTPServer::begin();
@@ -133,7 +157,7 @@ setup(){
   }
 
   // Random
-  randomSeed(BMP085::readPressure()+BMP085::readTemperature());
+  randomSeed(pressure->readPa()+pressure->readC());
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // RGB LED

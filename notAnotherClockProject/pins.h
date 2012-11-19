@@ -15,7 +15,8 @@
 #define PIN_BUTTON_C    66
 
 // DS18S20
-#define PIN_TEMP_EXT 7
+#define PIN_DS18S20 7
+#define PIN_ONEWIRE PIN_DS18S20
 
 // HIH4030
 #define PIN_HUMIDITY A2

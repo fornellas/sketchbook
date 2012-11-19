@@ -14,30 +14,57 @@
 #ifndef BMP085_H
 #define BMP085_H
 
-#include <Wire.h>
+#include <Pressure.h>
+#include <Temperature.h>
+#include <inttypes.h>
 
-namespace BMP085 {
+#define BMP085_ULTRALOWPOWER 0
+#define BMP085_STANDARD      1
+#define BMP085_HIGHRES       2
+#define BMP085_ULTRAHIGHRES  3
+
+class BMP085:
+public Pressure,
+public Temperature {
+private:
+  // Conf
+  uint8_t oversampling;
+  // I/O
+  int16_t bmp085ReadInt(uint8_t address);
+  // Temperature
+  uint16_t bmp085ReadUT();
+  int32_t bmp085ReadB5();
+  int16_t bmp085GetTemperature();
+  // Pressure
+  uint32_t bmp085ReadUP();
+  int32_t bmp085GetPressure();
+  // Calibration
   struct Calibration{
-    int ac1;
-    int ac2; 
-    int ac3; 
-    unsigned int ac4;
-    unsigned int ac5;
-    unsigned int ac6;
-    int b1;
-    int b2;
-    int mb;
-    int mc;
-    int md;
+    int16_t ac1;
+    int16_t ac2; 
+    int16_t ac3; 
+    uint16_t ac4;
+    uint16_t ac5;
+    uint16_t ac6;
+    int16_t b1;
+    int16_t b2;
+//    int16_t mb;
+    int16_t mc;
+    int16_t md;
   };
-  // Calibration data
-  struct BMP085::Calibration calibration();
-  // Temperature in C
-  float readTemperature();
-  float readTemperature(struct BMP085::Calibration *c);
-  // Pressure in Pa
-  long readPressure();
-  long readPressure(struct BMP085::Calibration *c);
+  struct Calibration calibration;
+  void bmp085Calibration();
+public:
+  // Temperature
+  double readK();
+//  static double readC();
+  // Pressure
+  uint32_t readPa();
+//  static uint32_t readPa(uint8_t os);
+  // Oversampling
+  void setOversampling(uint8_t newOversampling);
+  // Constructor
+  BMP085(uint8_t newOversampling);
 };
 
 #endif

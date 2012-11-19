@@ -1,20 +1,22 @@
 #######################################
-# Syntax Coloring Map For Thermistor
-#######################################
-
-#######################################
 # Datatypes (KEYWORD1)
 #######################################
 
-Thermistor	KEYWORD1
+Pressure	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-readK	KEYWORD2
+readPa	KEYWORD2
+readInHg KEYWORD2
+readHPa KEYWORD2
+readAtm KEYWORD2
+calcAltitude KEYWORD2
+readCalcAltitude KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+AVERAGE_SEA_LEVEL_PRESSURE LITERAL1

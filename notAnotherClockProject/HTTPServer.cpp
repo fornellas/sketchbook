@@ -75,7 +75,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
     char readBuffer[BUFF_READ];
     char mimeBuffer[BUFF_MIME];
     server.httpSuccess(strcpy_P(mimeBuffer, PSTR("text/plain; charset=utf-8")), NULL);
-    while(file.read(readBuffer, BUFF_READ))
+    while(uint8_t size=file.read(readBuffer, BUFF_READ))
       server.write(readBuffer, size); // No verification if failed to write to client
   }
   file.close();

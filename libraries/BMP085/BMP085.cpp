@@ -1,8 +1,8 @@
 #include <BMP085.h>
+#include <Wire.h>
 #include <Arduino.h>
 
 #define BMP085_ADDRESS 0x77  // I2C address of BMP085
-#define OSS 0 // Oversampling Setting
 
 //
 // I/O
@@ -11,9 +11,8 @@
 // Read 2 bytes from the BMP085
 // First byte will be from 'address'
 // Second byte will be from 'address'+1
-int bmp085ReadInt(unsigned char address)
-{
-  unsigned char msb, lsb;
+int16_t BMP085::bmp085ReadInt(uint8_t address){
+  uint8_t msb, lsb;
   
   Wire.beginTransmission(BMP085_ADDRESS);
   Wire.write(address);
@@ -25,7 +24,7 @@ int bmp085ReadInt(unsigned char address)
   msb = Wire.read();
   lsb = Wire.read();
   
-  return (int) msb<<8 | lsb;
+  return (int16_t) msb<<8 | lsb;
 }
 
 //
@@ -33,9 +32,8 @@ int bmp085ReadInt(unsigned char address)
 //
 
 // Read the uncompensated temperature value
-unsigned int bmp085ReadUT()
-{
-  unsigned int ut;
+uint16_t BMP085::bmp085ReadUT(){
+  uint16_t ut;
   
   // Write 0x2E into Register 0xF4
   // This requests a temperature reading
@@ -52,18 +50,18 @@ unsigned int bmp085ReadUT()
   return ut;
 }
 
-long bmp085ReadB5(struct BMP085::Calibration *c){
-  long x1, x2;
+int32_t BMP085::bmp085ReadB5(){
+  int32_t x1, x2;
   
-  x1 = (((long)bmp085ReadUT() - (long)c->ac6)*(long)c->ac5) >> 15;
-  x2 = ((long)c->mc << 11)/(x1 + c->md);
+  x1 = (((int32_t)bmp085ReadUT() - (int32_t)calibration.ac6)*(int32_t)calibration.ac5) >> 15;
+  x2 = ((int32_t)calibration.mc << 11)/(x1 + calibration.md);
   return x1 + x2;
 }
 
 // Calculate temperature given ut.
 // Value returned will be in units of 0.1 deg C
-short bmp085GetTemperature(struct BMP085::Calibration *c){
-  return ((bmp085ReadB5(c) + 8)>>4);  
+int16_t BMP085::bmp085GetTemperature(){
+  return ((bmp085ReadB5() + 8)>>4);  
 }
 
 //
@@ -71,20 +69,19 @@ short bmp085GetTemperature(struct BMP085::Calibration *c){
 //
 
 // Read the uncompensated pressure value
-unsigned long bmp085ReadUP()
-{
-  unsigned char msb, lsb, xlsb;
-  unsigned long up = 0;
+uint32_t BMP085::bmp085ReadUP(){
+  uint8_t msb, lsb, xlsb;
+  uint32_t up = 0;
   
-  // Write 0x34+(OSS<<6) into register 0xF4
+  // Write 0x34+(oversampling<<6) into register 0xF4
   // Request a pressure reading w/ oversampling setting
   Wire.beginTransmission(BMP085_ADDRESS);
   Wire.write(0xF4);
-  Wire.write(0x34 + (OSS<<6));
+  Wire.write(0x34 + (oversampling<<6));
   Wire.endTransmission();
   
-  // Wait for conversion, delay time dependent on OSS
-  delay(2 + (3<<OSS));
+  // Wait for conversion, delay time dependent on oversampling
+  delay(2 + (3<<oversampling));
   
   // Read register 0xF6 (MSB), 0xF7 (LSB), and 0xF8 (XLSB)
   Wire.beginTransmission(BMP085_ADDRESS);
@@ -99,7 +96,7 @@ unsigned long bmp085ReadUP()
   lsb = Wire.read();
   xlsb = Wire.read();
   
-  up = (((unsigned long) msb << 16) | ((unsigned long) lsb << 8) | (unsigned long) xlsb) >> (8-OSS);
+  up = (((uint32_t) msb << 16) | ((uint32_t) lsb << 8) | (uint32_t) xlsb) >> (8-oversampling);
   
   return up;
 }
@@ -108,25 +105,24 @@ unsigned long bmp085ReadUP()
 // calibration values must be known
 // b5 is also required so bmp085GetTemperature(...) must be called first.
 // Value returned will be pressure in units of Pa.
-long bmp085GetPressure(struct BMP085::Calibration *c)
-{
-  long x1, x2, x3, b3, b6, p;
-  unsigned long b4, b7;
+int32_t BMP085::bmp085GetPressure(){
+  int32_t x1, x2, x3, b3, b6, p;
+  uint32_t b4, b7;
   
-  b6 = bmp085ReadB5(c) - 4000;
+  b6 = bmp085ReadB5() - 4000;
   // Calculate B3
-  x1 = (c->b2 * (b6 * b6)>>12)>>11;
-  x2 = (c->ac2 * b6)>>11;
+  x1 = (calibration.b2 * (b6 * b6)>>12)>>11;
+  x2 = (calibration.ac2 * b6)>>11;
   x3 = x1 + x2;
-  b3 = (((((long)c->ac1)*4 + x3)<<OSS) + 2)>>2;
+  b3 = (((((int32_t)calibration.ac1)*4 + x3)<<oversampling) + 2)>>2;
   
   // Calculate B4
-  x1 = (c->ac3 * b6)>>13;
-  x2 = (c->b1 * ((b6 * b6)>>12))>>16;
+  x1 = (calibration.ac3 * b6)>>13;
+  x2 = (calibration.b1 * ((b6 * b6)>>12))>>16;
   x3 = ((x1 + x2) + 2)>>2;
-  b4 = (c->ac4 * (unsigned long)(x3 + 32768))>>15;
+  b4 = (calibration.ac4 * (uint32_t)(x3 + 32768))>>15;
   
-  b7 = ((unsigned long)(bmp085ReadUP() - b3) * (50000>>OSS));
+  b7 = ((uint32_t)(bmp085ReadUP() - b3) * (50000>>oversampling));
   if (b7 < 0x80000000)
     p = (b7<<1)/b4;
   else
@@ -148,47 +144,45 @@ long bmp085GetPressure(struct BMP085::Calibration *c)
 // Stores all of the bmp085's calibration values into global variables
 // Calibration values are required to calculate temp and pressure
 // This function should be called at the beginning of the program
-void bmp085Calibration(struct BMP085::Calibration *c)
-{
-  c->ac1 = bmp085ReadInt(0xAA);
-  c->ac2 = bmp085ReadInt(0xAC);
-  c->ac3 = bmp085ReadInt(0xAE);
-  c->ac4 = bmp085ReadInt(0xB0);
-  c->ac5 = bmp085ReadInt(0xB2);
-  c->ac6 = bmp085ReadInt(0xB4);
-  c->b1 = bmp085ReadInt(0xB6);
-  c->b2 = bmp085ReadInt(0xB8);
-  c->mb = bmp085ReadInt(0xBA);
-  c->mc = bmp085ReadInt(0xBC);
-  c->md = bmp085ReadInt(0xBE);
+void BMP085::bmp085Calibration(){
+  calibration.ac1 = bmp085ReadInt(0xAA);
+  calibration.ac2 = bmp085ReadInt(0xAC);
+  calibration.ac3 = bmp085ReadInt(0xAE);
+  calibration.ac4 = bmp085ReadInt(0xB0);
+  calibration.ac5 = bmp085ReadInt(0xB2);
+  calibration.ac6 = bmp085ReadInt(0xB4);
+  calibration.b1 = bmp085ReadInt(0xB6);
+  calibration.b2 = bmp085ReadInt(0xB8);
+//  calibration.mb = bmp085ReadInt(0xBA);
+  calibration.mc = bmp085ReadInt(0xBC);
+  calibration.md = bmp085ReadInt(0xBE);
 }
 
 //
-// Library
+// Public
 //
 
-struct BMP085::Calibration BMP085::calibration(){
-  struct BMP085::Calibration c;
-  bmp085Calibration(&c);
-  return c;
+// Temperature
+double BMP085::readK(){
+  return convC2K((double)bmp085GetTemperature()/10.0);
 }
 
-float BMP085::readTemperature(){
-  struct BMP085::Calibration c;
-  c=BMP085::calibration();
-  return (float)bmp085GetTemperature(&c)/10.0;
+//static double readC();
+
+// Pressure
+uint32_t BMP085::readPa(){
+  return bmp085GetPressure();
 }
 
-float BMP085::readTemperature(struct BMP085::Calibration *c){
-  return (float)bmp085GetTemperature(c)/10.0;
+//static uint32_t readPa(uint8_t os);
+
+// Oversampling
+void BMP085::setOversampling(uint8_t newOversampling){
+  oversampling=newOversampling;
 }
 
-long BMP085::readPressure(){
-  struct BMP085::Calibration c;
-  c=BMP085::calibration();
-  return bmp085GetPressure(&c);
-}
-
-long BMP085::readPressure(struct BMP085::Calibration *c){
-  return bmp085GetPressure(c);;
+// Constructor
+BMP085::BMP085(uint8_t newOversampling){
+  oversampling=newOversampling;
+  bmp085Calibration();
 }
