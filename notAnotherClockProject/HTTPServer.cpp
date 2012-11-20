@@ -22,7 +22,9 @@ void HTTPServer::footer(WebServer &server){
   uptime=time.getLocalTime()-bootTime;
   server.printP(PSTR("notAnotherClockProject Server at port "));
   server.print(HTTP_PORT);
-  server.printP(PSTR(".<br>Uptime: "));
+  server.printP(PSTR(".<br>Compiled on: "));
+  server.printP(PSTR(__DATE__));
+  server.printP(PSTR("<br>Uptime: "));
   server.print(uptime/(3600L*24L));
   server.printP(PSTR(" day(s), "));
   server.print((uptime%(3600L*24L))/3600L);
