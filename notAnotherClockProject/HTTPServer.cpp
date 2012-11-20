@@ -14,11 +14,9 @@ extern time_t bootTime;
 
 void footer(WebServer &server){
   time_t uptime;
-  time_t now;
   DS1307 time(UTC);
 
-  now=time.getLocalTime()-bootTime;
-
+  uptime=time.getLocalTime()-bootTime;
   server.printP(PSTR("notAnotherClockProject Server at port "));
   server.print(HTTP_PORT);
   server.printP(PSTR(".<br>Uptime: "));
