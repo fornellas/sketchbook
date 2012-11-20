@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#define CONV_PA_INHG 3377.0
+#define CONV_PA_INHG 3386.38866667
 #define CONVPA_HPA 100.0
 
 double Pressure::readInHg(){
