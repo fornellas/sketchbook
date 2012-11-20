@@ -28,38 +28,41 @@ Net::Net(){
 void Net::processAll(){  
   if(EthernetInterrupt::available()){
     analogWrite(PIN_G, light->read(255-20)+20);
-    for(uint8_t c=0;c<processorCount;c++){
-      processor[c]();
+    for(int8_t c=0;c<processorCount;c++){
+      if(processor[c]()){
+        removeProcessor(processor[c]);
+        c--;
+      }
     }
     EthernetInterrupt::next();
     digitalWrite(PIN_G, LOW);
   }
 }
 
-void Net::addProcessor(void (*l)()){
-  processor=(void (**)())realloc(
+void Net::addProcessor(uint8_t (*l)()){
+  processor=(uint8_t (**)())realloc(
     processor,
     sizeof(
-        void (*)
+        uint8_t (*)
     ) 
     * ++processorCount
   ); // FIXME Error reporting
   processor[processorCount-1]=l;
 }
 
-void Net::removeProcessor(void (*l)()){
+void Net::removeProcessor(uint8_t (*l)()){
   for(uint8_t c=0;c<processorCount;c++){
     if(processor[c]==l){
       for(uint8_t d=c;d<processorCount-1;c++){
         processor[d]=processor[d+1];
       }
       processorCount--;
-      processor=(void (**)())realloc(
+      processor=(uint8_t (**)())realloc(
         processor,
         sizeof(
-            void (*)
+            uint8_t (*)
         )
-        * ++processorCount
+        * processorCount
       ); // FIXME Error reporting
       break;
     }

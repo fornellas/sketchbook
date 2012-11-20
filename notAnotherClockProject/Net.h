@@ -5,13 +5,13 @@
 
 class Net {
 private:
-  void (**processor)();
+  uint8_t (**processor)();
   uint8_t processorCount;
 public:
   Net();
   void processAll();
-  void addProcessor(void (*l)());
-  void removeProcessor(void (*l)());
+  void addProcessor(uint8_t (*l)());
+  void removeProcessor(uint8_t (*l)());
   ~Net();
 };
 

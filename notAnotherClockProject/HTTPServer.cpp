@@ -2,6 +2,7 @@
 #include <SD.h>
 #include <MemoryFree.h>
 #include <DS1307.h>
+#include "Net.h"
 
 #define BUFF_READ 64
 #define BUFF_TAIL 37
@@ -9,10 +10,12 @@
 
 #define HTTP_PORT 80
 
-WebServer webserver("", HTTP_PORT);
 extern time_t bootTime;
+extern Net *net;
 
-void footer(WebServer &server){
+WebServer *HTTPServer::webserver=NULL;
+
+void HTTPServer::footer(WebServer &server){
   time_t uptime;
   DS1307 time(UTC);
 
@@ -28,7 +31,7 @@ void footer(WebServer &server){
   server.printP(PSTR(" minute(s)."));
 }
 
-void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, bool tail_complete){
+void HTTPServer::fileServer(WebServer &server, WebServer::ConnectionType type, char *path, bool tail_complete){
   File file;
 
   // only GET
@@ -98,7 +101,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
       entry.close();
       server.printP(PSTR("</td></tr>\n"));
     }
-    server.printP(PSTR("</tr>\n</table>\n"));
+    server.printP(PSTR("</tr>\n</table>\n<hr>\n"));
     footer(server);
     server.printP(PSTR("</body>\n</html>\n"));
   // dump files
@@ -112,8 +115,7 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   file.close();
 }
 
-void status(WebServer &server, WebServer::ConnectionType type, char *path, bool tail_complete){
-
+void HTTPServer::status(WebServer &server, WebServer::ConnectionType type, char *path, bool tail_complete){
   // only GET
   if (type != WebServer::GET){
     server.httpFail();
@@ -140,20 +142,27 @@ void status(WebServer &server, WebServer::ConnectionType type, char *path, bool 
   server.printP(PSTR(" bytes"));
 }
 
-void HTTPServer::begin(){
-  webserver.begin();
-  webserver.addCommand("status", &status);
-  webserver.addCommand("sd", &fileServer);
+HTTPServer::HTTPServer(){
+  if(!webserver)
+    webserver=new WebServer("", HTTP_PORT);
+  webserver->begin();
+  webserver->addCommand("status", &status);
+  webserver->addCommand("sd", &fileServer);
+  net->addProcessor(loop);
 }
 
-void HTTPServer::loop(){
+uint8_t HTTPServer::loop(){
   char buff[BUFF_TAIL];
   int len;
-
   len=BUFF_TAIL;
-  webserver.processConnection(buff, &len);
-  while(webserver.available()){
+  webserver->processConnection(buff, &len);
+  while(webserver->available()){
     len=BUFF_TAIL;
-    webserver.processConnection(buff, &len);
+    webserver->processConnection(buff, &len);
   }
+  return 0;
 }
+
+
+
+

@@ -70,6 +70,7 @@ BMP085 *pressure;
 
 // Net
 Net *net;
+HTTPServer *server;
 
 // Logger
 Logger *logger;
@@ -149,8 +150,7 @@ setup(){
 
   // Ethernet
   net=new Net();
-  HTTPServer::begin();
-  net->addProcessor(HTTPServer::loop);
+  server=new HTTPServer();
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Logger
