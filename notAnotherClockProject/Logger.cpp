@@ -16,7 +16,7 @@ extern BMP085 *pressure;
 extern DS1307 *time;
 
 #define BUFF_PATH 32
-#define BUFF_FILE 13
+#define BUFF_FILE 19
 #define BUFF_VALUE 8
 #define PATH_SUFFIX 19
 
@@ -34,6 +34,7 @@ void Logger::update(){
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
     date=time->readBTimeRTC();
+    time->changeZone(0); // always use GMT
     strcpy_P(path, PSTR("DATA/"));
     itoa(date.year, path+5, 10);
     path[9]='/';
@@ -78,7 +79,7 @@ void Logger::update(){
   char txt[BUFF_FILE]; \
   uint8_t len; \
   strcpy_P(path+PATH_SUFFIX, fileName); \
-  itoa((uint16_t)date->min*60+(uint16_t)date->sec, txt, 10); \
+  ltoa(time->getLocalTime(), txt, 10); \
   len=strlen(txt); \
   txt[len]='\t';
 
