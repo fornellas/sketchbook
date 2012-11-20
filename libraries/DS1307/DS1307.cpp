@@ -42,7 +42,7 @@ void DS1307::setRTC(btime_t newBTime){
   // save tz
   oldZone=bTime.zone; // save local zone
   // RTC always in UTC
-  changeZone(0);
+  changeZone(UTC);
   // set date
   Wire.beginTransmission(DS1307_ADDRESS);
   Wire.write(zero); //stop Oscillator

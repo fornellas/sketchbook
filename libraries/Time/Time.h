@@ -25,6 +25,8 @@
 #define NOVEMBER 11
 #define DECEMBER 12
 
+#define UTC 0
+
 typedef int32_t time_t;
 
 typedef struct {
