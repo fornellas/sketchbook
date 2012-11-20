@@ -24,8 +24,6 @@
 #include "pins.h"
 #include "Button.h"
 #include "EEPROM_addr.h"
-#include "Net.h"
-#include "Logger.h"
 // Modes
 #include "Mode.h"
 #include "Clock.h"
@@ -36,7 +34,12 @@
 #include "Equalizer.h"
 #include "ECA.h"
 #include "BigClock.h"
+// Net
+#include "Net.h"
 #include "HTTPServer.h"
+#include "WUnder.h"
+// Misc
+#include "Logger.h"
 
 // Sparkfun RGB LED Matrix
 SFRGBLEDMatrix *ledMatrix;
@@ -71,6 +74,7 @@ BMP085 *pressure;
 // Net
 Net *net;
 HTTPServer *server;
+WUnder *wunder;
 
 // Logger
 Logger *logger;
@@ -148,9 +152,10 @@ setup(){
   pressure=new BMP085(BMP085_ULTRAHIGHRES);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // Ethernet
+  // Net
   net=new Net();
   server=new HTTPServer();
+  wunder=new WUnder();
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Logger
@@ -201,13 +206,16 @@ loop(){
     mode->loop();
     // Ethernet
     net->processAll();
-    // Light update / Logger
+    // Light update / Logger / WUnder
     if(millis()-lastLightUpdate>LIGHT_UPDATE_MS){
+      // logger
+      logger->update();
+      // WUnder
+      wunder->update();
+      // Light
       light->update();
       lastLightUpdate+=LIGHT_UPDATE_MS;
       analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
-      // logger
-      logger->update();
       // Change to Big Clock when it gets dark
       if(lastLightReading>BIG_CLOCK_THRESHOLD && light->read(1023)<=BIG_CLOCK_THRESHOLD) {
         lastLightReading=light->read(1023);
