@@ -13,7 +13,6 @@
 extern Light *light;
 extern DS18S20 *temperatureOutside;
 extern BMP085 *pressure;
-extern DS1307 *time;
 
 #define BUFF_PATH 32
 #define BUFF_FILE 19
@@ -29,12 +28,12 @@ void Logger::update(){
     // Path: DATA/AAAA/MM/DD/HH/12345678.txt
     char path[BUFF_PATH];
     btime_t date;
+    DS1307 time(UTC);
 
     analogWrite(PIN_R, light->read(255-20)+20);
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
-    date=time->readBTimeRTC();
-    time->changeZone(0); // always use GMT
+    date=time.getBtime();
     strcpy_P(path, PSTR("DATA/"));
     itoa(date.year, path+5, 10);
     path[9]='/';
@@ -63,19 +62,19 @@ void Logger::update(){
     // Indoor Temperature
     float temperatureInside;
      byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
-    save(PSTR("TEMPINDO.TXT"), path, &date, pressure->readC());
+    save(PSTR("TEMPINDO.TXT"), path, &time, pressure->readC());
     // Outdoor Temperature
-    save(PSTR("TEMPOUTD.TXT"), path, &date, temperatureOutside->readC());
+    save(PSTR("TEMPOUTD.TXT"), path, &time, temperatureOutside->readC());
     // Humidity
-    save(PSTR("HUMIDITY.TXT"), path, &date, HIH4030::read(PIN_HUMIDITY, temperatureInside));
-    save(PSTR("PRESSURE.TXT"), path, &date, (long int)pressure->readPa());
+    save(PSTR("HUMIDITY.TXT"), path, &time, HIH4030::read(PIN_HUMIDITY, temperatureInside));
+    save(PSTR("PRESSURE.TXT"), path, &time, (long int)pressure->readPa());
     
     digitalWrite(PIN_R, LOW);
   }
 }
 
 // Append file name to path, add date\t to txt
-#define FILL_BUFF(fileName, path, date, value) \
+#define FILL_BUFF(fileName, path, time, value) \
   char txt[BUFF_FILE]; \
   uint8_t len; \
   strcpy_P(path+PATH_SUFFIX, fileName); \
@@ -84,18 +83,18 @@ void Logger::update(){
   txt[len]='\t';
 
 // save values to SD
-void Logger::save(PGM_P fileName, char *path, btime_t *date, double value){
-  FILL_BUFF(fileName, path, date, value);
+void Logger::save(PGM_P fileName, char *path, Time *time, double value){
+  FILL_BUFF(fileName, path, time, value);
   dtostrf(value, -2, 2, txt+len+1);
   writeToFile(path, txt);
 }
-void Logger::save(PGM_P fileName, char *path, btime_t *date, int value){
-  FILL_BUFF(fileName, path, date, value);
+void Logger::save(PGM_P fileName, char *path, Time *time, int value){
+  FILL_BUFF(fileName, path, time, value);
   itoa(value, txt+len+1, 10);
   writeToFile(path, txt);
 }
-void Logger::save(PGM_P fileName, char *path, btime_t *date, long int value){
-  FILL_BUFF(fileName, path, date, value);
+void Logger::save(PGM_P fileName, char *path, Time *time, long int value){
+  FILL_BUFF(fileName, path, time, value);
   ltoa(value, txt+len+1, 10);
   writeToFile(path, txt);
 }

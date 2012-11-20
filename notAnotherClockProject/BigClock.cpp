@@ -2,11 +2,11 @@
 
 #include <U8glib.h>
 #include <DS1307.h>
+#include "tz.h"
 
 #define BUFF_DATE 3
 
 extern U8GLIB_ST7920_128X64 *lcd;
-extern DS1307 *time;
 
 BigClock::BigClock():
 Mode(PSTR("Big Clock")){
@@ -14,9 +14,10 @@ Mode(PSTR("Big Clock")){
 
 void BigClock::loop(){
   btime_t date;
+  DS1307 time(TIMEZONE);
 
   // Date
-  date=time->getBtime();
+  date=time.getBtime();
 
   // LCD
   lcd->firstPage();

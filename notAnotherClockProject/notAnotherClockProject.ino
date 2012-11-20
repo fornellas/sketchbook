@@ -55,9 +55,8 @@ int lastLightReading;
 #define MODE_BIG_CLOCK 1
 #define LIGHT_UPDATE_MS 1000
 
-// DS1307
-DS1307 *time;
-#define TIMEZONE -3
+// Time
+time_t bootTime;
 
 // OneWire
 OneWire *ow;
@@ -79,7 +78,7 @@ Logger *logger;
 // setup()
 //
 
-#define BOOT_STEPS 15
+#define BOOT_STEPS 16
 
 void
 setup(){
@@ -131,8 +130,10 @@ setup(){
   lastLightReading=light->read(1023);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // DS1307
-  time=new DS1307(TIMEZONE); // FIXME make configurable
+  // uptime
+  DS1307 time(UTC);
+  bootTime=time.getLocalTime();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // OneWire
   ow=new OneWire(PIN_ONEWIRE);
@@ -205,6 +206,7 @@ loop(){
       light->update();
       lastLightUpdate+=LIGHT_UPDATE_MS;
       analogWrite(PIN_LCD_BLA, light->read(255-20)+20);
+      // logger
       logger->update();
       // Change to Big Clock when it gets dark
       if(lastLightReading>BIG_CLOCK_THRESHOLD && light->read(1023)<=BIG_CLOCK_THRESHOLD) {

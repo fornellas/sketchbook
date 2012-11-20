@@ -10,6 +10,7 @@
 class Clock: 
 public Mode {
 private:
+  Time *time;
   btime_t date;
   byte value; // light intensity
   // LCD
@@ -28,6 +29,7 @@ private:
 public:
   Clock();
   void loop();
+  ~Clock();
 };
 
 #endif

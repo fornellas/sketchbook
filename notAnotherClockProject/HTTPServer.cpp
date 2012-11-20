@@ -1,12 +1,34 @@
 #include "HTTPServer.h"
 #include <SD.h>
 #include <MemoryFree.h>
+#include <DS1307.h>
 
 #define BUFF_READ 64
 #define BUFF_TAIL 37
 #define BUFF_MIME 26
 
-WebServer webserver("", 80);
+#define HTTP_PORT 80
+
+WebServer webserver("", HTTP_PORT);
+extern time_t bootTime;
+
+void footer(WebServer &server){
+  time_t uptime;
+  time_t now;
+  DS1307 time(UTC);
+
+  now=time.getLocalTime()-bootTime;
+
+  server.printP(PSTR("notAnotherClockProject Server at port "));
+  server.print(HTTP_PORT);
+  server.printP(PSTR(".<br>Uptime: "));
+  server.print(uptime/(3600L*24L));
+  server.printP(PSTR(" day(s), "));
+  server.print((uptime%(3600L*24L))/3600L);
+  server.printP(PSTR(" hour(s), "));
+  server.print((uptime%(3600L))/60L);
+  server.printP(PSTR(" minute(s)."));
+}
 
 void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, bool tail_complete){
   File file;
@@ -52,11 +74,19 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
   // list directories
   if(file.isDirectory()){
     server.httpSuccess();
-    server.printP(PSTR("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\n<html>\n<title>Arduino File Server</title>\n<body>\n"));
-    server.print(path); // TODO add .. link
-    server.printP(PSTR("<br/>\n"));
+    server.printP(PSTR("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\n<html>\n<title>Arduino File Server</title>\n<body>\n<h1>Index of "));
+    server.print(path);
+    server.printP(PSTR("</h1>\n<table border=\"1\">\n<tr><td><b>Type</b></td><td><b>Name</b></td><td><b>Size</b></td></tr>"));
     file.rewindDirectory();
     while(File entry=file.openNextFile()){
+      // Type
+      server.printP(PSTR("<tr><td>"));
+      if(entry.isDirectory())
+        server.printP(PSTR("DIR"));
+      else
+        server.printP(PSTR("FILE"));
+      // Name
+      server.printP(PSTR("</td><td>"));
       server.printP(PSTR("<a href=\"sd?"));
       server.print(path);
       if(path[strlen(path)-1]!='/')
@@ -64,11 +94,14 @@ void fileServer(WebServer &server, WebServer::ConnectionType type, char *path, b
       server.print(entry.name());
       server.printP(PSTR("\">"));
       server.print(entry.name());
-      if(entry.isDirectory())
-        server.printP(PSTR("/"));
-      server.printP(PSTR("</a><br/>\n"));
+      // Size
+      server.printP(PSTR("</a></td><td>"));
+      server.print(entry.size());
       entry.close();
+      server.printP(PSTR("</td></tr>\n"));
     }
+    server.printP(PSTR("</tr>\n</table>\n"));
+    footer(server);
     server.printP(PSTR("</body>\n</html>\n"));
   // dump files
   } else {

@@ -12,6 +12,7 @@
 #include "Light.h"
 #include "Button.h"
 #include "EEPROM_addr.h"
+#include "tz.h"
 
 #define BUFF_LCD_MSG 8
 
@@ -20,7 +21,6 @@ extern U8GLIB_ST7920_128X64 *lcd;
 extern Light *light;
 extern DS18S20 *temperatureOutside;
 extern BMP085 *pressure;
-extern DS1307 *time;
 
 // LCD
 
@@ -298,6 +298,7 @@ Clock::Clock():
 Mode(PSTR("Clock")){
   lastLCDUpdate=millis();
   lastLCDUpdate=0;
+  time=new DS1307(TIMEZONE);
 }
 
 void Clock::loop(){
@@ -349,4 +350,8 @@ void Clock::loop(){
     return;
   }
   ledMatrix->show();
+}
+
+Clock::~Clock(){
+  delete time;
 }
