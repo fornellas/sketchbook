@@ -17,7 +17,7 @@
 #define HOST_PREFIX "Host: "
 #define WUNDER_HOST "weatherstation.wunderground.com"
 #define WUNDER_PORT 80
-#define GET_PREFIX "GET /weatherstation/updateweatherstation.php?ID=ISOPAULO25&PASSWORD="
+#define GET_PREFIX "GET /weatherstation/updateweatherstation.php?ID=ISPSAOPA12&PASSWORD="
 #define GET_SUFFIX " HTTP/1.1"
 #define SEND_BUFF_LEN 218
 #define SEND_BUFF_END &sendBuff[strlen(sendBuff)]
