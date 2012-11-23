@@ -37,3 +37,6 @@
 #define PIN_R 12
 #define PIN_G 9
 #define PIN_B 11
+
+// DHT22
+#define PIN_DHT22 13
