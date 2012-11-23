@@ -55,7 +55,7 @@ Serial.println("New connection.");
       if(client.connect(strcpy_P(sendBuff, PSTR(WUNDER_HOST)), WUNDER_PORT)){
         DS1307 time(UTC);
         btime_t bt;
-        bt=time.getBtime();
+        bt=time.getBTime();
         inProgress=1;
         sendBuff[0]='\0';
         double tInC;

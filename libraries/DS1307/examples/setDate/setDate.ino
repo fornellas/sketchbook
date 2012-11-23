@@ -11,7 +11,6 @@ void setup(){
 
   Serial.begin(115200);
   Wire.begin();
-  time=new DS1307(TIMEZONE);
 
   bt.sec=50;
   bt.min=21;
@@ -22,13 +21,16 @@ void setup(){
   bt.year=2012;
   bt.zone=TIMEZONE;
 
-//  time->setRTC(bt);
+  time=new DS1307(TIMEZONE);
+  time->mktime(bt);
+//  time->saveToRTC();
 }
 
 void loop(){
   btime_t bt;
 
-  bt=time->readBTimeRTC();
+  time->loadFromRTC();
+  bt=time->getBTime();
   Serial.print("TZ(");
   Serial.print(bt.zone);
   Serial.print(") ");

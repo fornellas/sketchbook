@@ -89,13 +89,13 @@ Clock::lcdInfo(){
     y+=lcd->getFontAscent()+1;
     lcd->setFont(u8g_font_7x14);
     lcd->setFontPosTop();
-    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getWeekDayName(date.wday))/2;
-    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getWeekDayName(date.wday));
+    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getWeekDayName())/2;
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getWeekDayName());
     // Date
     y+=lcd->getFontAscent()+2;
     x=0;
-    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getMonthName(date.mon));
-    t=lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getMonthName(date.mon));
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getMonthName());
+    t=lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getMonthName());
     itoa(date.year, buff, 10);
     x=lcd->getWidth()-lcd->getStrWidth(buff);
     lcd->drawStr(x, y, buff);
@@ -312,7 +312,8 @@ void Clock::loop(){
   value=V_GAMMA(value);
 
   // Date
-  date=time->readBTimeRTC();
+  time->loadFromRTC();
+  date=time->getBTime();
 
   // LCD
   if((now=millis())-lastLCDUpdate>1000){

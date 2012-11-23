@@ -33,7 +33,7 @@ void Logger::update(){
     analogWrite(PIN_R, light->read(255-20)+20);
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
-    date=time.getBtime();
+    date=time.getBTime();
     strcpy_P(path, PSTR("DATA/"));
     itoa(date.year, path+5, 10);
     path[9]='/';

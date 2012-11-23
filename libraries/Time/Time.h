@@ -44,16 +44,18 @@ class Time{
 protected:
   btime_t bTime;
 public:
+  Time(int8_t zone);
   // RTC
-  virtual btime_t readBTimeRTC()=0;
-  virtual void setRTC(btime_t newBTime)=0;
-  void setRTC();
-  // Utils
+  virtual void loadFromRTC(){}; // should be pure virtual, but avr-gcc can not link it...
+  virtual void saveToRTC()=0;
+  // change
   void mktime(btime_t newBTime);
   void mktime(time_t newLocalTime);
-  btime_t getBtime();
-  time_t getLocalTime(); // local time
   void changeZone(int8_t newZone);
+  // return values
+  time_t getLocalTime();
+  btime_t getBTime();
+  // names
   const PROGMEM char *getWeekDayName(uint8_t weekDay);
   const PROGMEM char *getWeekDayName();
   const PROGMEM char *getMonthName(uint8_t month);

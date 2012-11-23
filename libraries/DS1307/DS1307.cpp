@@ -12,7 +12,7 @@ uint8_t DS1307::decToBcd(uint8_t val){
   return ( (val/10*16) + (val%10) );
 }
 
-btime_t DS1307::readBTimeRTC(){
+void DS1307::loadFromRTC(){
   int16_t zero=0;
   int8_t oldZone;
 
@@ -30,15 +30,12 @@ btime_t DS1307::readBTimeRTC(){
   oldZone=bTime.zone;
   bTime.zone = 0; // RTC always UTC
   changeZone(oldZone); // convert to local time
-  return bTime;
 }
 
-void DS1307::setRTC(btime_t newBTime){
+void DS1307::saveToRTC(){
   int16_t zero=0;
   int8_t oldZone;
 
-  // save new time
-  bTime=newBTime;
   // save tz
   oldZone=bTime.zone; // save local zone
   // RTC always in UTC
@@ -59,8 +56,9 @@ void DS1307::setRTC(btime_t newBTime){
   changeZone(oldZone);
 }
 
-DS1307::DS1307(int8_t zone){
+DS1307::DS1307(int8_t zone):
+Time(zone){
   bTime.zone=zone;
-  readBTimeRTC();
+  loadFromRTC();
 }
 

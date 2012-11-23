@@ -24,9 +24,12 @@
 #define SECS_DEC (SECS_NOV+SECS_30_DAYS)
 #define SECS_PER_4_YEARS (SECS_PER_YEAR*4+SECS_PER_DAY)
 
-void Time::setRTC(){
-  setRTC(bTime);
+Time::Time(int8_t zone){
+  bTime.zone=zone;
+  loadFromRTC();
 }
+
+// change
 
 void Time::mktime(btime_t newBTime){
   bTime=newBTime;
@@ -77,7 +80,14 @@ void Time::mktime(time_t newLocalTime){
   bTime.sec=newLocalTime;
 }
 
-btime_t Time::getBtime(){
+void Time::changeZone(int8_t newZone){
+  mktime(getLocalTime()+((time_t)newZone-(time_t)bTime.zone)*SECS_PER_HOUR);
+  bTime.zone=newZone;
+}
+
+// return values
+
+btime_t Time::getBTime(){
   return bTime;
 }
 
@@ -138,10 +148,7 @@ time_t Time::getLocalTime(){
   return t;
 }
 
-void Time::changeZone(int8_t newZone){
-  mktime(getLocalTime()+((time_t)newZone-(time_t)bTime.zone)*SECS_PER_HOUR);
-  bTime.zone=newZone;
-}
+// names
 
 const PROGMEM char *Time::getWeekDayName(uint8_t weekDay){
   switch(weekDay){
@@ -196,5 +203,6 @@ const PROGMEM char *Time::getMonthName(uint8_t month){
 }
 
 const PROGMEM char *Time::getMonthName(){
-  getMonthName(bTime.mon);
+  return getMonthName(bTime.mon);
 }
+

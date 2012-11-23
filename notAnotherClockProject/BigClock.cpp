@@ -17,7 +17,7 @@ void BigClock::loop(){
   DS1307 time(TIMEZONE);
 
   // Date
-  date=time.getBtime();
+  date=time.getBTime();
 
   // LCD
   lcd->firstPage();
