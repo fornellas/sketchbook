@@ -87,9 +87,10 @@ Serial.println("New connection.");
         APPEND_DOUBLE(Temperature::convC2F(tOutC=temperatureOutside->readC()));
         APPEND_STR("&humidity=");
         APPEND_DOUBLE(h);
-        // Dew point from http://ag.arizona.edu/azmet/dewpoint.html
+        // http://www.srh.noaa.gov/images/epz/wxcalc/rhTdFromWetBulb.pdf
         APPEND_STR("&dewptf=");
-        dpb=(log(h / 100.0) + ((17.27 * tOutC) / (237.3 + tOutC))) / 17.27;
+        double E=rh*(6.112*exp(17.67*temp/(temp+243.5)))/100;
+        dpb=(243.5 * log(E/6.112))/(17.67-log(E/6.112));
         APPEND_DOUBLE(Temperature::convC2F((237.3 * dpb) / (1 - dpb)));
         APPEND_STR("&baromin=");
         APPEND_DOUBLE(pressure->readInHg());
