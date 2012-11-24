@@ -6,15 +6,16 @@
 byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
 
 OneWire *ow;
-DS18S20 *temperature;
+DS18S20 *sensor;
 
 void setup(){
   Serial.begin(115200);
   ow=new OneWire(PIN_ONEWIRE);
-  temperature=new DS18S20(addr, ow);
+  sensor=new DS18S20(addr, ow);
 }
 
 void loop(){
-  Serial.println(temperature->readC());
+  sensor->loadFromSensor();
+  Serial.println(sensor->getC());
   delay(1000);
 }

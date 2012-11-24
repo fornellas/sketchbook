@@ -4,16 +4,16 @@
 #include <inttypes.h>
 
 class Temperature{
+protected:
+  double K;
 public:
-  // Kelvin
-  virtual double readK()=0;
-  // Celsius
-  virtual double readC();
-  // Fahrenheit
-  virtual double readF();
-  // Conversion
-  static double convC2F(double C);
-  static double convC2K(double C);
+  Temperature();
+  // Sensor
+  virtual void loadFromSensor(){}; // should be pure virtual, but avr-gcc can not link it...
+  // return values
+  double getK(); // Kelvin
+  double getC(); // Celsius
+  double getF(); // Fahrenheit
 };
 
 #endif

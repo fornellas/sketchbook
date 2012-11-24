@@ -8,11 +8,10 @@ Temperature	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-readK	KEYWORD2
-readC	KEYWORD2
-readF	KEYWORD2
-convC2F	KEYWORD2
-convC2K	KEYWORD2
+loadFromSensor	KEYWORD2
+getK			KEYWORD2
+getC			KEYWORD2
+getF			KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

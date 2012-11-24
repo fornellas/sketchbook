@@ -1,17 +1,19 @@
 #include "Temperature.h"
 
-double Temperature::readC(){
-  return readK()-273.15;
+Temperature::Temperature(){
+  loadFromSensor();
 }
 
-double Temperature::readF(){
-  return readK()*9/5-459.57;
+// return values
+
+double Temperature::getK(){
+  return K;
 }
 
-double Temperature::convC2F(double C){
-  return C*9/5+32;
+double Temperature::getC(){
+  return K-273.15;
 }
 
-double Temperature::convC2K(double C){
-  return C+273.15;
+double Temperature::getF(){
+  return K*9/5-459.57;
 }

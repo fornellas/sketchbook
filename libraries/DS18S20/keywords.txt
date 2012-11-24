@@ -8,7 +8,7 @@ DS18S20	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-readK	KEYWORD2
+loadFromSensor	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

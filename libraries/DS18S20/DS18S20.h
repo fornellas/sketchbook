@@ -10,7 +10,7 @@ public Temperature {
   uint8_t *addr;
   OneWire *ow;
 public:
-  double readK();
+  void loadFromSensor();
   DS18S20(uint8_t *addr, OneWire *ow);
 };
 

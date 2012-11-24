@@ -8,9 +8,9 @@ BMP085	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-readK	KEYWORD2
-readPa	KEYWORD2
-setOversampling KEYWORD2
+loadFromSensor	KEYWORD2
+readPa			KEYWORD2
+setOversampling 	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

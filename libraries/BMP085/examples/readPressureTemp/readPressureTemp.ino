@@ -11,7 +11,8 @@ void setup(){
 }
 
 void loop(){
-  Serial.print(sensor->readC());
+  sensor->loadFromSensor();
+  Serial.print(sensor->getC());
   Serial.println(" C");
   Serial.print(sensor->readPa());
   Serial.println(" Pa");

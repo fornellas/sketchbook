@@ -1,7 +1,7 @@
 #include <DS18S20.h>
 #include <OneWire.h>
 
-double DS18S20::readK(){
+void DS18S20::loadFromSensor(){
   uint8_t data[2];
 
   // CONVERT
@@ -17,12 +17,12 @@ double DS18S20::readK(){
     data[i] = ow->read();
   
   // Calculate
-  return convC2K((double)((data[1]<<8)|data[0])/16.0);
+  K=((double)((data[1]<<8)|data[0])/16.0)+273.15;
 }
 
 DS18S20::DS18S20(uint8_t *a, OneWire *o){
   addr=a;
   ow=o;
   // discart first reading, always wrong on power on
-  readC();
+  loadFromSensor();
 }

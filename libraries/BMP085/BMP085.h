@@ -56,11 +56,9 @@ private:
   void bmp085Calibration();
 public:
   // Temperature
-  double readK();
-//  static double readC();
+  void loadFromSensor();
   // Pressure
   uint32_t readPa();
-//  static uint32_t readPa(uint8_t os);
   // Oversampling
   void setOversampling(uint8_t newOversampling);
   // Constructor
