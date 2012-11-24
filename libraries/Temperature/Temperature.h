@@ -14,6 +14,8 @@ public:
   double getK(); // Kelvin
   double getC(); // Celsius
   double getF(); // Fahrenheit
+  // conversion
+  static double convC2F(double C);
 };
 
 #endif
