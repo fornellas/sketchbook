@@ -2,13 +2,14 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-HIH4030	KEYWORD1
+Humidity	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-loadFromSensor	KEYWORD2
+loadFromSensor		KEYWORD2
+getRH			KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

@@ -1,16 +1,13 @@
-#include <HIH4030.h>
+#include "HIH4030.h"
+#include <Arduino.h>
 
-void HIH4030::setup(uint8_t pin){
+HIH4030::HIH4030(uint8_t sensorPin, Temperature *temp){
+  pin=sensorPin;
+  temperature=temp;
   pinMode(pin, INPUT);
+}
+
+void HIH4030::loadFromSensor(){
   analogReference(DEFAULT);
+  RH=((float(analogRead(pin))/1023.0)-0.16)/(0.00653852-0.000013392*temperature->getC());
 }
-
-float HIH4030::read(uint8_t pin, float temperature){
-  return calculate(float(analogRead(pin))/1023.0, temperature);
-}
-
-float HIH4030::calculate(float VoutVdc, float temperature){
-  return (VoutVdc-0.16)/(0.00653852-0.000013392*temperature);
-}
-
-

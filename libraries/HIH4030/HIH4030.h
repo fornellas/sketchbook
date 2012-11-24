@@ -1,12 +1,18 @@
 #ifndef HIH4030_h
 #define HIH4030_h
 
-#include <Arduino.h>
+#include <Humidity.h>
+#include <Temperature.h>
 
-namespace HIH4030 {
-  void setup(uint8_t pin); // 5V Arduinos only!
-  float read(uint8_t pin, float temperature); // Call setup() before
-  float calculate(float VoutVdc, float temperature); // VoutVdc = Vout / Vdc. Eg: float(analogRead(pin))/1023.0
+class HIH4030:
+public Humidity {
+private:
+  uint8_t pin;
+  Temperature *temperature;
+public:
+  HIH4030(uint8_t sensorPin, Temperature *temperature); // 5V Arduinos only!
+  // Sensor
+  void loadFromSensor();
 };
 
 #endif
