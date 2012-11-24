@@ -14,12 +14,13 @@
     return read(address);                         \
   }
 
-namespace EthernetInterrupt {
+class EthernetInterrupt {
+private:
   static uint8_t w5100int;
   static uint8_t interrupt;
-  void w5100IntProc();
-  uint8_t read(uint16_t addr);
-  uint8_t write(uint16_t _addr, uint8_t _data);
+  static void w5100IntProc();
+  static uint8_t read(uint16_t addr);
+  static uint8_t write(uint16_t _addr, uint8_t _data);
   __GP_REGISTER8 (IMR,    0x0016);    // Interrupt Mask
   __GP_REGISTER8(S0_IR,  0x0402);    // Socket 0 Interrupt
   __GP_REGISTER8(S1_IR,  0x0502);    // Socket 1 Interrupt
@@ -42,6 +43,7 @@ namespace EthernetInterrupt {
   inline static void setSS()     { PORTB &= ~_BV(2); };
   inline static void resetSS()   { PORTB |=  _BV(2); };
 #endif
+public:
   // Interrupt number is different for each board:
   // Duemilanove, Uno, Ethernet
   //   interrupt=0
@@ -52,9 +54,9 @@ namespace EthernetInterrupt {
   // Do not forget to solder the jumper INT on the Ethernet shield!
   // NOTE: on R3 of Ethernet shield, the jumper is unlabeled, and is located
   // below the board, at the left of the word "SHIELD".
-  void begin(uint8_t interrupt);
-  uint8_t available();
-  void next();
-}
+  static void begin(uint8_t interrupt);
+  static uint8_t available();
+  static void next();
+};
 
 #endif

@@ -3,6 +3,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+uint8_t EthernetInterrupt::w5100int=0;
+uint8_t EthernetInterrupt::interrupt=0;
+
 void EthernetInterrupt::w5100IntProc(){
   w5100int=1;
   /* It seems that the W5100 will not keep /INT low when there is a new
