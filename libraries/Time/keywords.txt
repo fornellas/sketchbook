@@ -1,0 +1,45 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+time_t	KEYWORD1
+btime_t	KEYWORD1
+Time	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+loadFromRTC	KEYWORD2
+saveToRTC	KEYWORD2
+mktime		KEYWORD2
+changeZone	KEYWORD2
+getLocalTime	KEYWORD2
+getBTime	KEYWORD2
+getWeekDayName	KEYWORD2
+getMonthName	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SUNDAY		LITERAL1
+MONDAY		LITERAL1
+TUESDAY		LITERAL1
+WEDNESDAY	LITERAL1
+THRUSDAY	LITERAL1
+FRIDAY		LITERAL1
+SATURDAY	LITERAL1
+JANUARY		LITERAL1
+FEBRUARY	LITERAL1
+MARCH		LITERAL1
+APRIL		LITERAL1
+MAY		LITERAL1
+JUNE		LITERAL1
+JULY		LITERAL1
+AUGUST		LITERAL1
+SEPTEMBER	LITERAL1
+OCTOBER		LITERAL1
+NOVEMBER	LITERAL1
+DECEMBER	LITERAL1
+UTC		LITERAL1
