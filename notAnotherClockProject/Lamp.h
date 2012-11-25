@@ -7,14 +7,7 @@ class Lamp:
 public Mode {
 public:
   Lamp();
-  void loop();
+  inline void loop();
 };
 
 #endif
-
-
-
-
-
-
-

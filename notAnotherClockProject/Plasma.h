@@ -18,7 +18,7 @@ private:
   void pSpeedValidate();
 public:
   Plasma();
-  void loop();
+  inline void loop();
   ~Plasma();
 };
 

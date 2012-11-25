@@ -28,7 +28,7 @@ private:
   void showBigDigit();
 public:
   Clock();
-  void loop();
+  inline void loop();
   ~Clock();
 };
 

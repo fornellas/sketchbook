@@ -57,7 +57,7 @@ U8GLIB_ST7920_128X64 *lcd;
 // Light
 Light *light;
 unsigned long lastLightUpdate;
-#define BIG_CLOCK_THRESHOLD 60
+#define BIG_CLOCK_THRESHOLD 50
 int lastLightReading;
 #define MODE_CLOCK 0
 #define MODE_BIG_CLOCK 1

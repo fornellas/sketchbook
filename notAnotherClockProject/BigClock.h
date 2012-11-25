@@ -10,7 +10,7 @@ public Mode {
 private:
 public:
   BigClock();
-  void loop();
+  inline void loop();
 };
 
 #endif

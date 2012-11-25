@@ -10,7 +10,7 @@ class Mode {
 public:
   PROGMEM char *name;
   Mode(PROGMEM char *name);
-  virtual void loop()=0;
+  virtual inline void loop()=0;
   virtual ~Mode();
 };
 

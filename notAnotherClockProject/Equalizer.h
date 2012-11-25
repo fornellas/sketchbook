@@ -10,7 +10,7 @@ private:
   uint8_t pin;
 public:
   Equalizer();
-  void loop();
+  inline void loop();
 };
 
 #endif

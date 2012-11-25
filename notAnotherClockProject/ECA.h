@@ -16,7 +16,7 @@ private:
   unsigned long lastLCDUpdate;
 public:
   ECA();
-  void loop();
+  inline void loop();
   ~ECA();
 };
 

@@ -12,7 +12,7 @@ private:
   byte *pixmap;
 public:
   Fire();
-  void loop();
+  inline void loop();
   ~Fire();
 };
 
