@@ -195,7 +195,8 @@ setup(){
   }
 
   // Random
-  randomSeed(pressure->readPa()+temperatureInside->getC());
+  bmp085->loadFromSensor();
+  randomSeed(pressure->getPa()+temperatureInside->getC());
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // RGB LED

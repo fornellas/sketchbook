@@ -78,9 +78,8 @@ Clock::lcdInfo(){
     x=lcd->getWidth()*3/4-lcd->getStrWidth(buff)/2;
     lcd->drawStr(x, y, buff);
     // Pressure
-    ltoa(pressure.readHPa(), buff, 10);
+    ltoa(pressure.getPa(), buff, 10);
     t=strlen(buff);
-    buff[t++]='h';
     buff[t++]='P';
     buff[t++]='a';
     buff[t]='\0';

@@ -6,18 +6,20 @@
 #define AVERAGE_SEA_LEVEL_PRESSURE 101325
 
 class Pressure{
+protected:
+  double Pa;
 public:
-  // Pascal
-  virtual uint32_t readPa()=0;
-  // inches Hg
-  virtual double readInHg();
-  // hPa
-  virtual double readHPa();
-  // Atmosphere
-  virtual double readAtm();
+  Pressure();
+  // Sensor
+  virtual void loadFromSensor(){}; // should be pure virtual, but avr-gcc can not link it...
+  // return values
+  double getPa(); // Pascal
+  double getInHg(); // Inches Hg
+  double getHPa(); // hPa / millibar
+  double getAtm(); // Atmosphere
   // Altitude
-  static double calcAltitude(uint32_t seaLevelPa, uint32_t Pa);
-  double readCalcAltitude(uint32_t seaLevelPa);
+  double altitude(double seaLevelPa);
+  static double expectedPressure(double seaLevelPa, double meters);
 };
 
 #endif

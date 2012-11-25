@@ -165,11 +165,7 @@ void BMP085::bmp085Calibration(){
 // Temperature
 void BMP085::loadFromSensor(){
   K=((double)bmp085GetTemperature()/10.0)+273.15;
-}
-
-// Pressure
-uint32_t BMP085::readPa(){
-  return bmp085GetPressure();
+  Pa=bmp085GetPressure();
 }
 
 // Oversampling

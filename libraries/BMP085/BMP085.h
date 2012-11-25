@@ -55,10 +55,8 @@ private:
   struct Calibration calibration;
   void bmp085Calibration();
 public:
-  // Temperature
+  // Sensor
   void loadFromSensor();
-  // Pressure
-  uint32_t readPa();
   // Oversampling
   void setOversampling(uint8_t newOversampling);
   // Constructor

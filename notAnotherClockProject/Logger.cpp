@@ -54,7 +54,7 @@ void Logger::update(){
     // Inside
     bmp085->loadFromSensor();
     save(PSTR("TEMPINDO.TXT"), path, &time, temperatureInside.getC());
-    save(PSTR("PRESSURE.TXT"), path, &time, (long int)pressure.readPa());
+    save(PSTR("PRESSURE.TXT"), path, &time, (long int)pressure.getPa());
     humidityInside.loadFromSensor();
     save(PSTR("HUMIDIIN.TXT"), path, &time, humidityInside.getRH());
     // Out

@@ -8,12 +8,12 @@ Pressure	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-readPa	KEYWORD2
-readInHg KEYWORD2
-readHPa KEYWORD2
-readAtm KEYWORD2
-calcAltitude KEYWORD2
-readCalcAltitude KEYWORD2
+getPa			KEYWORD2
+getInHg			KEYWORD2
+getHPa			KEYWORD2
+getAtm			KEYWORD2
+altitude		KEYWORD2
+expectedPressure	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
