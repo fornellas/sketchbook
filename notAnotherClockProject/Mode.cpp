@@ -17,7 +17,7 @@ Mode::Mode(PROGMEM char *name) {
   } 
   while( lcd->nextPage() );
   // CRT Out LED Matrix
-  ledMatrix->CRT(BLACK, BLACK);
+  ledMatrix->CRT(BLACK);
 }
 
 Mode::~Mode() {
