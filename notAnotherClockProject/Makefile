@@ -22,7 +22,9 @@ ARDUINO_LIBS=\
   SD/utility \
   Webduino \
   Temperature \
-  Pressure
+  Pressure \
+  DHT22 \
+  Humidity
 ARDUINO_DIR=/home/fornellas/local/arduino-1.0.1
 ARDMK_DIR=/home/fornellas/src/Arduino-Makefile
 AVR_TOOLS_DIR=/usr

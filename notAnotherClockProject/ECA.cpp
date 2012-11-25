@@ -1,13 +1,9 @@
 #include "ECA.h"
 
-#include "Button.h"
-#include <U8glib.h>
+#include "facilities.h"
 
 #define CHANGE_MS 5000
 #define BUFF_RULE 4
-
-extern U8GLIB_ST7920_128X64 *lcd;
-extern SFRGBLEDMatrix *ledMatrix;
 
 void ECA::newAutomata(){
   byte x;

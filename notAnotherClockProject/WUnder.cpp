@@ -1,16 +1,10 @@
 #include "WUnder.h"
 
 #include <Arduino.h>
-#include "Net.h"
-#include "Light.h"
-#include "pins.h"
-#include <DS1307.h>
-#include <HIH4030.h>
-#include <DS18S20.h>
-#include <BMP085.h>
-#include <Temperature.h>
 #include <math.h>
 #include "WUnderPass.h"
+#include <DS1307.h>
+#include "facilities.h"
 
 #define UPDATE_MS (300L*1000L)
 
@@ -24,11 +18,6 @@
 #define APPEND_INT(i) itoa(i, SEND_BUFF_END, 10);
 #define APPEND_STR(s) strcpy_P(SEND_BUFF_END, PSTR(s));
 #define APPEND_DOUBLE(d) dtostrf(d, -2, 3, SEND_BUFF_END);
-
-extern Net *net;
-extern Light *light;
-extern DS18S20 *temperatureOutside;
-extern BMP085 *pressure;
 
 uint8_t WUnder::inProgress;
 uint8_t WUnder::skipHeaders;
@@ -58,10 +47,6 @@ Serial.println("New connection.");
         bt=time.getBTime();
         inProgress=1;
         sendBuff[0]='\0';
-        double tInC;
-        double h;
-        double tOutC;
-        double dpb;
         // GET
         APPEND_STR(GET_PREFIX);
         // Password
@@ -79,21 +64,34 @@ Serial.println("New connection.");
         APPEND_INT(bt.min);
         APPEND_STR(":");
         APPEND_INT(bt.sec);
+        bmp085->loadFromSensor();
         APPEND_STR("&indoortempf=");
-        APPEND_DOUBLE(Temperature::convC2F(tInC=pressure->readC()));
+        APPEND_DOUBLE(temperatureInside.getF());
+        humidityInside.loadFromSensor();
         APPEND_STR("&indoorhumidity=");
-        APPEND_DOUBLE(h=HIH4030::read(PIN_HUMIDITY, tInC));
+        APPEND_DOUBLE(humidityInside.getRH());
         APPEND_STR("&tempf=");
-        APPEND_DOUBLE(Temperature::convC2F(tOutC=temperatureOutside->readC()));
+        dht22->loadFromSensor();
+        switch(dht22->error()){
+          case DHT_ERROR_NONE:
+          case DHT_ERROR_TOOQUICK:
+            break;
+          default:
+            // FIXME better error reporting
+            ledMatrix->fill(RED);
+            ledMatrix->show();
+            while(1);
+            break;
+        }
+        APPEND_DOUBLE(temperatureOutside.getF());
         APPEND_STR("&humidity=");
-        APPEND_DOUBLE(h);
+        APPEND_DOUBLE(humidityOutside.getRH());
         // http://www.srh.noaa.gov/images/epz/wxcalc/rhTdFromWetBulb.pdf
         APPEND_STR("&dewptf=");
-        double E=rh*(6.112*exp(17.67*temp/(temp+243.5)))/100;
-        dpb=(243.5 * log(E/6.112))/(17.67-log(E/6.112));
-        APPEND_DOUBLE(Temperature::convC2F((237.3 * dpb) / (1 - dpb)));
+        double E=humidityOutside.getRH()*(6.112*exp(17.67*temperatureOutside.getC()/(temperatureOutside.getC()+243.5)))/100;
+        APPEND_DOUBLE(Temperature::convC2F((243.5 * log(E/6.112))/(17.67-log(E/6.112))));
         APPEND_STR("&baromin=");
-        APPEND_DOUBLE(pressure->readInHg());
+        APPEND_DOUBLE(pressure.readInHg());
         APPEND_STR(GET_SUFFIX);
 Serial.println(sendBuff);
         client.println(sendBuff);

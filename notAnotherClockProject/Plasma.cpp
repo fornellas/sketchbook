@@ -1,9 +1,7 @@
 #include "Plasma.h"
-#include "EEPROM_addr.h"
-#include "Button.h"
 #include <EEPROM.h>
 
-extern SFRGBLEDMatrix *ledMatrix;
+#include "facilities.h"
 
 #define PIXMAP_WIDTH ((ledMatrix->width>>3)+3)
 #define PIXMAP_HEIGHT ((ledMatrix->height>>3)+3)

@@ -10,6 +10,7 @@
 #include <U8glib.h>
 #include <Time.h>
 #include <DS1307.h>
+#include <Humidity.h>
 #include <HIH4030.h>
 #include <OneWire.h>
 #include <Temperature.h>
@@ -20,6 +21,7 @@
 #include <EthernetInterrupt.h>
 #include <MemoryFree.h>
 #include <WebServer.h>
+#include <DHT22.h>
 // Util
 #include "pins.h"
 #include "Button.h"
@@ -46,30 +48,42 @@ SFRGBLEDMatrix *ledMatrix;
 #define LEDMATRIX_HORIZ 3
 #define LEDMATRIX_VERT 2
 
+// Time
+time_t bootTime;
+
 // LCD12864
 U8GLIB_ST7920_128X64 *lcd;
 
 // Light
 Light *light;
 unsigned long lastLightUpdate;
-#define BIG_CLOCK_THRESHOLD 68
+#define BIG_CLOCK_THRESHOLD 60
 int lastLightReading;
 #define MODE_CLOCK 0
 #define MODE_BIG_CLOCK 1
 #define LIGHT_UPDATE_MS 1000
 
-// Time
-time_t bootTime;
-
 // OneWire
 OneWire *ow;
 
 // DS18S20
-DS18S20 *temperatureOutside;
-byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
+byte DS18S20_addr[]={40, 200, 10, 228, 3, 0, 0, 62};
+DS18S20 *ds18s20;
+Temperature *temperatureOutside2;
 
 // BMP085
-BMP085 *pressure;
+BMP085 *bmp085;
+Pressure *pressure;
+Temperature *temperatureInside;
+
+// HIH4030
+HIH4030 *hih4030;
+Humidity *humidityInside;
+
+// DHT22
+DHT22 *dht22;
+Temperature *temperatureOutside;
+Humidity *humidityOutside;
 
 // Net
 Net *net;
@@ -83,7 +97,7 @@ Logger *logger;
 // setup()
 //
 
-#define BOOT_STEPS 16
+#define BOOT_STEPS 18
 
 void
 setup(){
@@ -102,12 +116,17 @@ setup(){
   ledMatrix->progressBarInit(WHITE);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // Serial
-  Serial.begin(115200);
-  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
-
   // Wire
   Wire.begin();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // uptime
+  DS1307 time(UTC);
+  bootTime=time.getLocalTime();
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // Serial
+  Serial.begin(115200);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // LCD12864
@@ -125,19 +144,10 @@ setup(){
   digitalWrite(PIN_LCD_BLA, HIGH);
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
-  // HIH4030
-  HIH4030::setup(PIN_HUMIDITY);
-  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
-
   // Light
   light=new Light(PIN_LIGHT);
   lastLightUpdate=0;
   lastLightReading=light->read(1023);
-  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
-
-  // uptime
-  DS1307 time(UTC);
-  bootTime=time.getLocalTime();
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // OneWire
@@ -145,11 +155,25 @@ setup(){
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // DS18S20
-  temperatureOutside=new DS18S20(addr, ow);
+  ds18s20=new DS18S20(DS18S20_addr, ow);
+  temperatureOutside2=ds18s20;
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // BMP085
-  pressure=new BMP085(BMP085_ULTRAHIGHRES);
+  bmp085=new BMP085(BMP085_ULTRAHIGHRES);
+  temperatureInside=bmp085;
+  pressure=bmp085;
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // HIH4030
+  hih4030=new HIH4030(PIN_HUMIDITY, bmp085);
+  humidityInside=hih4030;
+  ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
+
+  // DHT22
+  dht22=new DHT22(PIN_DHT22);
+  temperatureOutside=dht22;
+  humidityOutside=dht22;
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Net
@@ -171,7 +195,7 @@ setup(){
   }
 
   // Random
-  randomSeed(pressure->readPa()+pressure->readC());
+  randomSeed(pressure->readPa()+temperatureInside->getC());
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // RGB LED
@@ -237,9 +261,3 @@ loop(){
   }
   delete mode;
 }
-
-
-
-
-
-

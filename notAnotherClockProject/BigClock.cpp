@@ -1,12 +1,9 @@
 #include "BigClock.h"
 
-#include <U8glib.h>
-#include <DS1307.h>
 #include "tz.h"
+#include "facilities.h"
 
 #define BUFF_DATE 3
-
-extern U8GLIB_ST7920_128X64 *lcd;
 
 BigClock::BigClock():
 Mode(PSTR("Big Clock")){

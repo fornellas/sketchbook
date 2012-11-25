@@ -2,16 +2,13 @@
 #include <SD.h>
 #include <MemoryFree.h>
 #include <DS1307.h>
-#include "Net.h"
+#include "facilities.h"
 
 #define BUFF_READ 64
 #define BUFF_TAIL 37
 #define BUFF_MIME 26
 
 #define HTTP_PORT 80
-
-extern time_t bootTime;
-extern Net *net;
 
 WebServer *HTTPServer::webserver=NULL;
 

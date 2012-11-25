@@ -1,12 +1,6 @@
 #include "Mode.h"
-#include "Light.h"
 
-#include <SFRGBLEDMatrix.h>
-#include <U8glib.h>
-
-extern SFRGBLEDMatrix *ledMatrix;
-extern U8GLIB_ST7920_128X64 *lcd;
-extern Light *light;
+#include "facilities.h"
 
 Mode::Mode(PROGMEM char *name) {
   byte x;

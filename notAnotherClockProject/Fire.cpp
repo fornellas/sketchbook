@@ -1,9 +1,6 @@
 #include "Fire.h"
 
-#include <SFRGBLEDMatrix.h>
-#include "Button.h"
-
-extern SFRGBLEDMatrix *ledMatrix;
+#include "facilities.h"
 
 #define PIXMAP(x,y) *(pixmap+(ledMatrix->width+2)*(y)+(x))
 

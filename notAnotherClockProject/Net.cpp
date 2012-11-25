@@ -1,13 +1,11 @@
 #include "Net.h"
-#include "pins.h"
-#include "Light.h"
 
 #include <stdlib.h>
 
 #include <Ethernet.h>
 #include <EthernetInterrupt.h>
 
-extern Light *light;
+#include "facilities.h"
 
 Net::Net(){
   // Initialize Ethernet

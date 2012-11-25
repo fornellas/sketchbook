@@ -1,10 +1,7 @@
 #include "Equalizer.h"
 
 #include "pins.h"
-#include <SFRGBLEDMatrix.h>
-#include "Button.h"
-
-extern SFRGBLEDMatrix *ledMatrix;
+#include "facilities.h"
 
 #define BANDS 7
 

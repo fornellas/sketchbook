@@ -1,9 +1,6 @@
 #include "Lamp.h"
 
-#include <SFRGBLEDMatrix.h>
-#include <avr/pgmspace.h>
-
-extern SFRGBLEDMatrix *ledMatrix;
+#include "facilities.h"
 
 Lamp::Lamp():
 Mode(PSTR("Lamp")){

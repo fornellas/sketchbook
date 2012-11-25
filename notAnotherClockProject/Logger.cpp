@@ -1,18 +1,10 @@
 #include "Logger.h"
 
-#include "Light.h"
 #include <Arduino.h>
-#include <DS1307.h>
 #include <avr/pgmspace.h>
 #include <SD.h>
-#include <BMP085.h>
-#include "pins.h"
-#include <DS18S20.h>
-#include <HIH4030.h>
-
-extern Light *light;
-extern DS18S20 *temperatureOutside;
-extern BMP085 *pressure;
+#include <DS1307.h>
+#include "facilities.h"
 
 #define BUFF_PATH 32
 #define BUFF_FILE 19
@@ -59,16 +51,29 @@ void Logger::update(){
     if(!SD.mkdir(path)){
       while(true)Serial.println("Error creating dir."); // FIXME better error reporting
     }
-    // Indoor Temperature
-    float temperatureInside;
-     byte addr[]={40, 200, 10, 228, 3, 0, 0, 62};
-    save(PSTR("TEMPINDO.TXT"), path, &time, pressure->readC());
-    // Outdoor Temperature
-    save(PSTR("TEMPOUTD.TXT"), path, &time, temperatureOutside->readC());
-    // Humidity
-    save(PSTR("HUMIDITY.TXT"), path, &time, HIH4030::read(PIN_HUMIDITY, temperatureInside));
-    save(PSTR("PRESSURE.TXT"), path, &time, (long int)pressure->readPa());
-    
+    // Inside
+    bmp085->loadFromSensor();
+    save(PSTR("TEMPINDO.TXT"), path, &time, temperatureInside.getC());
+    save(PSTR("PRESSURE.TXT"), path, &time, (long int)pressure.readPa());
+    humidityInside.loadFromSensor();
+    save(PSTR("HUMIDIIN.TXT"), path, &time, humidityInside.getRH());
+    // Out
+    dht22->loadFromSensor();
+    switch(dht22->error()){
+      case DHT_ERROR_NONE:
+      case DHT_ERROR_TOOQUICK:
+        break;
+      default:
+        // FIXME better error reporting
+        ledMatrix->fill(RED);
+        ledMatrix->show();
+        while(1);
+        break;
+    }
+    save(PSTR("TEMPEOUT.TXT"), path, &time, temperatureOutside.getC());
+    save(PSTR("HUMIDOUT.TXT"), path, &time, humidityOutside.getRH());
+    temperatureOutside2.loadFromSensor();
+    save(PSTR("TEMPEOU2.TXT"), path, &time, temperatureOutside2.getC());
     digitalWrite(PIN_R, LOW);
   }
 }
