@@ -35,48 +35,22 @@ Clock::lcdInfo(){
   do {
     byte x;
     byte y;
-    // Temperature names
-    y=-1;
-    lcd->setFont(u8g_font_5x7);
+    // Week day
+    y=-2;
+    lcd->setFont(u8g_font_6x12);
     lcd->setFontPosTop();
-    x=lcd->getWidth()/4-lcd->getStrWidthP(U8G_PSTR("Inside"))/2;
-    lcd->drawStrP(x, y, U8G_PSTR("Inside"));
-    x=lcd->getWidth()-lcd->getStrWidthP(U8G_PSTR("Outside"));
-    x=lcd->getWidth()*3/4-lcd->getStrWidthP(U8G_PSTR("Outside"))/2;
-    lcd->drawStrP(x, y, U8G_PSTR("Outside"));
-    // Temperature inside
-    x=0;
-    y=lcd->getFontAscent();
-    lcd->setFont(u8g_font_fub14);
-    lcd->setFontPosTop();
-    lcd->drawStr(x, y, dtostrf(temperatureInside.getC(), -2, 1, buff));
-    x+=lcd->getStrWidth(dtostrf(temperatureInside.getC(), -2, 1, buff));
-    buff[0]=176;
-    buff[1]='C';
-    buff[2]='\0';
-    lcd->drawStr(x, y, buff);
-    // Temperature outside
-    dtostrf(temperatureOutside.getC(), -2, 1, buff);
+    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getWeekDayName())/2;
+    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getWeekDayName());
+    // Date
+    strcpy_P(buff, time->getMonthName());
     t=strlen(buff);
-    buff[t++]=176;
-    buff[t++]='C';
-    buff[t]='\0';
-    x=lcd->getWidth()-lcd->getStrWidth(buff);
-    lcd->drawStr(x, y, buff);
-    // Humidity inside
-    y+=lcd->getFontAscent()+1;
-    ltoa(humidityInside.getRH(), buff, 10);
+    buff[t++]=' ';
+    itoa(date.mday, buff+t, 10);
     t=strlen(buff);
-    buff[t++]='%';
-    buff[t]='\0';
-    x=lcd->getWidth()/4-lcd->getStrWidth(buff)/2;
-    lcd->drawStr(x, y, buff);
-    // Humidity outside
-    ltoa(humidityOutside.getRH(), buff, 10);
-    t=strlen(buff);
-    buff[t++]='%';
-    buff[t]='\0';
-    x=lcd->getWidth()*3/4-lcd->getStrWidth(buff)/2;
+    buff[t++]=' ';
+    itoa(date.year, buff+t, 10);
+    y+=lcd->getFontAscent()+2;
+    x=lcd->getWidth()/2-lcd->getStrWidth(buff)/2;
     lcd->drawStr(x, y, buff);
     // Pressure
     ltoa(pressure.getPa(), buff, 10);
@@ -98,22 +72,47 @@ Clock::lcdInfo(){
     lcd->setFontPosTop();
     x=lcd->getWidth()/2-lcd->getStrWidth(buff)/2;
     lcd->drawStr(x, y, buff);
-    // Week day
-    y+=lcd->getFontAscent();
-    lcd->setFont(u8g_font_6x12);
+    // Temperature names
+    y+=lcd->getFontAscent()+1;
+    lcd->setFont(u8g_font_5x7);
     lcd->setFontPosTop();
-    x=lcd->getWidth()/2-lcd->getStrWidthP((u8g_pgm_uint8_t *)time->getWeekDayName())/2;
-    lcd->drawStrP(x, y, (const u8g_pgm_uint8_t*)time->getWeekDayName());
-    // Date
-    strcpy_P(buff, time->getMonthName());
+    x=lcd->getWidth()/4-lcd->getStrWidthP(U8G_PSTR("Outside"))/2;
+    lcd->drawStrP(x, y, U8G_PSTR("Outside"));
+    x=lcd->getWidth()*3/4-lcd->getStrWidthP(U8G_PSTR("Inside"))/2;
+    lcd->drawStrP(x, y, U8G_PSTR("Inside"));
+    // Temperature outside
+    x=0;
+    y+=lcd->getFontAscent()+1;
+    lcd->setFont(u8g_font_fub14);
+    lcd->setFontPosTop();
+    lcd->drawStr(x, y, dtostrf(temperatureOutside.getC(), -2, 1, buff));
+    x+=lcd->getStrWidth(dtostrf(temperatureOutside.getC(), -2, 1, buff));
+    buff[0]=176;
+    buff[1]='C';
+    buff[2]='\0';
+    lcd->drawStr(x, y, buff);
+    // Temperature inside
+    dtostrf(temperatureInside.getC(), -2, 1, buff);
     t=strlen(buff);
-    buff[t++]=' ';
-    itoa(date.mday, buff+t, 10);
+    buff[t++]=176;
+    buff[t++]='C';
+    buff[t]='\0';
+    x=lcd->getWidth()-lcd->getStrWidth(buff);
+    lcd->drawStr(x, y, buff);
+    // Humidity outside
+    y+=lcd->getFontAscent()+1;
+    ltoa(humidityOutside.getRH(), buff, 10);
     t=strlen(buff);
-    buff[t++]=' ';
-    itoa(date.year, buff+t, 10);
-    y+=lcd->getFontAscent()+2;
-    x=lcd->getWidth()/2-lcd->getStrWidth(buff)/2;
+    buff[t++]='%';
+    buff[t]='\0';
+    x=lcd->getWidth()/4-lcd->getStrWidth(buff)/2;
+    lcd->drawStr(x, y, buff);
+    // Humidity inside
+    ltoa(humidityInside.getRH(), buff, 10);
+    t=strlen(buff);
+    buff[t++]='%';
+    buff[t]='\0';
+    x=lcd->getWidth()*3/4-lcd->getStrWidth(buff)/2;
     lcd->drawStr(x, y, buff);
   } 
   while( lcd->nextPage() );
