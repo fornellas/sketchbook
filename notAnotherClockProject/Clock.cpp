@@ -59,7 +59,7 @@ Clock::lcdInfo(){
     buff[t++]='a';
     buff[t++]=' ';
     buff[t++]='(';
-    double d=pressure.expectedPressure(AVERAGE_SEA_LEVEL_PRESSURE, ALTITUDE)-pressure.getPa();
+    double d=pressure.getPa()-pressure.expectedPressure(AVERAGE_SEA_LEVEL_PRESSURE, ALTITUDE);
     if(d>0)
       buff[t++]='+';
     ltoa(d, buff+t, 10);
