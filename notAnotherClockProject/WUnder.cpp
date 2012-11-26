@@ -40,7 +40,7 @@ Serial.println("New connection.");
       lastUpdate=millis();
       // new connection
       digitalWrite(PIN_G, LOW);
-      analogWrite(PIN_B, light->read(255-20)+20);
+      analogWrite(PIN_B, light->read(255-5)+5);
       if(client.connect(strcpy_P(sendBuff, PSTR(WUNDER_HOST)), WUNDER_PORT)){
         DS1307 time(UTC);
         btime_t bt;
@@ -111,7 +111,7 @@ Serial.println(sendBuff);
 Serial.println("Failed to open new connection.");
         lastUpdate=millis();
       }
-      analogWrite(PIN_G, light->read(255-20)+20);
+      analogWrite(PIN_G, light->read(255-5)+5);
       digitalWrite(PIN_B, LOW);
     }
   }else{
@@ -125,7 +125,7 @@ uint8_t WUnder::loop(){
     if(client.connected()){
 //Serial.println("connected");
       digitalWrite(PIN_G, LOW);
-      analogWrite(PIN_B, light->read(255-20)+20);
+      analogWrite(PIN_B, light->read(255-5)+5);
       // Headers
       if(skipHeaders){
 //Serial.println("skipHeaders");
@@ -185,7 +185,7 @@ Serial.println(recvBuff);
           }
         }
       }
-      analogWrite(PIN_G, light->read(255-20)+20);
+      analogWrite(PIN_G, light->read(255-5)+5);
       digitalWrite(PIN_B, LOW);
     }else{
       //Serial.println("Connection lost before end of transaciton.");

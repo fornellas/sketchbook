@@ -22,7 +22,7 @@ void Logger::update(){
     btime_t date;
     DS1307 time(UTC);
 
-    analogWrite(PIN_R, light->read(255-20)+20);
+    analogWrite(PIN_R, light->read(255-5)+5);
     lastLoggerUpdate+=LOGGER_UPDATE_MS;
     // prefix
     date=time.getBTime();
