@@ -6,7 +6,7 @@
 #include "facilities.h"
 
 #define BUFF_LCD_MSG 18
-#define ALTITUDE 808
+#define ALTITUDE 810
 
 // LCD
 
@@ -59,9 +59,10 @@ Clock::lcdInfo(){
     buff[t++]='a';
     buff[t++]=' ';
     buff[t++]='(';
-    if(pressure.expectedPressure(AVERAGE_SEA_LEVEL_PRESSURE, ALTITUDE)-pressure.getPa()>0)
+    double d=pressure.expectedPressure(AVERAGE_SEA_LEVEL_PRESSURE, ALTITUDE)-pressure.getPa();
+    if(d>0)
       buff[t++]='+';
-    ltoa(pressure.expectedPressure(AVERAGE_SEA_LEVEL_PRESSURE, ALTITUDE)-pressure.getPa(), buff+t, 10);
+    ltoa(d, buff+t, 10);
     t=strlen(buff);
     buff[t++]='P';
     buff[t++]='a';
