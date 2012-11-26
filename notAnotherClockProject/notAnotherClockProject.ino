@@ -36,6 +36,7 @@
 #include "Equalizer.h"
 #include "ECA.h"
 #include "BigClock.h"
+#include "Spore.h"
 // Net
 #include "Net.h"
 #include "HTTPServer.h"
@@ -223,6 +224,7 @@ loop(){
     MODE(4, Lamp);
     MODE(5, Fire);
     MODE(6, Equalizer);
+    MODE(7, Spore);
   default:
     EEPROM.write(EEPROM_MODE, 0);
     return;
