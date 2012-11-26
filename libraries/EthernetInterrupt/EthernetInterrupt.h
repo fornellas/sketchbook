@@ -55,7 +55,7 @@ public:
   // NOTE: on R3 of Ethernet shield, the jumper is unlabeled, and is located
   // below the board, at the left of the word "SHIELD".
   static void begin(uint8_t interrupt);
-  inline static uint8_t available();
+  static uint8_t available();
   static void next();
 };
 
