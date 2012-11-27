@@ -5,7 +5,7 @@
 #include <avr/pgmspace.h>
 
 
-#define LOGGER_UPDATE_MS (120*1000)
+#define LOGGER_UPDATE_MS (120L*1000L)
 
 class Logger {
 private:
