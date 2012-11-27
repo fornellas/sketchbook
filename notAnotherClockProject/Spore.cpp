@@ -1,10 +1,10 @@
 #include "Spore.h"
 #include "facilities.h"
 
-#define MAXCELLS 12
-#define SPORE_COLOR RGB(10, 15, 8)
+#define MAXCELLS 50
 // set lower for smoother animation, higher for faster simulation
-#define RUNS_PER_LOOP 2
+#define RUNS_PER_LOOP 40
+#define RANDOM_COLOR (ledMatrix->spectrum(random(ledMatrix->spectrumLen()), ledMatrix->spectrumLen()-1))
 
 Spore::Cell::Cell(int xin, int yin){
   x = xin;
@@ -29,8 +29,7 @@ void Spore::Cell::run(){
   // Cell instructions
   if (getpix(x + 1, y) == BLACK) {
     move(0, 1);
-  } 
-  else if (getpix(x, y - 1) != BLACK && getpix(x, y + 1) != BLACK) {
+  }else if (getpix(x, y - 1) != BLACK && getpix(x, y + 1) != BLACK) {
     move((int)random(9) - 4, (int)random(9) - 4);
   }
 }
@@ -69,7 +68,7 @@ Mode(PSTR("Spore")){
     int cX = (int)random(ledMatrix->width);
     int cY = (int)random(ledMatrix->height);
     if (getpix(cX, cY) == BLACK) {
-      setpix(cX, cY, SPORE_COLOR);
+      setpix(cX, cY, RANDOM_COLOR);
       cells[numcells] = new Cell(cX, cY);
       numcells++;
     }
