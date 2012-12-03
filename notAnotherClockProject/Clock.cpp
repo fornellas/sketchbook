@@ -6,7 +6,7 @@
 #include "facilities.h"
 
 #define BUFF_LCD_MSG 18
-#define ALTITUDE 810
+#define ALTITUDE 815
 
 // LCD
 
