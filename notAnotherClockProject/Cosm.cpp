@@ -13,7 +13,7 @@
 #define PUT_PREFIX "PUT /v2/feeds/"
 #define PUT_MIDDLE ".csv?key="
 #define PUT_SUFFIX " HTTP/1.1"
-#define SEND_BUFF_LEN 146
+#define SEND_BUFF_LEN 208
 #define SEND_BUFF_END &sendBuff[strlen(sendBuff)]
 #define APPEND_INT(i) itoa(i, SEND_BUFF_END, 10);
 #define APPEND_STR(s) strcpy_P(SEND_BUFF_END, PSTR(s));
@@ -81,14 +81,14 @@ Serial.println("Cosm: New connection.");
             while(1);
             break;
         }
-        APPEND_CSV_DOUBLE("tOut,", temperatureOutside.getC());
-        APPEND_CSV_DOUBLE("tIn,", temperatureInside.getC());
-        APPEND_CSV_DOUBLE("humIn,", humidityInside.getRH());
-        APPEND_CSV_DOUBLE("humOut,", humidityOutside.getRH());
-        APPEND_CSV_DOUBLE("dewPointIn,", Weather::dewPointC(humidityInside.getRH(), temperatureInside.getC()));
-        APPEND_CSV_DOUBLE("dewPointOut,", Weather::dewPointC(humidityOutside.getRH(), temperatureOutside.getC()));
-        APPEND_CSV_DOUBLE("heatIndexIn,", Weather::heatIndexC(humidityInside.getRH(), temperatureInside.getC()));
-        APPEND_CSV_DOUBLE("heatIndexOut,", Weather::heatIndexC(humidityOutside.getRH(), temperatureOutside.getC()));
+        APPEND_CSV_DOUBLE("temperatureOutside,", temperatureOutside.getC());
+        APPEND_CSV_DOUBLE("temperatureInside,", temperatureInside.getC());
+        APPEND_CSV_DOUBLE("humidityInside,", humidityInside.getRH());
+        APPEND_CSV_DOUBLE("humidityOutside,", humidityOutside.getRH());
+        APPEND_CSV_DOUBLE("dewPointInside,", Weather::dewPointC(humidityInside.getRH(), temperatureInside.getC()));
+        APPEND_CSV_DOUBLE("dewPointOutside,", Weather::dewPointC(humidityOutside.getRH(), temperatureOutside.getC()));
+        APPEND_CSV_DOUBLE("heatIndexInside,", Weather::heatIndexC(humidityInside.getRH(), temperatureInside.getC()));
+        APPEND_CSV_DOUBLE("heatIndexOutside,", Weather::heatIndexC(humidityOutside.getRH(), temperatureOutside.getC()));
         APPEND_CSV_DOUBLE("pressure,", pressure.getPa());
         // Content-Length value
 //Serial.print("Cosm: ");
@@ -104,7 +104,7 @@ Serial.println("Cosm: New connection.");
         recvBuff[0]='\0';
       }else{
         // FIXME better error report
-Serial.println("Failed to open new connection.");
+Serial.println("Cosm: Failed to open new connection.");
         lastUpdate=millis();
       }
       analogWrite(PIN_G, light->read(255-5)+5);
@@ -122,8 +122,8 @@ Serial.println("Cosm: inProgress");
 //Serial.println("Cosm: connected");
       digitalWrite(PIN_G, LOW);
       analogWrite(PIN_R, light->read(255-5)+5);
-      // Body
-//Serial.println("Cosm: Body");
+      // Headers
+//Serial.println("Cosm: Headers");
       while(client.available()){
         char c;
         c=client.read();
