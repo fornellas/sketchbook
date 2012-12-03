@@ -41,6 +41,7 @@
 #include "Net.h"
 #include "HTTPServer.h"
 #include "WUnder.h"
+#include "Cosm.h"
 // Misc
 #include "Logger.h"
 
@@ -90,6 +91,7 @@ Humidity *humidityOutside;
 Net *net;
 HTTPServer *server;
 WUnder *wunder;
+Cosm *cosm;
 
 // Logger
 Logger *logger;
@@ -181,6 +183,7 @@ setup(){
   net=new Net();
   server=new HTTPServer();
   wunder=new WUnder();
+  cosm=new Cosm();
   ledMatrix->progressBarUpdate(BLUE, ++step, BOOT_STEPS);
 
   // Logger
@@ -239,6 +242,7 @@ loop(){
       logger->update();
       // WUnder
       wunder->update();
+      cosm->update();
       // Light
       light->update();
       lastLightUpdate+=LIGHT_UPDATE_MS;
