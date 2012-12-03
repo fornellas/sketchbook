@@ -6,7 +6,7 @@
 double Weather::dewPointC(double humidity, double temperatureC){
   double E;
   E=humidity*(6.112*exp(17.67*temperatureC/(temperatureC+243.5)))/100;
-  return Temperature::convC2F((243.5 * log(E/6.112))/(17.67-log(E/6.112)));
+  return (243.5 * log(E/6.112))/(17.67-log(E/6.112));
 }
 
 // http://www.srh.noaa.gov/images/ffc/pdf/ta_htindx.PDF
