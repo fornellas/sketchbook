@@ -16,6 +16,7 @@ public:
   double getF(); // Fahrenheit
   // conversion
   static double convC2F(double C);
+  static double convF2C(double F);
 };
 
 #endif

@@ -21,3 +21,7 @@ double Temperature::getF(){
 double Temperature::convC2F(double C){
   return (C+273.15)*9/5-459.57;
 }
+
+double Temperature::convF2C(double F){
+  return (F-32)*5/9;
+}
