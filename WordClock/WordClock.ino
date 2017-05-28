@@ -113,6 +113,7 @@ void updateHour(uint8_t hour){
       litPixels(10, 13); // ELEVEN
       break;
     case 12:
+    case 0:
       litPixels(0, 4); // TWELVE 
       break;
   }
