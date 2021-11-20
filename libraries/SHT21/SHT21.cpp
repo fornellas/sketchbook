@@ -84,7 +84,7 @@ SHT21Error SHT21::_ReadRawMeasurement(struct RawMeasurement *raw_measurement) {
   raw_measurement->data |= (uint16_t)(_wire->read());
   raw_measurement->checksum = _wire->read();
 
-  if(err = _CheckCrc((uint8_t *)(&raw_measurement->data), sizeof(raw_measurement->data), raw_measurement->checksum))
+  if((err = _CheckCrc((uint8_t *)(&raw_measurement->data), sizeof(raw_measurement->data), raw_measurement->checksum)))
     return err;
 
   return SHT21_OK;
