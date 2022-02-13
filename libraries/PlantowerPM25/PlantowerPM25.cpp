@@ -207,6 +207,36 @@ PlantowerPM25_Error PlantowerPM25::_setModeNoSync(enum PlantowerPM25_Mode mode) 
   return PLANTOWER_PM25_ERROR_NONE;
 };
 
+PlantowerPM25_Error PlantowerPM25::_setSleepCommand(bool sleep) {
+  struct plantower_pm25_response response;
+  enum PlantowerPM25_Error error;
+  uint8_t sleep_mode;
+
+  if(sleep)
+    sleep_mode = 0;
+  else
+    sleep_mode = 1;
+
+  if((error = _send_command(COMMAND_SLEEP_SET, sleep_mode)))
+      return error;
+
+  if(sleep) {
+    if(error = _read_packet((uint8_t *)&response, sizeof(struct plantower_pm25_response)))
+      return error;
+
+    if(response.command != COMMAND_SLEEP_SET)
+      return PLANTOWER_PM25_ERROR_UNEXPECTED_RESPONSE;
+
+    if(response.data != sleep_mode)
+      return PLANTOWER_PM25_ERROR_UNEXPECTED_RESPONSE;
+  }
+
+  if(!sleep)
+    delay(DELAY_RESET_AFTER_MS);
+
+  return PLANTOWER_PM25_ERROR_NONE;
+};
+
 PlantowerPM25_Error PlantowerPM25::begin(Stream *stream) {
   _serial = stream;
   if(_set_pin != 255) {
@@ -223,36 +253,20 @@ PlantowerPM25_Error PlantowerPM25::begin(Stream *stream) {
     delay(DELAY_RESET_AFTER_MS);
   // Without a reset pin...
   } else {
-    unsigned long start_ms;
-    enum PlantowerPM25_Mode detected_mode = PLANTOWER_PM25_MODE_ACTIVE;
     enum PlantowerPM25_Error error;
 
-    // ...we must infer whether device is in active or passive mode...
-    start_ms = millis();
-    while(!_serial->available()) {
-      if(millis() - start_ms > BOOT_TIME_MS) {
-        detected_mode = PLANTOWER_PM25_MODE_PASSIVE;
-        break;
-      }
-    }
-
-    // ...and given the state of the device may be a half-sent command,
-    // me must try twice so we can set it to a know state.
+    // Without a reset pin, sensor may be sleeping so we need to wake it up.
+    // The sensor may also be in a half received command state, so we must
+    // send wake up twice to ensure it gets back to a consistent state.
+    // Sending a wakeup also seems to set the device to active.
     for(uint8_t i=0 ; i < 2 ; i++) {
-      switch(detected_mode) {
-        case PLANTOWER_PM25_MODE_ACTIVE:
-          error = setMode(PLANTOWER_PM25_MODE_ACTIVE);
-          break;
-        case PLANTOWER_PM25_MODE_PASSIVE:
-          error = _setModeNoSync(PLANTOWER_PM25_MODE_ACTIVE);
-          break;
-      }
-      if(!error)
-        break;
+      error = _setSleepCommand(false);
     }
     if(error)
       return error;
   }
+
+  _mode = PLANTOWER_PM25_MODE_ACTIVE;
 
   return PLANTOWER_PM25_ERROR_NONE;
 };
@@ -268,12 +282,20 @@ PlantowerPM25_Error PlantowerPM25::begin(HardwareSerial *hardwareSerial, uint8_t
   return begin(hardwareSerial);
 };
 
+PlantowerPM25_Error PlantowerPM25::begin(HardwareSerial *serial) {
+  return begin(serial, -1, -1);
+};
+
 PlantowerPM25_Error PlantowerPM25::begin(uint8_t pin_rx, uint8_t pin_tx, uint8_t set_pin, uint8_t reset_pin) {
   SoftwareSerial *softwareSerial = new SoftwareSerial();
   softwareSerial->begin(9600, SWSERIAL_8N1, pin_rx, pin_tx, false);
   _set_pin = set_pin;
   _reset_pin = reset_pin;
   return begin(softwareSerial);
+};
+
+PlantowerPM25_Error PlantowerPM25::begin(uint8_t pin_rx, uint8_t pin_tx) {
+  return begin(pin_rx, pin_tx, -1, -1);
 };
 
 PlantowerPM25_Error PlantowerPM25::setMode(enum PlantowerPM25_Mode mode) {
@@ -331,42 +353,20 @@ PlantowerPM25_Error PlantowerPM25::setSleep(bool sleep) {
   if(_set_pin != 255) {
     if(sleep)
       digitalWrite(_set_pin, LOW);
-    else
+    else {
       digitalWrite(_set_pin, HIGH);
+      delay(DELAY_RESET_AFTER_MS);
+    }
   } else {
-    struct plantower_pm25_response response;
-    enum PlantowerPM25_Error error;
-    uint8_t sleep_mode;
-
     if(_mode == PLANTOWER_PM25_MODE_ACTIVE) {
       struct PlantowerPM25_Measurement measurement;
+      enum PlantowerPM25_Error error;
 
       if(error = readActive(&measurement))
         return error;
     }
-
-    if(sleep)
-      sleep_mode = 0;
-    else
-      sleep_mode = 1;
-
-    if((error = _send_command(COMMAND_SLEEP_SET, sleep_mode)))
-        return error;
-
-    if(sleep) {
-      if(error = _read_packet((uint8_t *)&response, sizeof(struct plantower_pm25_response)))
-        return error;
-
-      if(response.command != COMMAND_SLEEP_SET)
-        return PLANTOWER_PM25_ERROR_UNEXPECTED_RESPONSE;
-
-      if(response.data != sleep_mode)
-        return PLANTOWER_PM25_ERROR_UNEXPECTED_RESPONSE;
-    }
+    _setSleepCommand(sleep);
   }
-
-  if(!sleep)
-    delay(DELAY_RESET_AFTER_MS);
 
   return PLANTOWER_PM25_ERROR_NONE;
 };

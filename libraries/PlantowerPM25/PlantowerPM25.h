@@ -60,10 +60,10 @@ enum PlantowerPM25_Mode {
 class PlantowerPM25 {
   public:
   
-  // PlantowerPM25_Error begin(HardwareSerial *serial);
   PlantowerPM25_Error begin(HardwareSerial *serial, uint8_t set_pin, uint8_t reset_pin);
-  // PlantowerPM25_Error begin(uint8_t pin_rx, uint8_t pin_tx);
+  PlantowerPM25_Error begin(HardwareSerial *serial);
   PlantowerPM25_Error begin(uint8_t pin_rx, uint8_t pin_tx, uint8_t set_pin, uint8_t reset_pin);
+  PlantowerPM25_Error begin(uint8_t pin_rx, uint8_t pin_tx);
 
   PlantowerPM25_Error setMode(enum PlantowerPM25_Mode mode);
 
@@ -81,12 +81,13 @@ class PlantowerPM25 {
   Stream* _serial;
   uint8_t _reset_pin = -1;
   uint8_t _set_pin = -1;
-  enum PlantowerPM25_Mode _mode = PLANTOWER_PM25_MODE_ACTIVE;
+  enum PlantowerPM25_Mode _mode;
 
   PlantowerPM25_Error _send_command(uint8_t command, uint16_t data);
   PlantowerPM25_Error _wait_for_data(void);
   PlantowerPM25_Error _read_packet(uint8_t *data, uint8_t len);
   PlantowerPM25_Error _setModeNoSync(enum PlantowerPM25_Mode mode);
+  PlantowerPM25_Error _setSleepCommand(bool sleep);
 };
 
 class PMS7003 : public PlantowerPM25 {};
