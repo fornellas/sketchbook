@@ -37,6 +37,7 @@ bool SetupPortalClass::_saveHostname(const char *newHostname) {
   }
   EEPROM.commit();
   _loadHostname();
+  return true;
 }
 
 bool SetupPortalClass::begin(const char *name, int eepromAddressHostname) {
